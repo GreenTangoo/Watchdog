@@ -9,7 +9,7 @@ using namespace siem_ex_space;
 /*--------------------------------PUBLIC----------------------------------------*/
 DateTime::DateTime() : years(0), months(0), days(0), hours(0), minutes(0), seconds(0), milliseconds(0)
 {
-
+	initializeDaysMap();
 }
 
 DateTime::DateTime(std::string const &timeString, std::string const &formatString) :
@@ -128,7 +128,8 @@ void DateTime::putFormatTime(std::string const &timeString, std::string const &f
 		formatSymbolType timeSymbol = (formatSymbolType)formatString[formatSymbolPos + 1];
 		if(formatSymbolPos + 2 >= formatStrLen)
 		{
-			std::string subTimeStr = timeString.substr(timeStrBeginSubTimePos, timeStringLen - 1);
+			std::string subTimeStr = timeString.substr(timeStrBeginSubTimePos, 
+															timeStringLen - timeStrBeginSubTimePos);
 			putSubTime(subTimeStr, timeSymbol);
 			return;
 		}
@@ -143,7 +144,8 @@ void DateTime::putFormatTime(std::string const &timeString, std::string const &f
 				throw DateTimeException("Time string ins't equal format string", DateTimeException::INCOMPITABLE_STRINGS);
 			}
 
-			std::string subTimeStr = timeString.substr(timeStrBeginSubTimePos, timeStringEndPos);
+			std::string subTimeStr = timeString.substr(timeStrBeginSubTimePos, 
+															timeStringEndPos - timeStrBeginSubTimePos);
 
 			putSubTime(subTimeStr, timeSymbol);
 			formatSymbolPos++;
@@ -254,37 +256,37 @@ void DateTime::sub(std::string const &timeString, std::string const &formatStrin
 	this->sub(newDateTime);
 }
 
-int DateTime::getYears()
+int DateTime::getYears() const
 {
 	return years;
 }
 
-int DateTime::getMonths()
+int DateTime::getMonths() const
 {
 	return months;
 }
 
-int DateTime::getDays()
+int DateTime::getDays() const
 {
 	return days;
 }
 
-int DateTime::getHours()
+int DateTime::getHours() const
 {
 	return hours;
 }
 
-int DateTime::getMinutes()
+int DateTime::getMinutes() const
 {
 	return minutes;
 }
 
-int DateTime::getSeconds()
+int DateTime::getSeconds() const
 {
 	return seconds;
 }
 
-int DateTime::getMilliseconds()
+int DateTime::getMilliseconds() const
 {
 	return milliseconds;
 }
@@ -365,16 +367,17 @@ DateTime::compareType DateTime::compare(DateTime const &first, DateTime const &s
 
 bool DateTime::isValidDateTime()
 {
-	if((this->years < 0)   ||
-	   (this->months < 0)  ||
-	   (this->days < 0)    ||
-	   (this->hours < 0)   ||
-	   (this->minutes < 0) ||
-	   (this->seconds < 0) ||
-	   (this->milliseconds < 0))
-	   {
-		   return false;
-	   }
+	int maxDays = monthDaysAmountMap[(monthType)months];
+	if((years < 0)                             ||
+	   (months < 0 || months > 12)             ||
+	   (days < 0 || days > maxDays)            ||
+	   (hours < 0 || hours > 23)               ||
+	   (minutes < 0 || minutes > 59)           ||
+	   (seconds < 0 || seconds > 59)           ||
+	   (milliseconds < 0 || milliseconds > 999))
+	{
+		return false;
+	}
 
 	return true;
 }
