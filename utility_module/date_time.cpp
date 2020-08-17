@@ -1,6 +1,6 @@
 #include "date_time.hpp"
 
-#include "../../exception_module/exceptions.hpp"
+#include "../exception_module/exceptions.hpp"
 
 using namespace utility_space;
 using namespace siem_ex_space;
