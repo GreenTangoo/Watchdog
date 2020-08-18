@@ -1,3 +1,6 @@
+#ifndef DATE_TIME_TEST_HPP
+#define DATE_TIME_TEST_HPP
+
 #include <string>
 #include <iostream>
 
@@ -83,3 +86,5 @@ public:
 		TS_ASSERT_EQUALS(timeObj.getMilliseconds(), 555);
 	}
 };
+
+#endif // DATE_TIME_TEST_HPP

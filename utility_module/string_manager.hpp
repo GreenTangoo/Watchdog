@@ -9,7 +9,7 @@ namespace utility_space
 {
 
 	enum symbolType { SPACE = ' ', QUOTE = '\'', DQUOTE = '\"', SLASH = '/',
-					  RSLASH = '\\' };
+					  RSLASH = '\\', NEW_LINE = '\n', TAB = '\t', COMMA = ',' };
 
 	class StringManager
 	{

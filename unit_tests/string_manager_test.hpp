@@ -1,3 +1,9 @@
+#ifndef STRING_MANAGER_TEST_HPP
+#define STRING_MANAGER_TEST_HPP
+
+#include <vector>
+#include <string>
+
 #include <cxxtest/TestSuite.h>
 #include "../utility_module/strings/string_manager.hpp"
 #include "../utility_module/strings/string_manager.cpp"
@@ -64,3 +70,5 @@ public:
 		TS_ASSERT_EQUALS(resultString, "/home/naruto/Downloads");
 	}
 };
+
+#endif // STRING_MANAGER_TEST_HPP

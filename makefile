@@ -17,3 +17,11 @@ creation:
 	@mkdir $(ODIR)
 	@mkdir $(ODIR)/utility_module
 
+
+
+
+.PHONY: clean
+
+clean:
+	rm -rf $(ODIR)
+

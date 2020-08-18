@@ -6,15 +6,16 @@
 
 namespace siem_ex_space
 {
-	class SIEMExcpetion : public std::exception
+	class SIEMExecption : public std::exception
 	{
 	protected:
 		std::string msg;
 		int errorCode;
 	public:
-		SIEMExcpetion(std::string const &exMsg, int errCode) : msg(exMsg), errorCode(errCode) {}
-		SIEMExcpetion(std::string &&exMsg, int errCode) : msg(std::move(exMsg)), errorCode(errCode) {}
-		~SIEMExcpetion() {}
+		enum MainSIEMErrorCode { BAD_FILE = 0 };
+		SIEMExecption(std::string const &exMsg, int errCode) : msg(exMsg), errorCode(errCode) {}
+		SIEMExecption(std::string &&exMsg, int errCode) : msg(std::move(exMsg)), errorCode(errCode) {}
+		~SIEMExecption() {}
 		const char *what() const noexcept
 		{
 			return msg.c_str();
@@ -25,16 +26,25 @@ namespace siem_ex_space
 		}
 	};
 
-	class DateTimeException : public SIEMExcpetion
+	class DateTimeException : public SIEMExecption
 	{
 	public:
-		enum DateTimeErrorCode { BAD_MONTH = 0,  BAD_DAY = 1, BAD_HOUR = 2, BAD_MINUTE = 3,
-								 BAD_SECOND = 4, BAD_MILLISECOND = 5, INCOMPITABLE_MONTH_DAY = 6,
-								 BAD_FORMAT_SYMBOL = 7, BAD_FORMAT_STRING = 8, INCOMPITABLE_STRINGS = 9,
-								 BAD_TIME_STRING = 10, BAD_MATH_OPERATION = 11, BAD_DATETIME_FORMAT = 12 };
-		DateTimeException(std::string const &exMsg, int errCode) : SIEMExcpetion(exMsg, errCode) {}
-		DateTimeException(std::string &&exMsg, int errCode) : SIEMExcpetion(std::move(exMsg), errCode) {}
+		enum DateTimeErrorCode { BAD_MONTH = 0,  BAD_DAY, BAD_HOUR, BAD_MINUTE,
+								 BAD_SECOND, BAD_MILLISECOND, INCOMPITABLE_MONTH_DAY,
+								 BAD_FORMAT_SYMBOL, BAD_FORMAT_STRING, INCOMPITABLE_STRINGS,
+								 BAD_TIME_STRING, BAD_MATH_OPERATION, BAD_DATETIME_FORMAT };
+		DateTimeException(std::string const &exMsg, int errCode) : SIEMExecption(exMsg, errCode) {}
+		DateTimeException(std::string &&exMsg, int errCode) : SIEMExecption(std::move(exMsg), errCode) {}
 		~DateTimeException() {}
+	};
+
+	class JsonException : public SIEMExecption
+	{
+	public:
+		enum JsonErrorCode { BAD_PATH = 0 };
+		JsonException(std::string const &exMsg, int errCode) : SIEMExecption(exMsg, errCode) {}
+		JsonException(std::string &&exMsg, int errCode) : SIEMExecption(std::move(exMsg), errCode) {}
+		~JsonException() {}
 	};
 }
 #endif // EXCEPTIONS_HPP
