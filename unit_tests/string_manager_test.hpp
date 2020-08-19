@@ -5,8 +5,8 @@
 #include <string>
 
 #include <cxxtest/TestSuite.h>
-#include "../utility_module/strings/string_manager.hpp"
-#include "../utility_module/strings/string_manager.cpp"
+#include "../utility_module/string_manager.hpp"
+#include "../utility_module/string_manager.cpp"
 
 using namespace utility_space;
 

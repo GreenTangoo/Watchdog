@@ -9,6 +9,7 @@ UTILITY_OBJS = $(addprefix $(ODIR)/, $(UTILITY_SOURCES:.cpp=.o))
 
 all: creation $(UTILITY_OBJS)
 	$(CC) $(CDFLAGS) main.cpp -o $(ODIR)/main.o
+	$(CC) -g $(UTILITY_OBJS) $(ODIR)/main.o -o $(ODIR)/main
 
 $(ODIR)/%.o: %.cpp
 	$(CC) $(CDFLAGS) $< -o $@

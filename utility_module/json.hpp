@@ -53,7 +53,6 @@ namespace utility_space
         JsonObject(JsonObject &&other);
         ~JsonObject();
         JsonObject& operator=(const JsonObject &other);
-        /*Construct json from program*/
         void setContainer(const JsonContainer &otherContainer);
         void addArray(const std::string &keyNode, const std::vector<std::string> &values, const std::string &parentpath);
         void addOrUpdateArray(const std::string &keyNode, const std::vector<std::string> &values, const std::string &arrayPath);
@@ -66,7 +65,6 @@ namespace utility_space
         void updateString(const std::pair<std::string, std::string> &keyValue, const std::string &stringPath);
         void addOrUpdateString(const std::pair<std::string, std::string> &keyValue, const std::string &stringPath);
         void clearJson();
-        /*Construct json from file*/
         void getJson(std::istream &in);
         void setJson(std::ostream &out, bool formatOut = false);
         std::shared_ptr<JsonContainer> findElementByName(const std::string &keyName);

@@ -2,12 +2,11 @@
 #define DATE_TIME_TEST_HPP
 
 #include <string>
-#include <iostream>
 
 #include <cxxtest/TestSuite.h>
 
-#include "../utility_module/time/date_time.hpp"
-#include "../utility_module/time/date_time.cpp"
+#include "../utility_module/date_time.hpp"
+#include "../utility_module/date_time.cpp"
 #include "../exception_module/exceptions.hpp"
 
 using namespace utility_space;
