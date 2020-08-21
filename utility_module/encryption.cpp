@@ -5,12 +5,12 @@ using namespace utility_space;
 /*-----------------------------------ENCRYPTION------------------------------------*/
 std::pair<std::string, std::string> Encryption::getTwinKey(twinKeyType typeKey)
 {
-
+	return std::pair<std::string, std::string>();
 }
 
 std::string Encryption::getSingleKey(singleKeyType typeKey)
 {
-
+	return "";
 }
 
 Encryption::Encryption(std::string pass)
@@ -30,52 +30,52 @@ Encryption::~Encryption()
 
 std::string Encryption::encryptWithProgramKey(std::string sourceStr)
 {
-
+	return "";
 }
 
 std::string Encryption::decryptWithProgramKey(std::string encryptedStr)
 {
-
+	return "";
 }
 
 std::string Encryption::encryptWithPassphrase(std::string sourceStr)
 {
-
+	return "";
 }
 
 std::string Encryption::decryptWithPassphrase(std::string decryptedStr)
 {
-	
+	return "";
 }
 
 std::string Encryption::getDES3Key()
 {
-
+	return "";
 }
 
 std::string Encryption::getBlowfishKey()
 {
-
+	return "";
 }
 
 std::string Encryption::getRC5Key()
 {
-
+	return "";
 }
 
 std::string Encryption::getVMPCKey()
 {
-
+	return "";
 }
 
 std::pair<std::string, std::string> Encryption::getRSAKey()
 {
-
+	return std::pair<std::string, std::string>();
 }
 
 std::pair<std::string, std::string> Encryption::getDSAKey()
 {
-
+	return std::pair<std::string, std::string>();
 }
 
 
@@ -102,12 +102,12 @@ EncryptionDES3::~EncryptionDES3()
 
 std::string EncryptionDES3::encryptData(std::string srcData, std::string pass)
 {
-
+	return "";
 }
 
 std::string EncryptionDES3::decryptData(std::string encryptedData, std::string pass)
 {
-
+	return "";
 }
 
 /*-------------------------ENCRYPTIONBLOWFISH--------------------------------*/
@@ -133,12 +133,12 @@ EncryptionBlowfish::~EncryptionBlowfish()
 
 std::string EncryptionBlowfish::encryptData(std::string srcData, std::string pass)
 {
-
+	return "";
 }
 
 std::string EncryptionBlowfish::decryptData(std::string encryptedData, std::string pass)
 {
-
+	return "";
 }
 
 /*-------------------------ENCRYPTIONRC5--------------------------------*/
@@ -164,12 +164,12 @@ EncryptionRC5::~EncryptionRC5()
 
 std::string EncryptionRC5::encryptData(std::string srcData, std::string pass)
 {
-
+	return "";
 }
 
 std::string EncryptionRC5::decryptData(std::string encryptedData, std::string pass)
 {
-
+	return "";
 }
 
 /*-------------------------EncryptionVMPC--------------------------------*/
@@ -195,12 +195,12 @@ EncryptionVMPC::~EncryptionVMPC()
 
 std::string EncryptionVMPC::encryptData(std::string srcData, std::string pass)
 {
-
+	return "";
 }
 
 std::string EncryptionVMPC::decryptData(std::string encryptedData, std::string pass)
 {
-
+	return "";
 }
 
 /*-------------------------EncryptionRSA--------------------------------*/
@@ -226,12 +226,12 @@ EncryptionRSA::~EncryptionRSA()
 
 std::string EncryptionRSA::encryptData(std::string srcData, std::string pass)
 {
-
+	return "";
 }
 
 std::string EncryptionRSA::decryptData(std::string encryptedData, std::string pass)
 {
-
+	return "";
 }
 
 /*-------------------------EncryptionDSA--------------------------------*/
@@ -257,10 +257,10 @@ EncryptionDSA::~EncryptionDSA()
 
 std::string EncryptionDSA::encryptData(std::string srcData, std::string pass)
 {
-
+	return "";
 }
 
 std::string EncryptionDSA::decryptData(std::string encryptedData, std::string pass)
 {
-
+	return "";
 }

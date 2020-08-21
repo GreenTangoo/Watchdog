@@ -41,7 +41,7 @@ namespace siem_ex_space
 	class JsonException : public SIEMExecption
 	{
 	public:
-		enum JsonErrorCode { BAD_PATH = 0 };
+		enum JsonErrorCode { BAD_PATH = 0, BAD_NAME };
 		JsonException(std::string const &exMsg, int errCode) : SIEMExecption(exMsg, errCode) {}
 		JsonException(std::string &&exMsg, int errCode) : SIEMExecption(std::move(exMsg), errCode) {}
 		~JsonException() {}

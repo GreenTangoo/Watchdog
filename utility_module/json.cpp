@@ -338,12 +338,12 @@ std::vector<std::shared_ptr<JsonContainer>> JsonObject::findElementsByName(const
 
 std::shared_ptr<JsonContainer> JsonObject::findElementByTemplate(const std::string &templateString)
 {
-
+	return nullptr;
 }
 
 std::vector<std::shared_ptr<JsonContainer>> JsonObject::findElementsByTemplate(const std::string &temlateString)
 {
-
+	return std::vector<std::shared_ptr<JsonContainer>>();
 }
 
 std::shared_ptr<JsonContainer> JsonObject::findElementByPath(const std::string &path)
