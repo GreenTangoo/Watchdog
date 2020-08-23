@@ -13,21 +13,21 @@ namespace description_space
 	class DescriptionTable
 	{
 	private:
-		std::map<symptomCategory, std::unique_ptr<SearchInfo>> descriptorSearching;
-		std::map<symptomCategory, std::unique_ptr<AggregationInfo>> descriptorAggregation;
+		std::map<symptomCategory, std::unique_ptr<SearchInfo>> _descriptorSearching;
+		std::map<symptomCategory, std::unique_ptr<AggregationInfo>> _descriptorAggregation;
 	private:
 		DescriptionTable();
+		~DescriptionTable();
 		DescriptionTable(DescriptionTable const &other) = delete;
 		DescriptionTable(DescriptionTable &&other) = delete;
 		DescriptionTable const& operator=(DescriptionTable const &other) = delete;
 		DescriptionTable const& operator=(DescriptionTable &&other) = delete;
-		void constructSearchInfoStructures();
-		void constructAggregationInfoStructures();
+		void constructSearchInfoStructures(std::shared_ptr<JsonContainer const> searchConfigNode);
+		void constructAggregationInfoStructures(std::shared_ptr<JsonContainer const> aggrConfigNode);
 	public:
-		~DescriptionTable();
 		static DescriptionTable& getInstance();
-		std::unique_ptr<SearchInfo> const getSearchStructure(symptomCategory sympType);
-		std::unique_ptr<AggregationInfo> const getAggrStructure(symptomCategory sympType);
+		SearchInfo const& getSearchStructure(symptomCategory sympType);
+		AggregationInfo const& getAggrStructure(symptomCategory sympType);
 		void tuneFromConfig(Configuration const &config);
 	};
 }

@@ -7,17 +7,18 @@ DescriptionTable::~DescriptionTable()
 
 }
 
-static DescriptionTable& getInstance()
+DescriptionTable& DescriptionTable::getInstance()
 {
-	
+	static DescriptionTable descriptionObject;
+	return descriptionObject;
 }
 
-void DescriptionTable::constructSearchInfoStructures()
+void DescriptionTable::constructSearchInfoStructures(std::shared_ptr<JsonContainer const> searchConfigNode)
 {
 
 }
 
-void DescriptionTable::constructAggregationInfoStructures()
+void DescriptionTable::constructAggregationInfoStructures(std::shared_ptr<JsonContainer const> aggrConfigNode)
 {
 
 }
@@ -27,12 +28,12 @@ void DescriptionTable::tuneFromConfig(Configuration const &config)
 	
 }
 
-std::unique_ptr<SearchInfo> const DescriptionTable::getSearchStructure(symptomCategory sympType)
+SearchInfo const& DescriptionTable::getSearchStructure(symptomCategory sympType)
 {
 
 }
 
-std::unique_ptr<AggregationInfo> const DescriptionTable::getAggrStructure(symptomCategory sympType)
+AggregationInfo const& DescriptionTable::getAggrStructure(symptomCategory sympType)
 {
 
 }

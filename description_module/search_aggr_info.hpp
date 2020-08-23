@@ -27,7 +27,6 @@ namespace description_space
 
 	struct SearchInfo
 	{
-		std::mutex fileManipulationMutex;
 		std::string jsonFilename;
 		std::unique_ptr<SearchInfoNode> rootSearchConfigNode;
 	};
@@ -43,7 +42,6 @@ namespace description_space
 
 	struct AggregationInfo
 	{
-		std::mutex fileManipulationMutex;
 		std::string logFilename;
 		std::string jsonFilename;
 		std::unique_ptr<AggregationInfoNode> rootAggregationInfoNode;
@@ -52,10 +50,9 @@ namespace description_space
 	class Configuration
 	{
 	private:
-		mutable std::mutex configMutex;
-		JsonObject configurationFileParser;
+		JsonObject _configurationFileParser;
 	public:
-		Configuration(JsonObject obj);
+		Configuration(std::string configurationPath);
 		Configuration(Configuration const &other);
 		Configuration(Configuration &&other);
 		Configuration const& operator=(Configuration const &other);

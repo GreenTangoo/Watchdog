@@ -2,19 +2,19 @@
 
 using namespace description_space;
 
-Configuration::Configuration(JsonObject obj) : configurationFileParser(obj)
+Configuration::Configuration(std::string configurationPath)
 {
 
 }
 
 Configuration::Configuration(Configuration const &other) : 
-					configurationFileParser(other.configurationFileParser)
+					_configurationFileParser(other._configurationFileParser)
 {
 
 }
 
 Configuration::Configuration(Configuration &&other) :
-					configurationFileParser(std::move(other.configurationFileParser))
+					_configurationFileParser(std::move(other._configurationFileParser))
 {
 
 }
@@ -23,11 +23,7 @@ Configuration const& Configuration::operator=(Configuration const &other)
 {
 	if(this != &other)
 	{
-		std::lock(configMutex, other.configMutex);
-		std::lock_guard<std::mutex> lhs(configMutex, std::adopt_lock);
-		std::lock_guard<std::mutex> rhs(other.configMutex, std::adopt_lock);
-
-		configurationFileParser = other.configurationFileParser;
+		_configurationFileParser = other._configurationFileParser;
 	}
 	return *this;
 }
@@ -36,11 +32,7 @@ Configuration const& Configuration::operator=(Configuration &&other)
 {
 	if(this != &other)
 	{
-		std::lock(configMutex, other.configMutex);
-		std::lock_guard<std::mutex> lhs(configMutex, std::adopt_lock);
-		std::lock_guard<std::mutex> rhs(other.configMutex, std::adopt_lock);
-
-		configurationFileParser = std::move(other.configurationFileParser);
+		_configurationFileParser = std::move(other._configurationFileParser);
 	}
 	return *this;
 }
@@ -48,7 +40,7 @@ Configuration const& Configuration::operator=(Configuration &&other)
 JsonObject Configuration::getConfiguration(std::string const &nameNode)
 {
 	JsonObject configNodeObj;
-	std::shared_ptr<JsonContainer> foundedContainer = configurationFileParser.findElementByName(nameNode);
+	std::shared_ptr<JsonContainer> foundedContainer = _configurationFileParser.findElementByName(nameNode);
 	
 	if(foundedContainer == nullptr)
 	{
