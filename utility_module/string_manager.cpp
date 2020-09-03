@@ -21,7 +21,8 @@ std::vector<std::string> StringManager::parseByDelimiter(std::string const &sour
 
 	while(foundPos != std::string::npos)
 	{
-		std::copy(sourceStr.begin() + lastPos, sourceStr.begin() + foundPos, std::back_inserter(tempStr));
+		std::copy(sourceStr.begin() + lastPos, sourceStr.begin() + foundPos, 
+			std::back_inserter(tempStr));
 
 		if(tempStr.length() > 0)
 			returnVec.push_back(tempStr);
@@ -42,7 +43,8 @@ std::vector<std::string> StringManager::parseByDelimiter(std::string const &sour
 std::string StringManager::deleteSymbol(std::string const &sourceStr, symbolType symbol)
 {
 	std::string cropedString = sourceStr;
-	cropedString.erase(std::remove(cropedString.begin(), cropedString.end(), symbol), cropedString.end());
+	cropedString.erase(std::remove(cropedString.begin(), cropedString.end(), symbol), 
+		cropedString.end());
 	return cropedString;
 }
 
@@ -50,7 +52,8 @@ std::string StringManager::deleteSymbols(std::string const &sourceStr, std::vect
 {
 	std::string cropedString = sourceStr;
 	for(size_t i(0); i < symbolsVec.size(); i++)
-		cropedString.erase(std::remove(cropedString.begin(), cropedString.end(), symbolsVec[i]), cropedString.end());
+		cropedString.erase(std::remove(cropedString.begin(), cropedString.end(), symbolsVec[i]), 
+			cropedString.end());
 
 	return cropedString;
 }
@@ -59,7 +62,8 @@ std::string StringManager::deleteSymbols(std::string const &sourceStr, std::stri
 {
 	std::string cropedString = sourceStr;
 	for(size_t i(0); i < symbolsString.size(); i++)
-		cropedString.erase(std::remove(cropedString.begin(), cropedString.end(), symbolsString[i]), cropedString.end());
+		cropedString.erase(std::remove(cropedString.begin(), cropedString.end(), symbolsString[i]), 
+			cropedString.end());
 
 	return cropedString;
 }
@@ -98,7 +102,8 @@ std::string StringManager::cropFromBegin(std::string const &sourceStr, symbolTyp
 		cropIndex++;
 	}
 
-	return cropIndex <= stringSize - 1 ? cropedString.substr(cropIndex + 1, stringSize - 1) : sourceStr;
+	return cropIndex <= stringSize - 1 ? cropedString.substr(cropIndex + 1, stringSize - 1) : 
+		sourceStr;
 }
 
 std::string StringManager::constructPath(symbolType delimPath, std::vector<std::string> const &args)

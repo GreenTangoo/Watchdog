@@ -3,10 +3,11 @@
 
 #include <map>
 
-#include "search_aggr_info.hpp"
 #include "../correlation_module/symptom_implementation.hpp"
+#include "../exception_module/exceptions.hpp"
 
 using namespace correlation_space;
+using namespace siem_ex_space;
 
 namespace description_space
 {
@@ -28,7 +29,7 @@ namespace description_space
 		static DescriptionTable& getInstance();
 		SearchInfo const& getSearchStructure(symptomCategory sympType);
 		AggregationInfo const& getAggrStructure(symptomCategory sympType);
-		void tuneFromConfig(Configuration const &config);
+		void tuneFromConfig(Configuration const &searchconfig, Configuration const &aggregationConfig);
 	};
 }
 

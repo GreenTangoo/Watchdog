@@ -2,6 +2,8 @@
 
 using namespace description_space;
 
+typedef std::map<symptomCategory, std::unique_ptr<SearchInfo>>::iterator searchIterator;
+
 DescriptionTable::~DescriptionTable()
 {
 
@@ -23,14 +25,21 @@ void DescriptionTable::constructAggregationInfoStructures(std::shared_ptr<JsonCo
 
 }
 
-void DescriptionTable::tuneFromConfig(Configuration const &config)
+void tuneFromConfig(Configuration const &searchconfig, Configuration const &aggregationConfig)
 {
 	
 }
 
 SearchInfo const& DescriptionTable::getSearchStructure(symptomCategory sympType)
 {
-
+	searchIterator structureIt = _descriptorSearching.find(sympType);
+	if(structureIt == _descriptorSearching.end())
+	{
+		throw ConfigurationException("Cannot find search structure by symptom type: " 
+			+ std::to_string(static_cast<int>(sympType)),
+			ConfigurationException::BAD_SEARCH_STRUCTURE);
+	}
+	return *(structureIt->second.get());
 }
 
 AggregationInfo const& DescriptionTable::getAggrStructure(symptomCategory sympType)

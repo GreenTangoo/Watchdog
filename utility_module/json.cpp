@@ -137,7 +137,7 @@ void JsonObject::addArrayElement(const std::string &value, const std::string &pa
     if(foundedArrayNode == nullptr)
     {
         throw JsonException("Cannot find node by path: " + parentPath + " in addArrayElement method", 
-												JsonException::BAD_PATH);
+			JsonException::BAD_PATH);
     }
 
     JsonContainer newArrayElementContainer;
@@ -193,7 +193,7 @@ void JsonObject::updateArray(const std::string &keyNode, const std::vector<std::
     if(foundedArrayNode == nullptr)
     {
         throw  JsonException("Cannot find node by path: " + arrayPath + " in updateArray method",
-											JsonException::BAD_PATH);
+			JsonException::BAD_PATH);
     }
 
     if(foundedArrayNode->childNode != nullptr)
@@ -223,7 +223,7 @@ void JsonObject::addEmptyNode(const std::string &keyNode, const std::string &par
     if(foundedContainer == nullptr)
     {
         throw JsonException("Cannot find node by path: " + parentPath + " in addEmptyNode method",
-											JsonException::BAD_PATH);
+			JsonException::BAD_PATH);
     }
 
     addChild(foundedContainer, newContainer);
@@ -236,7 +236,7 @@ void JsonObject::updateNodeName(const std::string &keyNode, const std::string &n
     if(foundedNode == nullptr)
     {
         throw JsonException("Cannot find node by path: " + nodePath + " in updateNodeName method",
-											JsonException::BAD_PATH);
+			JsonException::BAD_PATH);
     }
 
     foundedNode->keyValue.first = keyNode;
@@ -266,7 +266,7 @@ void JsonObject::addString(const std::pair<std::string, std::string> &keyValue, 
     if(foundedContainer == nullptr)
     {
         throw JsonException("Cannot find node by path: " + parentPath + " in addString method",
-												JsonException::BAD_PATH);
+			JsonException::BAD_PATH);
     }
 
     addChild(foundedContainer, newContainer);
@@ -279,7 +279,7 @@ void JsonObject::updateString(const std::pair<std::string, std::string> &keyValu
     if(foundedStringNode == nullptr)
     {
         throw JsonException("Cannot find node by path: " + stringPath + " in updateString method",
-												JsonException::BAD_PATH);
+			JsonException::BAD_PATH);
     }
 
     foundedStringNode->keyValue = keyValue;
@@ -316,7 +316,7 @@ void JsonObject::getJson(std::istream &in)
     rootNode->keyValue.first = "root";
 }
 
-void JsonObject::setJson(std::ostream &out, bool formatOut)
+void JsonObject::setJson(std::ostream &out, bool formatOut) const
 {
     if(!formatOut)
         JsonStreamParser::getInstance().putToStream(out, rootNode->childNode);
@@ -386,7 +386,8 @@ std::vector<std::shared_ptr<JsonContainer>> JsonObject::findsByName(std::shared_
 
         if(itPtr->childNode != nullptr)
         {
-            std::vector<std::shared_ptr<JsonContainer>> returnedVec = findsByName(itPtr->childNode, keyName);
+            std::vector<std::shared_ptr<JsonContainer>> returnedVec = findsByName(itPtr->childNode, 
+                keyName);
             std::copy(returnedVec.begin(), returnedVec.end(), std::back_inserter(foundedVec));
         }
     }
@@ -394,7 +395,8 @@ std::vector<std::shared_ptr<JsonContainer>> JsonObject::findsByName(std::shared_
     return foundedVec;
 }
 
-std::shared_ptr<JsonContainer> JsonObject::findByPath(std::shared_ptr<JsonContainer> node, const std::string &path)
+std::shared_ptr<JsonContainer> JsonObject::findByPath(std::shared_ptr<JsonContainer> node, 
+    const std::string &path)
 {
     std::shared_ptr<JsonContainer> foundedNodePtr = node;
     std::vector<std::string> pathNodesVec = StringManager::parseByDelimiter(path, "/");
@@ -493,14 +495,15 @@ std::shared_ptr<JsonContainer> JsonStreamParser::getFromStream(std::istream &in,
     return getNode(in, parentNode);
 }
 
-void JsonStreamParser::putToStream(std::ostream &out, std::shared_ptr<JsonContainer> jsonNode)
+void JsonStreamParser::putToStream(std::ostream &out, std::shared_ptr<JsonContainer> jsonNode) const
 {
     out.write("{", 1);
     putNode(out, jsonNode);
     out.write("}", 1);
 }
 
-void JsonStreamParser::putToStreamFormat(std::ostream &out, std::shared_ptr<JsonContainer> jsonNode, size_t offset)
+void JsonStreamParser::putToStreamFormat(std::ostream &out, std::shared_ptr<JsonContainer> jsonNode, 
+    size_t offset) const
 {
     out.write("{\n", 2);
     putNodeFormat(out, jsonNode, offset + 4);
@@ -527,7 +530,7 @@ std::string JsonStreamParser::getUntilSymbol(std::istream &in, symbolType delime
 std::shared_ptr<JsonContainer> JsonStreamParser::getNode(std::istream &in, std::shared_ptr<JsonContainer> parentNode)
 {
     std::shared_ptr<JsonContainer> newContainerPtr
-            = std::make_shared<JsonContainer>(JsonContainer());
+        = std::make_shared<JsonContainer>(JsonContainer());
 
     char symbol = 0;
     std::string firstStringNodeVar;
@@ -591,7 +594,7 @@ std::shared_ptr<JsonContainer> JsonStreamParser::getNode(std::istream &in, std::
 std::shared_ptr<JsonContainer> JsonStreamParser::getArrayElement(std::istream &in, std::shared_ptr<JsonContainer> parentNode)
 {
     std::shared_ptr<JsonContainer> arrayElementContainerPtr
-            = std::make_shared<JsonContainer>(JsonContainer());
+        = std::make_shared<JsonContainer>(JsonContainer());
 
     arrayElementContainerPtr->typeNode = ARRAY_ELEMENT;
 
@@ -626,9 +629,10 @@ std::shared_ptr<JsonContainer> JsonStreamParser::getArrayElement(std::istream &i
     return arrayElementContainerPtr;
 }
 
-void JsonStreamParser::putNode(std::ostream &out, std::shared_ptr<JsonContainer> node)
+void JsonStreamParser::putNode(std::ostream &out, std::shared_ptr<JsonContainer> node) const
 {
-    for(std::shared_ptr<JsonContainer> nodeIter = node; nodeIter != nullptr; nodeIter = nodeIter->nextNode)
+    for(std::shared_ptr<JsonContainer> nodeIter = node; nodeIter != nullptr; 
+        nodeIter = nodeIter->nextNode)
     {
         if(nodeIter.get()->typeNode == STRING)
         {
@@ -674,9 +678,10 @@ void JsonStreamParser::putNode(std::ostream &out, std::shared_ptr<JsonContainer>
     }
 }
 
-void JsonStreamParser::putArrayElement(std::ostream &out, std::shared_ptr<JsonContainer> node)
+void JsonStreamParser::putArrayElement(std::ostream &out, std::shared_ptr<JsonContainer> node) const
 {
-    for(std::shared_ptr<JsonContainer> nodeIter = node; nodeIter != nullptr; nodeIter = nodeIter->nextNode)
+    for(std::shared_ptr<JsonContainer> nodeIter = node; nodeIter != nullptr; 
+        nodeIter = nodeIter->nextNode)
     {
         std::string arrayElement = nodeIter.get()->keyValue.first;
         arrayElement = "\"" + arrayElement + "\"";
@@ -687,11 +692,13 @@ void JsonStreamParser::putArrayElement(std::ostream &out, std::shared_ptr<JsonCo
     }
 }
 
-void JsonStreamParser::putNodeFormat(std::ostream &out, std::shared_ptr<JsonContainer> node, size_t offset)
+void JsonStreamParser::putNodeFormat(std::ostream &out, std::shared_ptr<JsonContainer> node, 
+    size_t offset) const
 {
     std::string offsetStr(" ", offset);
 
-    for(std::shared_ptr<JsonContainer> nodeIter = node; nodeIter != nullptr; nodeIter = nodeIter->nextNode)
+    for(std::shared_ptr<JsonContainer> nodeIter = node; nodeIter != nullptr; 
+        nodeIter = nodeIter->nextNode)
     {
         if(nodeIter.get()->typeNode == STRING)
         {
@@ -745,7 +752,8 @@ void JsonStreamParser::putNodeFormat(std::ostream &out, std::shared_ptr<JsonCont
     }
 }
 
-void JsonStreamParser::putArrayElementFormat(std::ostream &out, std::shared_ptr<JsonContainer> node, size_t offset)
+void JsonStreamParser::putArrayElementFormat(std::ostream &out, std::shared_ptr<JsonContainer> node, 
+    size_t offset) const
 {
     std::string offsetStr(" ", offset);
     for(std::shared_ptr<JsonContainer> nodeIter = node; nodeIter != nullptr; nodeIter = nodeIter->nextNode)

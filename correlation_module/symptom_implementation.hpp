@@ -3,7 +3,7 @@
 
 #include "../utility_module/json.hpp"
 #include "../utility_module/encryption.hpp"
-#include "../description_module/search_aggr_info.hpp"
+#include "../description_module/configuration.hpp"
 
 using namespace utility_space;
 using namespace description_space;

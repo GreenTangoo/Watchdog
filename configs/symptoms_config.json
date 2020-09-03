@@ -1,0 +1,15 @@
+{
+    "symptom":{
+        "json_filename":"iptables_log.json",
+        "category":"port_scanning",
+        "key-node":"[ip_addr]",
+        "and":{
+            "key-node":"amount_requests",
+            "key-value":">1000",
+            "and":{
+                "key-node":"protocol",
+                "key-value":"tcp"
+            }
+        }
+    }
+}

@@ -13,8 +13,12 @@ namespace siem_ex_space
 		int errorCode;
 	public:
 		enum MainSIEMErrorCode { BAD_FILE = 0 };
-		SIEMExecption(std::string const &exMsg, int errCode) : msg(exMsg), errorCode(errCode) {}
-		SIEMExecption(std::string &&exMsg, int errCode) : msg(std::move(exMsg)), errorCode(errCode) {}
+		SIEMExecption(std::string const &exMsg, int errCode) : 
+			msg(exMsg), errorCode(errCode) {}
+
+		SIEMExecption(std::string &&exMsg, int errCode) : 
+			msg(std::move(exMsg)), errorCode(errCode) {}
+
 		~SIEMExecption() {}
 		const char *what() const noexcept
 		{
@@ -33,8 +37,12 @@ namespace siem_ex_space
 								 BAD_SECOND, BAD_MILLISECOND, INCOMPITABLE_MONTH_DAY,
 								 BAD_FORMAT_SYMBOL, BAD_FORMAT_STRING, INCOMPITABLE_STRINGS,
 								 BAD_TIME_STRING, BAD_MATH_OPERATION, BAD_DATETIME_FORMAT };
-		DateTimeException(std::string const &exMsg, int errCode) : SIEMExecption(exMsg, errCode) {}
-		DateTimeException(std::string &&exMsg, int errCode) : SIEMExecption(std::move(exMsg), errCode) {}
+		DateTimeException(std::string const &exMsg, int errCode) :
+			SIEMExecption(exMsg, errCode) {}
+
+		DateTimeException(std::string &&exMsg, int errCode) : 
+			SIEMExecption(std::move(exMsg), errCode) {}
+
 		~DateTimeException() {}
 	};
 
@@ -42,9 +50,26 @@ namespace siem_ex_space
 	{
 	public:
 		enum JsonErrorCode { BAD_PATH = 0, BAD_NAME };
-		JsonException(std::string const &exMsg, int errCode) : SIEMExecption(exMsg, errCode) {}
-		JsonException(std::string &&exMsg, int errCode) : SIEMExecption(std::move(exMsg), errCode) {}
+		JsonException(std::string const &exMsg, int errCode) : 
+			SIEMExecption(exMsg, errCode) {}
+
+		JsonException(std::string &&exMsg, int errCode) : 
+			SIEMExecption(std::move(exMsg), errCode) {}
+
 		~JsonException() {}
+	};
+
+	class ConfigurationException : public SIEMExecption
+	{
+	public:
+		enum ConfigErrorCode { BAD_SEARCH_STRUCTURE = 0, BAD_AGGR_STRUCTURE };
+		ConfigurationException(std::string const &exMsg, int errCode) :
+			SIEMExecption(exMsg, errCode) {}
+
+		ConfigurationException(std::string &&exMsg, int errCode) : 
+			SIEMExecption(std::move(exMsg), errCode) {}
+
+		~ConfigurationException() {}
 	};
 }
 #endif // EXCEPTIONS_HPP

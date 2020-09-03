@@ -2,7 +2,8 @@
 
 using namespace correlation_space;
 
-SymptomChecker::SymptomChecker(SearchInfo const &infoSearch, symptomCategory sympType) : info(infoSearch)
+SymptomChecker::SymptomChecker(SearchInfo const &infoSearch, symptomCategory sympType) : 
+    info(infoSearch)
 {
 
 }

@@ -1,5 +1,5 @@
-#ifndef SEARCH_AGGR_INFO_HPP
-#define SEARCH_AGGR_INFO_HPP
+#ifndef CONFIGURATION_HPP
+#define CONFIGURATION_HPP
 
 #include <string>
 #include <memory>
@@ -7,6 +7,7 @@
 #include <regex>
 
 #include "../utility_module/json.hpp"
+#include "../utility_module/syntax_analyzer.hpp"
 #include "../exception_module/exceptions.hpp"
 
 using namespace utility_space;
@@ -14,9 +15,6 @@ using namespace siem_ex_space;
 
 namespace description_space
 {
-	enum relationshipCondition { AND = 0, OR };
-	enum compareCondition { EQ = '=', LT = '<', GT = '>' };
-
 	struct SearchInfoNode
 	{
 		relationshipCondition condition;
@@ -61,4 +59,4 @@ namespace description_space
 	};
 }
 
-#endif // SEARCH_AGGR_INFO_HPP
+#endif // CONFIGURATION_HPP

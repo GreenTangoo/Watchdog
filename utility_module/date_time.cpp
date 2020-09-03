@@ -7,20 +7,21 @@ using namespace siem_ex_space;
 
 
 /*--------------------------------PUBLIC----------------------------------------*/
-DateTime::DateTime() : years(0), months(0), days(0), hours(0), minutes(0), seconds(0), milliseconds(0)
+DateTime::DateTime() : 
+	years(0), months(0), days(0), hours(0), minutes(0), seconds(0), milliseconds(0)
 {
 	initializeDaysMap();
 }
 
 DateTime::DateTime(std::string const &timeString, std::string const &formatString) :
-					years(0), months(0), days(0), hours(0), minutes(0), seconds(0), milliseconds(0)
+	years(0), months(0), days(0), hours(0), minutes(0), seconds(0), milliseconds(0)
 {
 	putFormatTime(timeString, formatString);
 	initializeDaysMap();
 }
 
 DateTime::DateTime(DateTime const &other) : years(other.years), months(other.months), days(other.days),
-	 					hours(other.days), minutes(other.days), seconds(other.seconds), milliseconds(other.milliseconds)
+	hours(other.days), minutes(other.days), seconds(other.seconds), milliseconds(other.milliseconds)
 {
 	initializeDaysMap();
 }
@@ -91,7 +92,8 @@ std::string DateTime::getFormatTime(std::string const &formatString)
 		{
 			if(i >= formatStrLength - 1)
 			{
-				throw DateTimeException("Incorrect format string format", DateTimeException::BAD_FORMAT_STRING);
+				throw DateTimeException("Incorrect format string format", 
+					DateTimeException::BAD_FORMAT_STRING);
 			}
 
 			char formatSymbol = formatString[i + 1];
@@ -122,14 +124,15 @@ void DateTime::putFormatTime(std::string const &timeString, std::string const &f
 		
 		if(formatSymbolPos == formatStrLen - 1)
 		{
-			throw DateTimeException("Bad format string format", DateTimeException::BAD_FORMAT_STRING);
+			throw DateTimeException("Bad format string format", 
+				DateTimeException::BAD_FORMAT_STRING);
 		}
 
 		formatSymbolType timeSymbol = (formatSymbolType)formatString[formatSymbolPos + 1];
 		if(formatSymbolPos + 2 >= formatStrLen)
 		{
 			std::string subTimeStr = timeString.substr(timeStrBeginSubTimePos, 
-															timeStringLen - timeStrBeginSubTimePos);
+				timeStringLen - timeStrBeginSubTimePos);
 			putSubTime(subTimeStr, timeSymbol);
 			return;
 		}
@@ -141,11 +144,12 @@ void DateTime::putFormatTime(std::string const &timeString, std::string const &f
 			size_t timeStringEndPos = timeString.find(behindFormatSymbol, findPos);
 			if(timeStringEndPos == std::string::npos)
 			{
-				throw DateTimeException("Time string ins't equal format string", DateTimeException::INCOMPITABLE_STRINGS);
+				throw DateTimeException("Time string ins't equal format string", 
+					DateTimeException::INCOMPITABLE_STRINGS);
 			}
 
 			std::string subTimeStr = timeString.substr(timeStrBeginSubTimePos, 
-															timeStringEndPos - timeStrBeginSubTimePos);
+				timeStringEndPos - timeStrBeginSubTimePos);
 
 			putSubTime(subTimeStr, timeSymbol);
 			formatSymbolPos++;
@@ -154,7 +158,8 @@ void DateTime::putFormatTime(std::string const &timeString, std::string const &f
 	}
 
 	if(isValidDateTime() == false)
-		throw DateTimeException("Incorrect DateTime class format", DateTimeException::BAD_DATETIME_FORMAT);
+		throw DateTimeException("Incorrect DateTime class format", 
+			DateTimeException::BAD_DATETIME_FORMAT);
 }
 
 void DateTime::add(DateTime const &other)
@@ -247,7 +252,8 @@ void DateTime::sub(DateTime const &other)
 	}
 
 	if(this->years < 0)
-		throw DateTimeException("Date result below zero", DateTimeException::BAD_MATH_OPERATION);
+		throw DateTimeException("Date result below zero", 
+			DateTimeException::BAD_MATH_OPERATION);
 }
 
 void DateTime::sub(std::string const &timeString, std::string const &formatString)
@@ -304,7 +310,7 @@ void DateTime::setMonths(int value)
 	int maxDays = monthDaysAmountMap[(monthType)value];
 	if(this->days > maxDays)
 		throw DateTimeException("Amount days in input month are bigger than stored in class", 
-								DateTimeException::INCOMPITABLE_MONTH_DAY);
+			DateTimeException::INCOMPITABLE_MONTH_DAY);
 
 	months = value;
 }
@@ -313,7 +319,8 @@ void DateTime::setDays(int value)
 {
 	int maxDays = monthDaysAmountMap[(monthType)this->months];
 	if(value > maxDays)
-		throw DateTimeException("Day number bigger than " + std::to_string(maxDays), DateTimeException::BAD_DAY);
+		throw DateTimeException("Day number bigger than " + std::to_string(maxDays), 
+			DateTimeException::BAD_DAY);
 	days = value;
 }
 
@@ -341,7 +348,8 @@ void DateTime::setSeconds(int value)
 void DateTime::setMilliseconds(int value)
 {
 	if(value > 1000)
-		throw DateTimeException("Milliseconds number bigger than 1000", DateTimeException::BAD_MILLISECOND);
+		throw DateTimeException("Milliseconds number bigger than 1000", 
+			DateTimeException::BAD_MILLISECOND);
 	milliseconds = value;
 }
 
@@ -431,14 +439,16 @@ std::string DateTime::getSubTime(char formatSymbol)
 		return std::to_string(this->milliseconds);
 		break;
 	default:
-		throw DateTimeException("Bad symol in format string: " + formatSymbol, DateTimeException::BAD_FORMAT_SYMBOL);
+		throw DateTimeException("Bad symol in format string: " + formatSymbol, 
+			DateTimeException::BAD_FORMAT_SYMBOL);
 	}
 }
 
 void DateTime::putSubTime(std::string timeStr, formatSymbolType symbolTimeType)
 {
 	if(!isNumberString(timeStr))
-		throw DateTimeException("Incorrect sub time string format", DateTimeException::BAD_TIME_STRING);
+		throw DateTimeException("Incorrect sub time string format", 
+			DateTimeException::BAD_TIME_STRING);
 
 	int numReprStr = std::stoul(timeStr);
 
@@ -466,7 +476,8 @@ void DateTime::putSubTime(std::string timeStr, formatSymbolType symbolTimeType)
 		this->milliseconds = numReprStr;
 		break;
 	default:
-		throw DateTimeException("Bad symol in format string: " + symbolTimeType, DateTimeException::BAD_FORMAT_SYMBOL);
+		throw DateTimeException("Bad symol in format string: " + symbolTimeType, 
+			DateTimeException::BAD_FORMAT_SYMBOL);
 	}
 }
 

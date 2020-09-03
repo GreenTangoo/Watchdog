@@ -1,4 +1,4 @@
-#include "search_aggr_info.hpp"
+#include "configuration.hpp"
 
 using namespace description_space;
 
@@ -8,13 +8,13 @@ Configuration::Configuration(std::string configurationPath)
 }
 
 Configuration::Configuration(Configuration const &other) : 
-					_configurationFileParser(other._configurationFileParser)
+	_configurationFileParser(other._configurationFileParser)
 {
 
 }
 
 Configuration::Configuration(Configuration &&other) :
-					_configurationFileParser(std::move(other._configurationFileParser))
+	_configurationFileParser(std::move(other._configurationFileParser))
 {
 
 }
@@ -40,11 +40,13 @@ Configuration const& Configuration::operator=(Configuration &&other)
 JsonObject Configuration::getConfiguration(std::string const &nameNode)
 {
 	JsonObject configNodeObj;
-	std::shared_ptr<JsonContainer> foundedContainer = _configurationFileParser.findElementByName(nameNode);
+	std::shared_ptr<JsonContainer> foundedContainer = 
+		_configurationFileParser.findElementByName(nameNode);
 	
 	if(foundedContainer == nullptr)
 	{
-		throw JsonException("Cannot find configuration node by name: " + nameNode, JsonException::BAD_NAME);
+		throw JsonException("Cannot find configuration node by name: " + nameNode, 
+			JsonException::BAD_NAME);
 	}
 	else
 	{
