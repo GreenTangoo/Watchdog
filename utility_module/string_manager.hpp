@@ -21,6 +21,7 @@ namespace utility_space
 		StringManager(StringManager &&other) = delete;
 		StringManager const& operator=(StringManager const &other) = delete;
 		StringManager const& operator=(StringManager &&other) = delete;
+		static std::string getSubStr(std::string const &sourceStr, std::string const &subStr);
 		static std::vector<std::string> parseByDelimiter(std::string const &sourceStr, std::string const &delimiter);
 		static std::string deleteSymbol(std::string const &sourceStr, symbolType symbol);
 		static std::string deleteSymbols(std::string const &sourceStr, std::vector<symbolType> const &symbolsVec);

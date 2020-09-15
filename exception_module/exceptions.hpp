@@ -9,24 +9,24 @@ namespace siem_ex_space
 	class SIEMExecption : public std::exception
 	{
 	protected:
-		std::string msg;
-		int errorCode;
+		std::string _msg;
+		int _errorCode;
 	public:
 		enum MainSIEMErrorCode { BAD_FILE = 0 };
 		SIEMExecption(std::string const &exMsg, int errCode) : 
-			msg(exMsg), errorCode(errCode) {}
+			_msg(exMsg), _errorCode(errCode) {}
 
 		SIEMExecption(std::string &&exMsg, int errCode) : 
-			msg(std::move(exMsg)), errorCode(errCode) {}
+			_msg(std::move(exMsg)), _errorCode(errCode) {}
 
 		~SIEMExecption() {}
 		const char *what() const noexcept
 		{
-			return msg.c_str();
+			return _msg.c_str();
 		}
 		int getErrorCode() const noexcept
 		{
-			return errorCode;
+			return _errorCode;
 		}
 	};
 
@@ -70,6 +70,19 @@ namespace siem_ex_space
 			SIEMExecption(std::move(exMsg), errCode) {}
 
 		~ConfigurationException() {}
+	};
+
+	class SyntaxAnalyzeException : public SIEMExecption
+	{
+	public:
+		enum SyntaxErrorCode { NOT_FOUND_CONDITION = 0, NOT_FOUND_RELATIONSHIP };
+		SyntaxAnalyzeException(std::string const &exMsg, int errCode) : 
+			SIEMExecption(exMsg, errCode) {}
+
+		SyntaxAnalyzeException(std::string &&exMsg, int errCode) :
+			SIEMExecption(std::move(exMsg), errCode) {}
+
+		~SyntaxAnalyzeException() {}
 	};
 }
 #endif // EXCEPTIONS_HPP

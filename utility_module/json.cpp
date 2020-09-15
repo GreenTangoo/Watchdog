@@ -8,7 +8,9 @@ using namespace siem_ex_space;
 #define STRING_NODE "string"
 #define NONE_NODE ""
 
+/*--------------------------------------------------------------------------------*/
 /*----------------------------------JSON CONTAINER--------------------------------*/
+/*--------------------------------------------------------------------------------*/
 JsonContainer::JsonContainer()
 {
     typeNode = NONE;
@@ -84,7 +86,9 @@ void JsonContainer::moveElements(JsonContainer &destObj, JsonContainer &srcObj)
     }
 }
 
+/*----------------------------------------------------------------------------------*/
 /*-----------------------------------JSON OBJECT------------------------------------*/
+/*----------------------------------------------------------------------------------*/
 JsonObject::JsonObject()
 {
     rootNode = std::make_shared<JsonContainer>(JsonContainer());
@@ -352,7 +356,9 @@ std::shared_ptr<JsonContainer> JsonObject::findElementByPath(const std::string &
     return foundedNodePtr;
 }
 
+/*---------------------------------------------------------------------------------------------*/
 /*------------------------------------JSON OBJECT(PRIVATE)-------------------------------------*/
+/*---------------------------------------------------------------------------------------------*/
 std::shared_ptr<JsonContainer> JsonObject::findByName(std::shared_ptr<JsonContainer> node, const std::string &keyName)
 {
     for(std::shared_ptr<JsonContainer> itPtr = node; itPtr != nullptr; itPtr = itPtr->nextNode)
@@ -473,7 +479,9 @@ void JsonObject::clearEmptyJsonNodes(std::shared_ptr<JsonContainer> node)
     }
 }
 
+/*--------------------------------------------------------------------------------------*/
 /*------------------------------------JSON STREAM PARSER--------------------------------*/
+/*--------------------------------------------------------------------------------------*/
 JsonStreamParser::JsonStreamParser()
 {
 
@@ -510,7 +518,9 @@ void JsonStreamParser::putToStreamFormat(std::ostream &out, std::shared_ptr<Json
     out.write("}", 1);
 }
 
+/*--------------------------------------------------------------------------------------*/
 /*----------------------------------JSON STREAM PARSER(PRIVATE)-------------------------*/
+/*--------------------------------------------------------------------------------------*/
 std::string JsonStreamParser::getUntilSymbol(std::istream &in, symbolType delimeterSymbol)
 {
     std::string getString;
@@ -769,7 +779,9 @@ void JsonStreamParser::putArrayElementFormat(std::ostream &out, std::shared_ptr<
     }
 }
 
+/*-------------------------------------------------------------------------------------------------*/
 /*------------------------------------TYPE JSON NODE RESOLVER--------------------------------------*/
+/*-------------------------------------------------------------------------------------------------*/
 JSONNodeTypeResolver::JSONNodeTypeResolver()
 {
 
@@ -805,7 +817,9 @@ std::string JSONNodeTypeResolver::getNodeName(const typeNodeJSON &typeNode)
         return NONE_NODE;
 }
 
+/*-------------------------------------------------------------------------------*/
 /*----------------------------------------FUNCTIONS------------------------------*/
+/*-------------------------------------------------------------------------------*/
 utility_space::JsonObject getJsonData(std::string jsonFilename)
 {
     std::ifstream fin;

@@ -11,6 +11,9 @@ namespace utility_space
 
     class SyntaxAnalyzer
     {
+    private:
+        std::string getCompareCondition(std::string const &valueStr);
+        std::string getRelationship(std::string const &keyRelationshipStr);
     public:
         SyntaxAnalyzer();
         SyntaxAnalyzer(SyntaxAnalyzer const &other) = default;
@@ -18,6 +21,8 @@ namespace utility_space
         ~SyntaxAnalyzer();
         SyntaxAnalyzer const& operator=(SyntaxAnalyzer const &other) = delete;
         SyntaxAnalyzer const& operator=(SyntaxAnalyzer &&other) = delete;
+        compareCondition foundCompareCondition(std::string const &valuesStr);
+        relationshipCondition foundNextRelationship(std::shared_ptr<JsonContainer> const ptr);
         compareCondition tryFoundCompareCondition(std::string const &valueStr);
         relationshipCondition tryFoundNextRelationship(std::shared_ptr<JsonContainer> const ptr);
     };

@@ -12,6 +12,17 @@ StringManager::~StringManager()
 
 }
 
+std::string StringManager::getSubStr(std::string const &sourceStr, std::string const &subStr)
+{
+	size_t subStrStartIndex = sourceStr.find(subStr);
+	if(subStrStartIndex == std::string::npos)
+	{
+		return std::string("");
+	}
+	
+	return sourceStr.substr(subStrStartIndex, subStr.size());
+}
+
 std::vector<std::string> StringManager::parseByDelimiter(std::string const &sourceStr, std::string const &delimiter)
 {
 	std::vector<std::string> returnVec;
