@@ -55,7 +55,7 @@ namespace description_space
 		Configuration(Configuration &&other);
 		Configuration const& operator=(Configuration const &other);
 		Configuration const& operator=(Configuration &&other);
-		JsonObject getConfiguration(std::string const &nameNode);
+		JsonObject getConfiguration(std::string const &nameNode) const;
 	};
 }
 

@@ -328,13 +328,13 @@ void JsonObject::setJson(std::ostream &out, bool formatOut) const
         JsonStreamParser::getInstance().putToStreamFormat(out, rootNode->childNode);
 }
 
-std::shared_ptr<JsonContainer> JsonObject::findElementByName(const std::string &keyName)
+std::shared_ptr<JsonContainer> JsonObject::findElementByName(const std::string &keyName) const
 {
     std::shared_ptr<JsonContainer> foundedNodePtr = findByName(rootNode, keyName);
     return foundedNodePtr;
 }
 
-std::vector<std::shared_ptr<JsonContainer>> JsonObject::findElementsByName(const std::string &keyName)
+std::vector<std::shared_ptr<JsonContainer>> JsonObject::findElementsByName(const std::string &keyName) const
 {
     std::vector<std::shared_ptr<JsonContainer>> foundedVecPtr = findsByName(rootNode, keyName);
     return foundedVecPtr;
@@ -359,7 +359,8 @@ std::shared_ptr<JsonContainer> JsonObject::findElementByPath(const std::string &
 /*---------------------------------------------------------------------------------------------*/
 /*------------------------------------JSON OBJECT(PRIVATE)-------------------------------------*/
 /*---------------------------------------------------------------------------------------------*/
-std::shared_ptr<JsonContainer> JsonObject::findByName(std::shared_ptr<JsonContainer> node, const std::string &keyName)
+std::shared_ptr<JsonContainer> JsonObject::findByName(std::shared_ptr<JsonContainer> node, 
+    const std::string &keyName) const
 {
     for(std::shared_ptr<JsonContainer> itPtr = node; itPtr != nullptr; itPtr = itPtr->nextNode)
     {
@@ -379,7 +380,8 @@ std::shared_ptr<JsonContainer> JsonObject::findByName(std::shared_ptr<JsonContai
     return nullptr;
 }
 
-std::vector<std::shared_ptr<JsonContainer>> JsonObject::findsByName(std::shared_ptr<JsonContainer> node, const std::string &keyName)
+std::vector<std::shared_ptr<JsonContainer>> JsonObject::findsByName(std::shared_ptr<JsonContainer> node, 
+    const std::string &keyName) const
 {
     std::vector<std::shared_ptr<JsonContainer>> foundedVec;
 

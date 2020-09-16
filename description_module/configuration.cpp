@@ -37,7 +37,7 @@ Configuration const& Configuration::operator=(Configuration &&other)
 	return *this;
 }
 
-JsonObject Configuration::getConfiguration(std::string const &nameNode)
+JsonObject Configuration::getConfiguration(std::string const &nameNode) const 
 {
 	JsonObject configNodeObj;
 	std::shared_ptr<JsonContainer> foundedContainer = 

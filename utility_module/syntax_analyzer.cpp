@@ -21,32 +21,41 @@ SyntaxAnalyzer::~SyntaxAnalyzer()
 
 }
 
-std::string SyntaxAnalyzer::getCompareCondition(std::string const &valueStr)
-{
-
-}
-
-std::string SyntaxAnalyzer::getRelationship(std::string const &keyRelationshipStr)
-{
-
-}
-
-compareCondition SyntaxAnalyzer::foundCompareCondition(std::string const &valueStr)
-{
-
-}
-
-relationshipCondition SyntaxAnalyzer::foundNextRelationship(std::shared_ptr<JsonContainer> const ptr)
-{
-
-}
-
 compareCondition SyntaxAnalyzer::tryFoundCompareCondition(std::string const &valueStr)
 {
-
+    std::string conditionStr = StringManager::getStrBetweenSymbols(valueStr, '[', ']');
+    
+    if(conditionStr == EQUAL)
+        return EQ;
+    if(conditionStr == NOT_EQUAL)
+        return NE;
+    if(conditionStr == GREATER_THAN)
+        return GT;
+    if(conditionStr == GREATER_EQUAL)
+        return GE;
+    if(conditionStr == LESS_THAN)
+        return LT;
+    if(conditionStr == LESS_EQUAL)
+        return LE;
+    
+    return NO_CONDITION;
 }
 
 relationshipCondition SyntaxAnalyzer::tryFoundNextRelationship(std::shared_ptr<JsonContainer> const ptr)
 {
-    
+    JsonObject nodeObj(*(ptr.get()));
+
+    std::shared_ptr<JsonContainer> relationshipNodePtr = nodeObj.findElementByName(AND_CONDITION);
+    if(relationshipNodePtr)
+    {
+        return AND;
+    }
+
+    relationshipNodePtr = nodeObj.findElementByName(OR_CONDITION);
+    if(relationshipNodePtr)
+    {
+        return OR;
+    }
+
+    return NO_RELATIONSHIP;
 }

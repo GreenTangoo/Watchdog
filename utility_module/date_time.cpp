@@ -5,8 +5,9 @@
 using namespace utility_space;
 using namespace siem_ex_space;
 
-
+/*------------------------------------------------------------------------------*/
 /*--------------------------------PUBLIC----------------------------------------*/
+/*------------------------------------------------------------------------------*/
 DateTime::DateTime() : 
 	years(0), months(0), days(0), hours(0), minutes(0), seconds(0), milliseconds(0)
 {
@@ -353,7 +354,9 @@ void DateTime::setMilliseconds(int value)
 	milliseconds = value;
 }
 
-/*---------------------------------PRIVATE----------------------------*/
+/*----------------------------------------------------------------------*/
+/*---------------------------------PRIVATE------------------------------*/
+/*----------------------------------------------------------------------*/
 DateTime::compareType DateTime::compare(DateTime const &first, DateTime const &second)
 {
 	if(first.years != second.years)
@@ -376,6 +379,7 @@ DateTime::compareType DateTime::compare(DateTime const &first, DateTime const &s
 bool DateTime::isValidDateTime()
 {
 	int maxDays = monthDaysAmountMap[(monthType)months];
+
 	if((years < 0)                             ||
 	   (months < 0 || months > 12)             ||
 	   (days < 0 || days > maxDays)            ||

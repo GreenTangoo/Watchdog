@@ -75,7 +75,6 @@ namespace siem_ex_space
 	class SyntaxAnalyzeException : public SIEMExecption
 	{
 	public:
-		enum SyntaxErrorCode { NOT_FOUND_CONDITION = 0, NOT_FOUND_RELATIONSHIP };
 		SyntaxAnalyzeException(std::string const &exMsg, int errCode) : 
 			SIEMExecption(exMsg, errCode) {}
 
@@ -83,6 +82,20 @@ namespace siem_ex_space
 			SIEMExecption(std::move(exMsg), errCode) {}
 
 		~SyntaxAnalyzeException() {}
+	};
+
+	class DescriptionException : public SIEMExecption
+	{
+	public:
+		enum DescriptionErrorCode { INVALID_SEARCH_CONFIG = 0, INVALID_AGGREGATION_CONFIG,
+			NOT_FOUND_JSONLOGFILE, NOT_FOUND_SYMPTOM_CATEGORY };
+		DescriptionException(std::string const &exMsg, int errCode) : 
+			SIEMExecption(exMsg, errCode) {}
+
+		DescriptionException(std::string &&exMsg, int errCode) : 
+			SIEMExecption(std::move(exMsg), errCode) {}
+
+		~DescriptionException() {}
 	};
 }
 #endif // EXCEPTIONS_HPP

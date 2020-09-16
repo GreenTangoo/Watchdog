@@ -41,9 +41,9 @@ namespace utility_space
         std::shared_ptr<JsonContainer> rootNode;
     private:
         std::shared_ptr<JsonContainer> findByName(std::shared_ptr<JsonContainer> node, 
-            const std::string &keyName);
+            const std::string &keyName) const;
         std::vector<std::shared_ptr<JsonContainer>> findsByName(std::shared_ptr<JsonContainer> node, 
-            const std::string &keyName);
+            const std::string &keyName) const;
         std::shared_ptr<JsonContainer> findByPath(std::shared_ptr<JsonContainer> node, 
             const std::string &path);
         void addChild(std::shared_ptr<JsonContainer>node, JsonContainer &childNode);
@@ -76,8 +76,8 @@ namespace utility_space
         void clearJson();
         void getJson(std::istream &in);
         void setJson(std::ostream &out, bool formatOut = false) const;
-        std::shared_ptr<JsonContainer> findElementByName(const std::string &keyName);
-        std::vector<std::shared_ptr<JsonContainer>> findElementsByName(const std::string &keyName);
+        std::shared_ptr<JsonContainer> findElementByName(const std::string &keyName) const;
+        std::vector<std::shared_ptr<JsonContainer>> findElementsByName(const std::string &keyName) const;
         std::shared_ptr<JsonContainer> findElementByPath(const std::string &path);
         std::shared_ptr<JsonContainer> findElementByTemplate(const std::string &templateString);
         std::vector<std::shared_ptr<JsonContainer>> findElementsByTemplate(const std::string &templateString);

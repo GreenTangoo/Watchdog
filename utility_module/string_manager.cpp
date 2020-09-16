@@ -12,15 +12,29 @@ StringManager::~StringManager()
 
 }
 
-std::string StringManager::getSubStr(std::string const &sourceStr, std::string const &subStr)
+std::string StringManager::getStrBetweenSymbols(std::string const &sourceStr, 
+	unsigned char first, unsigned char second)
 {
-	size_t subStrStartIndex = sourceStr.find(subStr);
-	if(subStrStartIndex == std::string::npos)
+	size_t firstSymbolPos = sourceStr.find(first);
+	if(firstSymbolPos == std::string::npos)
 	{
 		return std::string("");
 	}
-	
-	return sourceStr.substr(subStrStartIndex, subStr.size());
+
+	size_t secondSymbolPos = sourceStr.find(second, firstSymbolPos + 1);
+	if(secondSymbolPos == std::string::npos)
+	{
+		if(second == '\0')
+		{
+			secondSymbolPos = sourceStr.size() + 1;
+		}
+		else
+		{
+			return std::string("");
+		}
+	}
+
+	return sourceStr.substr(firstSymbolPos + 1, secondSymbolPos - firstSymbolPos - 1);
 }
 
 std::vector<std::string> StringManager::parseByDelimiter(std::string const &sourceStr, std::string const &delimiter)

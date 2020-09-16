@@ -10,7 +10,7 @@ using namespace description_space;
 
 namespace correlation_space
 {
-	enum symptomCategory { PORT_SCANNING, LFI };
+	enum symptomCategory { port_scanning = 0, lfi };
 
 	class SymptomChecker
 	{
@@ -25,6 +25,13 @@ namespace correlation_space
 		SymptomChecker(SymptomChecker &&other);
 		~SymptomChecker();
 		bool tryFoundSymptom();
+	};
+
+	class SymptomCategoryResolver // STATIC CLASS
+	{
+	public:
+		static symptomCategory stringToSymptomCategory(std::string const &symptomStr);
+		static std::string symptomCategoryToString(symptomCategory sympCategory);
 	};
 
 }

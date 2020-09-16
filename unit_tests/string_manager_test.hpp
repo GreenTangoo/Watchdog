@@ -17,12 +17,13 @@ class StringManagerTest : public CxxTest::TestSuite
 public:
 	void testGetSubStr(void)
 	{
-		std::string subStr1 = "world";
-		std::string resusltSubStr = StringManager::getSubStr(TESTED_STRING, subStr1);
+		std::string resusltSubStr = StringManager::getStrBetweenSymbols(TESTED_STRING, ' ', '!');
 		TS_ASSERT_EQUALS(resusltSubStr, "world");
 
-		std::string subStr2 = "WORLD";
-		resusltSubStr = StringManager::getSubStr(TESTED_STRING, subStr2);
+		resusltSubStr = StringManager::getStrBetweenSymbols(TESTED_STRING, 'H', '\0');
+		TS_ASSERT_EQUALS(resusltSubStr, "ello world!");
+
+		resusltSubStr = StringManager::getStrBetweenSymbols(TESTED_STRING, '[', ']');
 		TS_ASSERT_EQUALS(resusltSubStr, "");
 	}
 
