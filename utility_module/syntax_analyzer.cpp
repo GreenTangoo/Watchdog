@@ -4,6 +4,7 @@ using namespace utility_space;
 
 #define AND_CONDITION "and"
 #define OR_CONDITION "or"
+#define INNER_CONDITION "inner"
 #define EQUAL "="
 #define NOT_EQUAL "!="
 #define GREATER_THAN ">"
@@ -55,6 +56,12 @@ relationshipCondition SyntaxAnalyzer::tryFoundNextRelationship(std::shared_ptr<J
     if(relationshipNodePtr)
     {
         return OR;
+    }
+
+    relationshipNodePtr = nodeObj.findElementByName(INNER_CONDITION);
+    if(relationshipNodePtr)
+    {
+        return INNER;
     }
 
     return NO_RELATIONSHIP;

@@ -6,7 +6,7 @@
 
 namespace utility_space
 {
-    enum relationshipCondition { AND = 0, OR, NO_RELATIONSHIP };
+    enum relationshipCondition { AND = 0, OR, INNER, NO_RELATIONSHIP };
     enum compareCondition { EQ = 0, NE, LT, LE, GT, GE, NO_CONDITION}; 
 
     class SyntaxAnalyzer

@@ -6,6 +6,8 @@
 
 #define CATEGORY "category"
 #define JSON_FILENAME "json_filename"
+#define KEY_NODE "key-node"
+#define VALUE_NODE "value-node"
 
 using namespace description_space;
 
@@ -71,11 +73,11 @@ void DescriptionTable::constructSearchInfoStructures(JsonObject const &searchJso
 			std::unique_ptr<SearchInfo> oneSearchConfig = std::make_unique<SearchInfo>();
 
 			std::shared_ptr<JsonContainer> jsonLogFilenamePtr = configObj.findElementByName(JSON_FILENAME);
-			oneSearchConfig.get()->jsonFilename = jsonLogFilenamePtr.get()->keyValue.second;
+			oneSearchConfig->jsonFilename = jsonLogFilenamePtr->keyValue.second;
 			
 			std::unique_ptr<SearchInfoNode> rootSearchConfigNode = std::make_unique<SearchInfoNode>();
 			rootSearchConfigNode = addSearchingInfo(configObj, std::move(rootSearchConfigNode));
-			oneSearchConfig.get()->rootSearchConfigNode = std::move(rootSearchConfigNode);
+			oneSearchConfig->rootSearchConfigNode = std::move(rootSearchConfigNode);
 
 			std::shared_ptr<JsonContainer> symptomCategoryNodePtr = configObj.findElementByName(CATEGORY);
 			if(!symptomCategoryNodePtr)
@@ -105,7 +107,22 @@ void DescriptionTable::constructAggregationInfoStructures(JsonObject const &aggr
 std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject const &searchConfigObj, 
 	std::unique_ptr<SearchInfoNode> infoStruct)
 {
-	
+	{
+		std::shared_ptr<JsonContainer> keyNodePtr = searchConfigObj.findElementByName(KEY_NODE);
+		if(!keyNodePtr)
+		{
+			throw DescriptionException("Cannot find key-node parameter",
+				DescriptionException::NOT_FOUND_KEY_NODE);
+		}
+		infoStruct->keyNode = keyNodePtr->keyValue.second;
+	}
+	{
+		std::shared_ptr<JsonContainer> valueNodePtr = searchConfigObj.findElementByName(VALUE_NODE);
+		if(valueNodePtr)
+		{
+			
+		}
+	}
 }
 
 std::unique_ptr<AggregationInfoNode> DescriptionTable::addAggrInfo(JsonObject const &aggrConfigObj, 

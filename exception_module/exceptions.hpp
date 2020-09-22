@@ -88,7 +88,8 @@ namespace siem_ex_space
 	{
 	public:
 		enum DescriptionErrorCode { INVALID_SEARCH_CONFIG = 0, INVALID_AGGREGATION_CONFIG,
-			NOT_FOUND_JSONLOGFILE, NOT_FOUND_SYMPTOM_CATEGORY };
+									INVALID_VALUE_STRING, NOT_FOUND_JSONLOGFILE, 
+									NOT_FOUND_SYMPTOM_CATEGORY, NOT_FOUND_KEY_NODE };
 		DescriptionException(std::string const &exMsg, int errCode) : 
 			SIEMExecption(exMsg, errCode) {}
 
