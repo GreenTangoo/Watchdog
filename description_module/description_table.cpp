@@ -76,8 +76,9 @@ void DescriptionTable::constructSearchInfoStructures(JsonObject const &searchJso
 			oneSearchConfig->jsonFilename = jsonLogFilenamePtr->keyValue.second;
 			
 			std::unique_ptr<SearchInfoNode> rootSearchConfigNode = std::make_unique<SearchInfoNode>();
-			rootSearchConfigNode = addSearchingInfo(configObj, std::move(rootSearchConfigNode));
-			oneSearchConfig->rootSearchConfigNode = std::move(rootSearchConfigNode);
+			rootSearchConfigNode->condition = AND;
+			oneSearchConfig->rootSearchConfigNode = 
+				addSearchingInfo(configObj, std::move(rootSearchConfigNode));
 
 			std::shared_ptr<JsonContainer> symptomCategoryNodePtr = configObj.findElementByName(CATEGORY);
 			if(!symptomCategoryNodePtr)
@@ -107,22 +108,52 @@ void DescriptionTable::constructAggregationInfoStructures(JsonObject const &aggr
 std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject const &searchConfigObj, 
 	std::unique_ptr<SearchInfoNode> infoStruct)
 {
+	SyntaxAnalyzer analyzer;
+
+	std::shared_ptr<JsonContainer> nodePtr = searchConfigObj.findElementByName(KEY_NODE);
+	if(!nodePtr)
 	{
-		std::shared_ptr<JsonContainer> keyNodePtr = searchConfigObj.findElementByName(KEY_NODE);
-		if(!keyNodePtr)
-		{
-			throw DescriptionException("Cannot find key-node parameter",
-				DescriptionException::NOT_FOUND_KEY_NODE);
-		}
-		infoStruct->keyNode = keyNodePtr->keyValue.second;
+		throw DescriptionException("Cannot find key-node parameter",
+			DescriptionException::NOT_FOUND_KEY_NODE);
 	}
+	infoStruct->keyNode = nodePtr->keyValue.second;
+
+	nodePtr = searchConfigObj.findElementByName(VALUE_NODE);
+	if(nodePtr)
 	{
-		std::shared_ptr<JsonContainer> valueNodePtr = searchConfigObj.findElementByName(VALUE_NODE);
-		if(valueNodePtr)
+		std::string valueStr = nodePtr->keyValue.second;
+		compareCondition valueCondition = analyzer.tryFoundCompareCondition(valueStr);
+
+		if(valueCondition == NO_CONDITION)
 		{
-			
+			throw DescriptionException("Cannot get compare condition",
+				DescriptionException::INVALID_VALUE_STRING);
 		}
+
+		std::string valueWithoutCondition = StringManager::getAfterSymbol(valueStr,
+			R_SQ_BRACKET);
+
+		infoStruct->searchDetail = 
+			std::pair<std::string, compareCondition>(valueWithoutCondition, valueCondition);
 	}
+
+	std::shared_ptr<JsonContainer> relationshipNode = 
+		analyzer.tryFoundNextRelationship(searchConfigObj, 0);
+	if(relationshipNode)
+	{
+		std::unique_ptr<SearchInfoNode> additionalSearchNode = 
+			std::make_unique<SearchInfoNode>();
+
+		std::string relationshipStr = relationshipNode->keyValue.first;
+		additionalSearchNode->condition = 
+			analyzer.stringToRelationship(relationshipStr);
+
+		infoStruct->additionalSearchNode = 
+			addSearchingInfo(JsonObject(*relationshipNode.get()), 
+			std::move(additionalSearchNode));
+	}
+
+	return infoStruct;
 }
 
 std::unique_ptr<AggregationInfoNode> DescriptionTable::addAggrInfo(JsonObject const &aggrConfigObj, 

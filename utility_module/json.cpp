@@ -369,9 +369,10 @@ std::shared_ptr<JsonContainer> JsonObject::findByName(std::shared_ptr<JsonContai
         if(nodeKey == keyName)
             return itPtr;
 
-        if(itPtr->childNode != nullptr)
+        if((itPtr->childNode != nullptr))
         {
-            std::shared_ptr<JsonContainer> foundedJsonPtr = findByName(itPtr->childNode, keyName);
+            std::shared_ptr<JsonContainer> foundedJsonPtr = findByName(itPtr->childNode, 
+                keyName);
             if(foundedJsonPtr != nullptr)
                 return foundedJsonPtr;
         }

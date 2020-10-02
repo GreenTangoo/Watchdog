@@ -75,6 +75,9 @@ namespace siem_ex_space
 	class SyntaxAnalyzeException : public SIEMExecption
 	{
 	public:
+		enum SyntaxAnalyzerErrorCode { BAD_COMPARE_PARAMETER = 0, 
+									   BAD_RELATIONSHIP_PARAMETER, 
+									   BAD_SUBNODE_LEVEL };
 		SyntaxAnalyzeException(std::string const &exMsg, int errCode) : 
 			SIEMExecption(exMsg, errCode) {}
 

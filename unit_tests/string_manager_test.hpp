@@ -81,6 +81,18 @@ public:
 		resultString = StringManager::constructPath(symbolType::SLASH, pathElements);
 		TS_ASSERT_EQUALS(resultString, "/home/naruto/Downloads");
 	}
+
+	void testGetAfterSymbol(void)
+	{
+		std::string subStr = StringManager::getAfterSymbol(TESTED_STRING, SPACE);
+		TS_ASSERT_EQUALS(subStr, "world!");
+	}
+
+	void testBeforeSymbol(void)
+	{
+		std::string subStr = StringManager::getBeforeSymbol(TESTED_STRING, SPACE);
+		TS_ASSERT_EQUALS(subStr, "Hello");
+	}
 };
 
 #endif // STRING_MANAGER_TEST_HPP

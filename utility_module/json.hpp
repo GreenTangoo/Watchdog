@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <list>
+#include <iostream>
 
 #include "string_manager.hpp"
 #include "../exception_module/exceptions.hpp"

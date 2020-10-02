@@ -9,7 +9,8 @@ namespace utility_space
 {
 
 	enum symbolType { SPACE = ' ', QUOTE = '\'', DQUOTE = '\"', SLASH = '/',
-					  RSLASH = '\\', NEW_LINE = '\n', TAB = '\t', COMMA = ',' };
+					  RSLASH = '\\', NEW_LINE = '\n', TAB = '\t', COMMA = ',',
+					  L_SQ_BRACKET = '[', R_SQ_BRACKET = ']' };
 
 	class StringManager
 	{
@@ -28,6 +29,8 @@ namespace utility_space
 		static std::string deleteSymbols(std::string const &sourceStr, std::string const &symbolsString);
 		static std::string cropFromEnd(std::string const &sourceStr, symbolType delimiterSymbol);
 		static std::string cropFromBegin(std::string const &sourceStr, symbolType delimiterSymbol);
+		static std::string getBeforeSymbol(std::string const &sourceStr, symbolType delimiterSymbol);
+		static std::string getAfterSymbol(std::string const &sourceStr, symbolType delimiterSymbol);
 		static std::string constructPath(symbolType pathDelim, std::vector<std::string> const &args);
 	};
 

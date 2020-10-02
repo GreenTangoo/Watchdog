@@ -20,7 +20,7 @@ namespace description_space
 		relationshipCondition condition;
 		std::string keyNode;
 		std::pair<std::string, compareCondition> searchDetail;
-		std::unique_ptr<SearchInfoNode> additionalSearching;
+		std::unique_ptr<SearchInfoNode> additionalSearchNode;
 	};
 
 	struct SearchInfo

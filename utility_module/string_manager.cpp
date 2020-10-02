@@ -131,6 +131,28 @@ std::string StringManager::cropFromBegin(std::string const &sourceStr, symbolTyp
 		sourceStr;
 }
 
+std::string StringManager::getBeforeSymbol(std::string const &sourceStr, symbolType delimiterSymbol)
+{
+	size_t symbolPos = sourceStr.find(delimiterSymbol);
+	if(symbolPos == std::string::npos)
+	{
+		return std::string("");
+	}
+
+	return sourceStr.substr(0, symbolPos);
+}
+
+std::string StringManager::getAfterSymbol(std::string const &sourceStr, symbolType delimiterSymbol)
+{
+	size_t symbolPos = sourceStr.find(delimiterSymbol);
+	if(symbolPos == std::string::npos)
+	{
+		return std::string("");
+	}
+
+	return sourceStr.substr(symbolPos + 1, sourceStr.size() - symbolPos - 1);
+}
+
 std::string StringManager::constructPath(symbolType delimPath, std::vector<std::string> const &args)
 {
 	std::string pathStr = args[0];
