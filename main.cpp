@@ -30,7 +30,7 @@ int main()
 	SyntaxAnalyzer analyzer;
 
     std::shared_ptr<JsonContainer> nodePtr = obj.findElementByName("one-config");
-	std::shared_ptr<JsonContainer> ptr = analyzer.tryFoundNextRelationship(obj, 3);
-    ptr = analyzer.tryFoundNextRelationship(ptr, 3);
+	std::shared_ptr<JsonContainer> ptr = analyzer.tryFoundNextRelationship(nodePtr, 2);
+    ptr = analyzer.tryFoundNextRelationship(ptr, 2);
 	return 0;
 }

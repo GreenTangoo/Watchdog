@@ -1,7 +1,6 @@
 #ifndef SYNTAX_ANALYZER_TEST_HPP
 #define SYNTAX_ANALYZER_TEST_HPP
 
-#include <iostream>
 #include <cxxtest/TestSuite.h>
 #include "../utility_module/syntax_analyzer.hpp"
 #include "../utility_module/syntax_analyzer.cpp"
@@ -80,7 +79,7 @@ public:
         JsonObject obj = constructJsonContainer();
 
         std::shared_ptr<JsonContainer> relationshipNode = obj.findElementByName("one-config");
-        relationshipNode = analyzer.tryFoundNextRelationship(relationshipNode, 3);
+        relationshipNode = analyzer.tryFoundNextRelationship(relationshipNode, 2);
         
         if(!relationshipNode)
         {
@@ -90,7 +89,7 @@ public:
         std::string relationshipStr = relationshipNode->keyValue.first;
         TS_ASSERT_EQUALS(relationshipStr, INNER_CONDITION);
         
-        relationshipNode = analyzer.tryFoundNextRelationship(relationshipNode, 1);
+        relationshipNode = analyzer.tryFoundNextRelationship(relationshipNode, 2);
         if(!relationshipNode)
         {
             TS_FAIL("Nullptr relationship pointer in second relationship");

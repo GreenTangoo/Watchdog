@@ -102,10 +102,6 @@ public:
 		elementValue = foundedElement->keyValue.first;
 		TS_ASSERT_EQUALS(elementValue, "first");
 
-		foundedElement = parser.findNearElementByName("name", 2);
-		elementValue = foundedElement->keyValue.second;
-		TS_ASSERT_EQUALS(elementValue, "Alex");
-
 		std::filesystem::remove(JSON_FILENAME);
 	}
 };

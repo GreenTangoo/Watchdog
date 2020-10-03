@@ -138,7 +138,7 @@ std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject co
 	}
 
 	std::shared_ptr<JsonContainer> relationshipNode = 
-		analyzer.tryFoundNextRelationship(searchConfigObj, 0);
+		analyzer.tryFoundNextRelationship(searchConfigObj, 2);
 	if(relationshipNode)
 	{
 		std::unique_ptr<SearchInfoNode> additionalSearchNode = 

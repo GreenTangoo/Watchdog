@@ -123,7 +123,7 @@ JsonObject& JsonObject::operator=(const JsonObject &other)
 {
     if(this != &other)
     {
-        this->rootNode = other.rootNode;
+        rootNode = other.rootNode;
     }
 
     return *this;
@@ -131,7 +131,8 @@ JsonObject& JsonObject::operator=(const JsonObject &other)
 
 void JsonObject::setContainer(const JsonContainer &otherContainer)
 {
-    this->rootNode->recursiveCopyElements(*(rootNode.get()), otherContainer);
+    rootNode->childNode = std::make_shared<JsonContainer>();
+    rootNode->recursiveCopyElements(*(rootNode->childNode.get()), otherContainer);
 }
 
 void JsonObject::addArrayElement(const std::string &value, const std::string &parentPath)
