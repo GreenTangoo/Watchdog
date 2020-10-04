@@ -1,7 +1,7 @@
 {
     "search-configs":{
         "one-config":{
-            "json_filename":"iptables_log.json",
+            "json-filename":"iptables_log.json",
             "category":"port_scanning",
             "key-node":"[ip_addr]",
             "inner":{
@@ -12,6 +12,8 @@
                     "value-node":"[=]tcp"
                 }
             }
-        }
+		},
+		"one-config":{
+		}
     }
 }

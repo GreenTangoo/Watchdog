@@ -1,6 +1,6 @@
 CC=g++
-CDFLAGS=-c -g -Wall
-CRFLAGS=-c
+CDFLAGS=-c -g -Wall -std=c++17
+CRFLAGS=-c -std=c++17
 
 ODIR=build-WideProtectSIEM
 

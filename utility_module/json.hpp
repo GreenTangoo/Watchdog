@@ -117,8 +117,9 @@ namespace utility_space
 
     class JSONNodeTypeResolver // SINGLETON
     {
+	private:
+		JSONNodeTypeResolver();
     public:
-        JSONNodeTypeResolver();
         JSONNodeTypeResolver(const JSONNodeTypeResolver &other) = delete;
         JSONNodeTypeResolver(JSONNodeTypeResolver &&other) = delete;
         JSONNodeTypeResolver operator=(const JSONNodeTypeResolver &other) = delete;

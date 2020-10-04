@@ -35,14 +35,13 @@ namespace description_space
 		std::string parentNode;
 		std::regex keyFindRegex;
 		std::regex valueFindRegex;
-		std::unique_ptr<AggregationInfoNode> additionalAggregation;
 	};
 
 	struct AggregationInfo
 	{
 		std::string logFilename;
 		std::string jsonFilename;
-		std::unique_ptr<AggregationInfoNode> rootAggregationInfoNode;
+		std::vector<std::unique_ptr<AggregationInfoNode>> aggregationsInfo;
 	};
 
 	class Configuration

@@ -4,9 +4,11 @@
 #include <map>
 
 #include "../correlation_module/symptom_implementation.hpp"
+#include "../aggregation_module/aggregator_implementation.hpp"
 #include "../exception_module/exceptions.hpp"
 
 using namespace correlation_space;
+using namespace aggregation_space;
 using namespace siem_ex_space;
 
 namespace description_space
@@ -15,7 +17,7 @@ namespace description_space
 	{
 	private:
 		std::map<symptomCategory, std::unique_ptr<SearchInfo>> _descriptorSearching;
-		std::map<symptomCategory, std::unique_ptr<AggregationInfo>> _descriptorAggregation;
+		std::map<grabberCategory, std::unique_ptr<AggregationInfo>> _descriptorAggregation;
 	private:
 		DescriptionTable();	
 		DescriptionTable(DescriptionTable const &other) = delete;
@@ -32,7 +34,7 @@ namespace description_space
 		~DescriptionTable();
 		static DescriptionTable& getInstance();
 		SearchInfo const& getSearchStructure(symptomCategory sympType);
-		AggregationInfo const& getAggrStructure(symptomCategory sympType);
+		AggregationInfo const& getAggrStructure(grabberCategory grabType);
 		void tuneFromConfig(Configuration const &searchconfig, Configuration const &aggregationConfig);
 	};
 }

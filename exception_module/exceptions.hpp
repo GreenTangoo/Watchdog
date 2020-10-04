@@ -49,7 +49,7 @@ namespace siem_ex_space
 	class JsonException : public SIEMExecption
 	{
 	public:
-		enum JsonErrorCode { BAD_PATH = 0, BAD_NAME };
+		enum JsonErrorCode { BAD_PATH = 0, BAD_NAME, BAD_NODE };
 		JsonException(std::string const &exMsg, int errCode) : 
 			SIEMExecption(exMsg, errCode) {}
 
@@ -92,7 +92,7 @@ namespace siem_ex_space
 	public:
 		enum DescriptionErrorCode { INVALID_SEARCH_CONFIG = 0, INVALID_AGGREGATION_CONFIG,
 									INVALID_VALUE_STRING, NOT_FOUND_JSONLOGFILE, 
-									NOT_FOUND_SYMPTOM_CATEGORY, NOT_FOUND_KEY_NODE };
+									NOT_FOUND_NODE };
 		DescriptionException(std::string const &exMsg, int errCode) : 
 			SIEMExecption(exMsg, errCode) {}
 
