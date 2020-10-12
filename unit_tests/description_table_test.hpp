@@ -33,15 +33,15 @@ using namespace correlation_space;
 "\"value-node\":\"[>]1000\",\"and\":{\"key-node\":\"protocol\","\
 "\"value-node\":\"[=]tcp\"}}}}"
 
-#define AGGR_CONFIG_DATA "{\"grab-configs\":{\"one-config\":{"\
+#define AGGR_CONFIG_DATA "{\"aggregation-configs\":{\"one-config\":{"\
 "\"category\":\"iptables\",\"source-log\":\"iptables.log\","\
 "\"result-json\":\"iptables_log.json\",\"info-node\":{"\
-"\"node-type\":\"node\",\"key-name\":\"*regexp*\","\
+"\"node-type\":\"object\",\"key-name\":\"regexp\","\
 "\"parent-node\":\"root\"},\"info-node\":{"\
 "\"node-type\":\"string\",\"key-name\":\"amount_requests\","\
-"\"value-name\":\"*regexp*\",\"parent-node\":\"[ip_addr]\"},"\
+"\"value-name\":\"regexp\",\"parent-node\":\"[ip_addr]\"},"\
 "\"info-node\":{\"node-type\":\"string\",\"key-name\":\"protocol\","\
-"\"value-name\":\"*regexp*\",\"parent-node\":\"[ip_addr]\"}}}}"
+"\"value-name\":\"regexp\",\"parent-node\":\"[ip_addr]\"}}}}"
 
 static JsonObject getSearchConfig();
 static JsonObject getAggrConfig();
@@ -83,6 +83,39 @@ public:
 
     void testGetAggrConfig(void)
     {
+        DescriptionTable &table = DescriptionTable::getInstance();
+        JsonObject configJson = getAggrConfig();
+        Configuration config(configJson);
+
+        table.tuneFromConfig(config, DescriptionTable::AGGREGATION_CONFIG);
+        AggregationInfo const &iptablesInfo = table.getAggrStructure(IPTABLES);
+
+        TS_ASSERT_EQUALS(iptablesInfo.logFilename, "iptables.log");
+        TS_ASSERT_EQUALS(iptablesInfo.jsonFilename, "iptables_log.json")
+
+        typeNodeJSON standartTypeNodeArr[] = { OBJECT, STRING, STRING };
+        std::string standartParentNodeArr[] = { "root", "[ip_addr]", "[ip_addr]" };
+
+        std::string standartKeyNameArr[] = { "regexp", "amount_requests", "protocol" };
+
+        std::string standartValueNameArr[] = { "", "regexp", "regexp" };
+
+        for(size_t i(0); i < iptablesInfo.aggregationsInfo.size(); i++)
+        {
+            typeNodeJSON nodeType = iptablesInfo.aggregationsInfo[i].get()->typeNode;
+            std::regex keyReg = iptablesInfo.aggregationsInfo[i].get()->keyFindRegex;
+            std::regex valueReg = iptablesInfo.aggregationsInfo[i].get()->valueFindRegex;
+            std::string parentNodeStr = iptablesInfo.aggregationsInfo[i].get()->parentNode;
+            
+            bool keyRegMatch = std::regex_match(standartKeyNameArr[i], keyReg);
+            bool valueRegMatch = std::regex_match(standartValueNameArr[i], valueReg);
+
+            TS_ASSERT_EQUALS(nodeType, standartTypeNodeArr[i]);
+            TS_ASSERT_EQUALS(keyRegMatch, true);
+            TS_ASSERT_EQUALS(valueRegMatch, true);
+            TS_ASSERT_EQUALS(parentNodeStr, standartParentNodeArr[i]);
+        }
+
     }
 };
 

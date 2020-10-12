@@ -1,24 +1,24 @@
 {
-    "grab-configs":{
+    "aggregation-configs":{
 		"one-config":{
 			"category":"iptables",
 			"source-log":"iptables.log",
 			"result-json":"iptables_log.json",
 			"info-node":{
-				"node-type":"node",
-				"key-name":"*regexp*",
+				"node-type":"object",
+				"key-name":"[regexp]",
 				"parent-node":"root"
 			},
 			"info-node":{
 				"node-type":"string",
 				"key-name":"amount_requests",
-				"value-name":"*regexp*",
+				"value-name":"[regexp]",
 				"parent-node":"[ip_addr]"
 			},
 			"info-node":{
 				"node-type":"string",
 				"key-name":"protocol",
-				"value-name":"*regexp*",
+				"value-name":"[regexp]",
 				"parent-node":"[ip_addr]"
 			}
 		}

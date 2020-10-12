@@ -1,9 +1,11 @@
 #include "symptom_implementation.hpp"
 
-#define _PORT_SCANNING "port_scanning"
-#define _LFI "lfi"
-
 using namespace correlation_space;
+
+static std::map<symptomCategory, std::string> categoryStringSearchMap = 
+    {
+        {PORT_SCANNING, "port_scanning"}, {LFI, "lfi"}
+    };
 
 /*-----------------------------------------------------------------------------*/
 /*-----------------------------SYMPTOM_CHECKER---------------------------------*/
@@ -39,21 +41,27 @@ bool SymptomChecker::tryFoundSymptom()
 /*-----------------------------------------------------------------------------*/
 symptomCategory SymptomCategoryResolver::stringToSymptomCategory(std::string const &symptomStr)
 {
-    if(symptomStr == _PORT_SCANNING)
-        return PORT_SCANNING;
-    if(symptomStr == _LFI)
-        return LFI;
+    for(std::map<symptomCategory, std::string>::const_iterator it = categoryStringSearchMap.begin();
+        it != categoryStringSearchMap.end(); it++)
+    {
+        if(it->second == symptomStr)
+        {
+            return it->first;
+        }
+    }
+
+    throw CorrelationException("Incorrect symptom string parameter",
+        CorrelationException::INCORRECT_SEARCH_STRING);
 }
 
 std::string SymptomCategoryResolver::symptomCategoryToString(symptomCategory sympCategory)
 {
-    switch(sympCategory)
+    auto it = categoryStringSearchMap.find(sympCategory);
+    if(it != categoryStringSearchMap.end())
     {
-    case PORT_SCANNING:
-        return std::string("port_scanning");
-        break;
-    case LFI:
-        return std::string("lfi");
-        break;
+        return it->second;
     }
+
+    throw CorrelationException("Incorrect symptom category parameter",
+        CorrelationException::INCORRECT_SEARCH_CATEGORY);
 }

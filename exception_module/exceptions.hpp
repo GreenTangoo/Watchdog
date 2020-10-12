@@ -101,5 +101,31 @@ namespace siem_ex_space
 
 		~DescriptionException() {}
 	};
+
+	class AggregationException : public SIEMExecption
+	{
+	public:
+		enum AggregationErrorCode { INCORRECT_AGGR_CATEGORY = 0, INCORRECT_AGGR_STRING };
+		AggregationException(std::string const &exMsg, int errCode) :
+			SIEMExecption(exMsg, errCode) {}
+
+		AggregationException(std::string &&exMsg, int errCode) :
+			SIEMExecption(std::move(exMsg), errCode) {}
+
+		~AggregationException() {}
+	};
+
+	class CorrelationException : public SIEMExecption
+	{
+	public:
+		enum CorrelationErrorCode { INCORRECT_SEARCH_CATEGORY = 0, INCORRECT_SEARCH_STRING };
+		CorrelationException(std::string const &exMsg, int errCode) :
+			SIEMExecption(exMsg, errCode) {}
+
+		CorrelationException(std::string &&exMsg, int errCode) :
+			SIEMExecption(std::move(exMsg), errCode) {}
+
+		~CorrelationException() {}
+	};
 }
 #endif // EXCEPTIONS_HPP

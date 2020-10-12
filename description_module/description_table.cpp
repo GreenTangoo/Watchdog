@@ -146,7 +146,7 @@ void DescriptionTable::constructAggregationInfoStructures(JsonObject const &aggr
 			oneGrabConfig->logFilename = sourceLogNode->keyValue.second;
 
 			std::shared_ptr<JsonContainer> resultJsonNode = guaranteeGetPtrByName(configObj, RESULT_JSON);
-			oneGrabConfig->jsonFilename = sourceLogNode->keyValue.second;
+			oneGrabConfig->jsonFilename = resultJsonNode->keyValue.second;
 
 			std::vector<std::shared_ptr<JsonContainer>> infoNodes = configObj.findElementsByName(INFO_NODE);
 			for(size_t j(0); j < infoNodes.size(); j++)
@@ -268,12 +268,21 @@ std::unique_ptr<AggregationInfoNode> DescriptionTable::addAggrInfo(JsonObject co
 
 		std::shared_ptr<JsonContainer> keyNamePtr = guaranteeGetPtrByName(aggrConfigObj, KEY_NAME);
 		std::string keyNameRegStr = keyNamePtr->keyValue.second;
-		aggrStruct->keyFindRegex = keyNameRegStr;
+		aggrStruct->keyFindRegex = std::regex(keyNameRegStr);
 
-		std::shared_ptr<JsonContainer> valueNamePtr = guaranteeGetPtrByName(aggrConfigObj, VALUE_NAME);
-		std::string valueNameRegStr = valueNamePtr->keyValue.second;
-		aggrStruct->valueFindRegex = valueNameRegStr;
+		std::shared_ptr<JsonContainer> valueNamePtr = 
+			JsonObject(*(typeNodePtr.get())).findNearElementByName(VALUE_NAME);
 
+		if(valueNamePtr)
+		{
+			std::string valueNameRegStr = valueNamePtr->keyValue.second;
+			aggrStruct->valueFindRegex = std::regex(valueNameRegStr);
+		}	
+		else
+		{
+			aggrStruct->valueFindRegex = std::regex("");
+		}
+		
 		std::shared_ptr<JsonContainer> parentNodePtr = guaranteeGetPtrByName(aggrConfigObj, PARENT_NODE);
 		std::string parentNodeStr = parentNodePtr->keyValue.second;
 		aggrStruct->parentNode = parentNodeStr;
