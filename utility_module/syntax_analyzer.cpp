@@ -62,7 +62,15 @@ std::shared_ptr<JsonContainer> SyntaxAnalyzer::tryFoundNextRelationship(JsonObje
     int subNodeLevel)
 {
     std::shared_ptr<JsonContainer> relationshipNodePtr = obj.findElementByName("root");
+
+    if(!(relationshipNodePtr->childNode))
+    {
+        throw JsonException("Empty container passed", 
+            JsonException::EMPTY_CONTAINER);
+    }
     
+    relationshipNodePtr = relationshipNodePtr->childNode;
+
     for(int i(0); i < subNodeLevel; i++)
     {
         if(!(relationshipNodePtr->childNode))

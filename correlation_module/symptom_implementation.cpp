@@ -1,7 +1,7 @@
 #include "symptom_implementation.hpp"
 
-#define PORT_SCANNING "port_scanning"
-#define LFI "lfi"
+#define _PORT_SCANNING "port_scanning"
+#define _LFI "lfi"
 
 using namespace correlation_space;
 
@@ -39,20 +39,20 @@ bool SymptomChecker::tryFoundSymptom()
 /*-----------------------------------------------------------------------------*/
 symptomCategory SymptomCategoryResolver::stringToSymptomCategory(std::string const &symptomStr)
 {
-    if(symptomStr == PORT_SCANNING)
-        return port_scanning;
-    if(symptomStr == LFI)
-        return lfi;
+    if(symptomStr == _PORT_SCANNING)
+        return PORT_SCANNING;
+    if(symptomStr == _LFI)
+        return LFI;
 }
 
 std::string SymptomCategoryResolver::symptomCategoryToString(symptomCategory sympCategory)
 {
     switch(sympCategory)
     {
-    case port_scanning:
+    case PORT_SCANNING:
         return std::string("port_scanning");
         break;
-    case lfi:
+    case LFI:
         return std::string("lfi");
         break;
     }

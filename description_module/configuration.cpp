@@ -2,7 +2,8 @@
 
 using namespace description_space;
 
-Configuration::Configuration(std::string configurationPath)
+Configuration::Configuration(JsonObject configJson) : 
+	_configurationFileParser(configJson)
 {
 
 }

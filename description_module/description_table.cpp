@@ -35,14 +35,25 @@ DescriptionTable& DescriptionTable::getInstance()
 	return descriptionObject;
 }
 
-void DescriptionTable::tuneFromConfig(Configuration const &searchConfig, 
-	Configuration const &aggregationConfig)
+void DescriptionTable::tuneFromConfig(Configuration const &config, configType typeConfig)
 {
-	JsonObject searchingConfig = searchConfig.getConfiguration(SEARCH_CONFIGS);
-	constructSearchInfoStructures(searchingConfig);
+	JsonObject configObj;
 
-	JsonObject aggregatingConfig = aggregationConfig.getConfiguration(AGGR_CONFIGS);
-	constructSearchInfoStructures(aggregatingConfig);
+	if(typeConfig == DescriptionTable::CORRELATION_CONFIG)
+	{
+		configObj = config.getConfiguration(SEARCH_CONFIGS);
+		constructSearchInfoStructures(configObj);
+	}
+	else if(typeConfig == DescriptionTable::AGGREGATION_CONFIG)
+	{
+		configObj = config.getConfiguration(AGGR_CONFIGS);
+		constructAggregationInfoStructures(configObj);
+	}
+	else
+	{
+		throw DescriptionException("Invalid config type recieved in tuneFromConfig method",
+			DescriptionException::INVALID_CONFIG_TYPE);
+	}
 }
 
 SearchInfo const& DescriptionTable::getSearchStructure(symptomCategory sympType)
@@ -181,27 +192,50 @@ std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject co
 		throw DescriptionException(ex.what(), DescriptionException::NOT_FOUND_NODE);
 	}
 
-	nodePtr = searchConfigObj.findElementByName(VALUE_NODE);
-	if(nodePtr)
-	{
-		std::string valueStr = nodePtr->keyValue.second;
-		compareCondition valueCondition = analyzer.tryFoundCompareCondition(valueStr);
+	JsonObject nodeObj(*(nodePtr.get()));
+	std::shared_ptr<JsonContainer> relationshipNode;
 
-		if(valueCondition == NO_CONDITION)
+	try
+	{
+		nodePtr = nodeObj.findNearElementByName(VALUE_NODE);
+
+		if(nodePtr)
 		{
-			throw DescriptionException("Cannot get compare condition",
-				DescriptionException::INVALID_VALUE_STRING);
+			std::string valueStr = nodePtr->keyValue.second;
+			compareCondition valueCondition = analyzer.tryFoundCompareCondition(valueStr);
+
+			if(valueCondition == NO_CONDITION)
+			{
+				throw DescriptionException("Cannot get compare condition",
+					DescriptionException::INVALID_VALUE_STRING);
+			}
+
+			std::string valueWithoutCondition = StringManager::getAfterSymbol(valueStr,
+				R_SQ_BRACKET);
+
+			infoStruct->searchDetail = 
+				std::pair<std::string, compareCondition>(valueWithoutCondition, valueCondition);
 		}
 
-		std::string valueWithoutCondition = StringManager::getAfterSymbol(valueStr,
-			R_SQ_BRACKET);
-
-		infoStruct->searchDetail = 
-			std::pair<std::string, compareCondition>(valueWithoutCondition, valueCondition);
+		 relationshipNode = 
+			analyzer.tryFoundNextRelationship(searchConfigObj, 1);
 	}
-
-	std::shared_ptr<JsonContainer> relationshipNode = 
-		analyzer.tryFoundNextRelationship(searchConfigObj, 2);
+	catch(JsonException const &ex)
+	{
+		std::string errMsg(ex.what());
+		int errCode = ex.getErrorCode();
+		throw DescriptionException("Adding search info failed: " + errMsg + 
+			", code: " + std::to_string(errCode),
+			DescriptionException::INVALID_SEARCH_CONFIG);
+	}
+	catch(SyntaxAnalyzeException const &ex)
+	{
+		std::string errMsg(ex.what());
+		int errCode = ex.getErrorCode();
+		throw DescriptionException("Falied analyzing process: " + errMsg +
+			", code: " + std::to_string(errCode), 
+			DescriptionException::INVALID_PARAMETER);
+	}
 
 	if(relationshipNode)
 	{

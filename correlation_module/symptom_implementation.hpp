@@ -10,7 +10,7 @@ using namespace description_space;
 
 namespace correlation_space
 {
-	enum symptomCategory { port_scanning = 0, lfi };
+	enum symptomCategory { PORT_SCANNING = 0, LFI };
 
 	class SymptomChecker
 	{

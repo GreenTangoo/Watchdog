@@ -49,7 +49,7 @@ namespace description_space
 	private:
 		JsonObject _configurationFileParser;
 	public:
-		Configuration(std::string configurationPath);
+		Configuration(JsonObject configJson);
 		Configuration(Configuration const &other);
 		Configuration(Configuration &&other);
 		Configuration const& operator=(Configuration const &other);

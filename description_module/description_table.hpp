@@ -31,11 +31,12 @@ namespace description_space
 		void constructSearchInfoStructures(JsonObject const &searchJsonObj);
 		void constructAggregationInfoStructures(JsonObject const &aggregationJsonObj);
 	public:
+		enum configType { CORRELATION_CONFIG = 0, AGGREGATION_CONFIG }; 
 		~DescriptionTable();
 		static DescriptionTable& getInstance();
 		SearchInfo const& getSearchStructure(symptomCategory sympType);
 		AggregationInfo const& getAggrStructure(grabberCategory grabType);
-		void tuneFromConfig(Configuration const &searchconfig, Configuration const &aggregationConfig);
+		void tuneFromConfig(Configuration const &config, configType typeConfig);
 	};
 }
 

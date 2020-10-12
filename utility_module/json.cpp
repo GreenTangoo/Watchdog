@@ -357,6 +357,13 @@ std::shared_ptr<JsonContainer> JsonObject::findElementByPath(const std::string &
     return foundedNodePtr;
 }
 
+std::shared_ptr<JsonContainer> JsonObject::findNearElementByName(const std::string &keyName,
+            size_t elementNumber) const
+{
+    std::shared_ptr<JsonContainer> foundedNodePtr = findNearByName(rootNode, keyName, elementNumber);
+    return foundedNodePtr;
+}
+
 /*---------------------------------------------------------------------------------------------*/
 /*------------------------------------JSON OBJECT(PRIVATE)-------------------------------------*/
 /*---------------------------------------------------------------------------------------------*/
@@ -403,6 +410,33 @@ std::vector<std::shared_ptr<JsonContainer>> JsonObject::findsByName(std::shared_
     }
 
     return foundedVec;
+}
+
+std::shared_ptr<JsonContainer> JsonObject::findNearByName(std::shared_ptr<JsonContainer> node,
+            const std::string &keyName, size_t elementNumber) const
+{
+    if(!(node->childNode))
+    {
+        throw JsonException("Empty container passed",
+            JsonException::EMPTY_CONTAINER);
+    }
+    node = node->childNode; // Move down from root node
+
+    for(std::shared_ptr<JsonContainer> itNode = node; 
+        itNode != nullptr; itNode = itNode->nextNode)
+    {
+        std::string name = itNode->keyValue.first;
+        if(name == keyName)
+        {
+            if(elementNumber > 0)
+            {
+                elementNumber--;
+            }
+            return itNode;
+        }
+    }
+
+    return nullptr;
 }
 
 std::shared_ptr<JsonContainer> JsonObject::findByPath(std::shared_ptr<JsonContainer> node, 
@@ -839,4 +873,12 @@ utility_space::JsonObject getJsonData(std::string jsonFilename)
 
     fin.close();
     return readJsonObj;
+}
+
+utility_space::JsonObject getJsonData(std::stringstream &stream)
+{
+    JsonObject jsonObj;
+    jsonObj.getJson(stream);
+
+    return jsonObj;
 }

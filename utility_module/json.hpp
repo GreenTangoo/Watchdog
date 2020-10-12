@@ -7,6 +7,7 @@
 #include <memory>
 #include <list>
 #include <iostream>
+#include <sstream>
 
 #include "string_manager.hpp"
 #include "../exception_module/exceptions.hpp"
@@ -43,10 +44,16 @@ namespace utility_space
     private:
         std::shared_ptr<JsonContainer> findByName(std::shared_ptr<JsonContainer> node, 
             const std::string &keyName) const;
+
         std::vector<std::shared_ptr<JsonContainer>> findsByName(std::shared_ptr<JsonContainer> node, 
             const std::string &keyName) const;
+
+        std::shared_ptr<JsonContainer> findNearByName(std::shared_ptr<JsonContainer> node,
+            const std::string &keyName, size_t elementNumber = 0) const;
+
         std::shared_ptr<JsonContainer> findByPath(std::shared_ptr<JsonContainer> node, 
             const std::string &path);
+
         void addChild(std::shared_ptr<JsonContainer>node, JsonContainer &childNode);
         void addNeighbor(std::shared_ptr<JsonContainer> node, JsonContainer &neighborNode);
         void clearEmptyJsonNodes(std::shared_ptr<JsonContainer> node);
@@ -60,20 +67,26 @@ namespace utility_space
         void setContainer(const JsonContainer &otherContainer);
         void addArray(const std::string &keyNode, const std::vector<std::string> &values, 
             const std::string &parentpath);
+
         void addOrUpdateArray(const std::string &keyNode, const std::vector<std::string> &values, 
             const std::string &arrayPath);
+
         void updateArray(const std::string &keyNode, const std::vector<std::string> &values, 
             const std::string &arrayPath);
+
         void addArrayElement(const std::string &value, const std::string &parentPath);
         void addEmptyNode(const std::string &keyNode, const std::string &parentpath);
         void addOrUpdateNode(const std::string &keyNode, const std::string &nodePath);
         void updateNodeName(const std::string &keyNode, const std::string &nodePath);
         void addString(const std::pair<std::string, std::string> &keyValue, 
             const std::string &parentpath);
+
         void updateString(const std::pair<std::string, std::string> &keyValue, 
             const std::string &stringPath);
+
         void addOrUpdateString(const std::pair<std::string, std::string> &keyValue, 
             const std::string &stringPath);
+
         void clearJson();
         void getJson(std::istream &in);
         void setJson(std::ostream &out, bool formatOut = false) const;
@@ -82,6 +95,8 @@ namespace utility_space
         std::shared_ptr<JsonContainer> findElementByPath(const std::string &path);
         std::shared_ptr<JsonContainer> findElementByTemplate(const std::string &templateString);
         std::vector<std::shared_ptr<JsonContainer>> findElementsByTemplate(const std::string &templateString);
+        std::shared_ptr<JsonContainer> findNearElementByName(const std::string &keyName,
+            size_t elementNumber = 0) const;
     };
 
     class JsonStreamParser // SINGLETON
@@ -110,6 +125,7 @@ namespace utility_space
         static JsonStreamParser& getInstance();
         std::shared_ptr<JsonContainer> getFromStream(std::istream &in, 
             std::shared_ptr<JsonContainer> parentNode);
+
         void putToStream(std::ostream &out, std::shared_ptr<JsonContainer> jsonNode) const;
         void putToStreamFormat(std::ostream &out, std::shared_ptr<JsonContainer> jsonNode, 
             size_t offset = 0) const;
@@ -130,5 +146,6 @@ namespace utility_space
 }
 
 utility_space::JsonObject getJsonData(std::string jsonFilename);
+utility_space::JsonObject getJsonData(std::stringstream &stream);
 
 #endif

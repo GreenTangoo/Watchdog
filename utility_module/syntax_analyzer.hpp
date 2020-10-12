@@ -11,8 +11,8 @@ using namespace siem_ex_space;
 
 namespace utility_space
 {
-    enum relationshipCondition { AND = 0, OR, INNER, NO_RELATIONSHIP };
-    enum compareCondition { EQ = 0, NE, LT, LE, GT, GE, NO_CONDITION}; 
+    enum relationshipCondition { NO_RELATIONSHIP = 0, AND, OR, INNER };
+    enum compareCondition { NO_CONDITION = 0, EQ, NE, LT, LE, GT, GE }; 
 
     class SyntaxAnalyzer
     {
