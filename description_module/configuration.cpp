@@ -2,6 +2,12 @@
 
 using namespace description_space;
 
+
+
+AggregationInfoNode::AggregationInfoNode() :
+	keyRegGroup(-1), valueRegGrop(-1), typeNode(NONE)
+{}
+
 Configuration::Configuration(JsonObject configJson) : 
 	_configurationFileParser(configJson)
 {

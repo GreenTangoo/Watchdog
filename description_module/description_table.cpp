@@ -1,5 +1,7 @@
 #include "description_table.hpp"
 
+#define EMPTY_PATTERN ""
+
 #define SEARCH_CONFIGS "search-configs"
 #define AGGR_CONFIGS "aggregation-configs"
 #define ONE_CONFIG "one-config"
@@ -14,7 +16,9 @@
 #define INFO_NODE "info-node"
 #define TYPE_NODE "node-type"
 #define KEY_NAME "key-name"
+#define KEY_GROUP "key-group"
 #define VALUE_NAME "value-name"
+#define VALUE_GROUP "value-group"
 #define PARENT_NODE "parent-node"
 
 using namespace description_space;
@@ -126,7 +130,7 @@ void DescriptionTable::constructSearchInfoStructures(JsonObject const &searchJso
 		}
 		catch(JsonException const &ex)
 		{
-
+			/*PASS TO DEBUG_INFO_OUTPUT*/
 		}
 	}
 }
@@ -180,23 +184,17 @@ std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject co
 	std::unique_ptr<SearchInfoNode> infoStruct)
 {
 	SyntaxAnalyzer analyzer;
-	std::shared_ptr<JsonContainer> nodePtr;
-
-	try
-	{
-		nodePtr = guaranteeGetPtrByName(searchConfigObj, KEY_NODE);
-		infoStruct->keyNode = nodePtr->keyValue.second;
-	}
-	catch(JsonException const &ex)
-	{
-		throw DescriptionException(ex.what(), DescriptionException::NOT_FOUND_NODE);
-	}
-
-	JsonObject nodeObj(*(nodePtr.get()));
 	std::shared_ptr<JsonContainer> relationshipNode;
 
 	try
 	{
+		std::shared_ptr<JsonContainer> nodePtr = 
+			guaranteeGetPtrByName(searchConfigObj, KEY_NODE);
+
+		infoStruct->keyNode = nodePtr->keyValue.second;
+
+		JsonObject nodeObj(*(nodePtr.get()));
+
 		nodePtr = nodeObj.findNearElementByName(VALUE_NODE);
 
 		if(nodePtr)
@@ -260,27 +258,41 @@ std::unique_ptr<AggregationInfoNode> DescriptionTable::addAggrInfo(JsonObject co
 {
 	try
 	{
-		std::shared_ptr<JsonContainer> typeNodePtr = guaranteeGetPtrByName(aggrConfigObj, TYPE_NODE);
-		std::string typeNodeStr = typeNodePtr->keyValue.second;
+		std::shared_ptr<JsonContainer> nodePtr = guaranteeGetPtrByName(aggrConfigObj, TYPE_NODE);
+		std::string typeNodeStr = nodePtr->keyValue.second;
+
+		JsonObject nodeObj(*(nodePtr.get()));
 
 		typeNodeJSON nodeType = JSONNodeTypeResolver::getInstance().getNodeType(typeNodeStr);
 		aggrStruct->typeNode = nodeType;
 
-		std::shared_ptr<JsonContainer> keyNamePtr = guaranteeGetPtrByName(aggrConfigObj, KEY_NAME);
-		std::string keyNameRegStr = keyNamePtr->keyValue.second;
+		nodePtr = guaranteeGetPtrByName(aggrConfigObj, KEY_NAME);
+		std::string keyNameRegStr = nodePtr->keyValue.second;
 		aggrStruct->keyFindRegex = std::regex(keyNameRegStr);
 
-		std::shared_ptr<JsonContainer> valueNamePtr = 
-			JsonObject(*(typeNodePtr.get())).findNearElementByName(VALUE_NAME);
-
-		if(valueNamePtr)
+		nodePtr = nodeObj.findNearElementByName(KEY_GROUP);
+		if(nodePtr)
 		{
-			std::string valueNameRegStr = valueNamePtr->keyValue.second;
+			std::string keyRegGroupStr = nodePtr->keyValue.second;
+			aggrStruct->keyRegGroup = std::atoi(keyRegGroupStr.c_str());
+		}
+
+		nodePtr = nodeObj.findNearElementByName(VALUE_NAME);
+		if(nodePtr)
+		{
+			std::string valueNameRegStr = nodePtr->keyValue.second;
 			aggrStruct->valueFindRegex = std::regex(valueNameRegStr);
 		}	
 		else
 		{
-			aggrStruct->valueFindRegex = std::regex("");
+			aggrStruct->valueFindRegex = std::regex(EMPTY_PATTERN);
+		}
+
+		nodePtr = nodeObj.findNearElementByName(VALUE_GROUP);
+		if(nodePtr)
+		{
+			std::string valueRegGroupStr = nodePtr->keyValue.second;
+			aggrStruct->valueRegGrop = std::atoi(valueRegGroupStr.c_str());
 		}
 		
 		std::shared_ptr<JsonContainer> parentNodePtr = guaranteeGetPtrByName(aggrConfigObj, PARENT_NODE);

@@ -8,6 +8,7 @@
 #include "../description_module/configuration.hpp"
 
 using namespace utility_space;
+using namespace description_space;
 
 namespace aggregation_space
 {
@@ -15,6 +16,17 @@ namespace aggregation_space
 
     class SymptomGrabber
     {
+    private:
+        JsonObject m_parser;
+        std::unique_ptr<Encryption> m_encryptor; 
+        grabberCategory m_grabType;
+        AggregationInfo const &m_info;
+    public:
+        SymptomGrabber(AggregationInfo const &info, grabberCategory grabType);
+        SymptomGrabber(SymptomGrabber const &other);
+        SymptomGrabber(SymptomGrabber &&other);
+        ~SymptomGrabber();
+        bool tryAggregationInfo();
     };
 
     class GrabberCategoryResolver // STATIC CLASS

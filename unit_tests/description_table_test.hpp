@@ -36,12 +36,12 @@ using namespace correlation_space;
 #define AGGR_CONFIG_DATA "{\"aggregation-configs\":{\"one-config\":{"\
 "\"category\":\"iptables\",\"source-log\":\"iptables.log\","\
 "\"result-json\":\"iptables_log.json\",\"info-node\":{"\
-"\"node-type\":\"object\",\"key-name\":\"regexp\","\
+"\"node-type\":\"object\",\"key-name\":\"regexp\",\"key-group\":\"1\","\
 "\"parent-node\":\"root\"},\"info-node\":{"\
 "\"node-type\":\"string\",\"key-name\":\"amount_requests\","\
-"\"value-name\":\"regexp\",\"parent-node\":\"[ip_addr]\"},"\
+"\"value-name\":\"regexp\",\"value-group\":\"1\",\"parent-node\":\"[ip_addr]\"},"\
 "\"info-node\":{\"node-type\":\"string\",\"key-name\":\"protocol\","\
-"\"value-name\":\"regexp\",\"parent-node\":\"[ip_addr]\"}}}}"
+"\"value-name\":\"regexp\",\"value-group\":\"1\",\"parent-node\":\"[ip_addr]\"}}}}"
 
 static JsonObject getSearchConfig();
 static JsonObject getAggrConfig();
@@ -98,7 +98,11 @@ public:
 
         std::string standartKeyNameArr[] = { "regexp", "amount_requests", "protocol" };
 
+        int standartKeyRegGroup[] = { 1, -1, -1 };
+
         std::string standartValueNameArr[] = { "", "regexp", "regexp" };
+
+        int standartValueRegGroup[] = {-1, 1, 1 };
 
         for(size_t i(0); i < iptablesInfo.aggregationsInfo.size(); i++)
         {
@@ -106,6 +110,8 @@ public:
             std::regex keyReg = iptablesInfo.aggregationsInfo[i].get()->keyFindRegex;
             std::regex valueReg = iptablesInfo.aggregationsInfo[i].get()->valueFindRegex;
             std::string parentNodeStr = iptablesInfo.aggregationsInfo[i].get()->parentNode;
+            int keyRegGroup = iptablesInfo.aggregationsInfo[i].get()->keyRegGroup;
+            int valueRegGroup = iptablesInfo.aggregationsInfo[i].get()->valueRegGrop;
             
             bool keyRegMatch = std::regex_match(standartKeyNameArr[i], keyReg);
             bool valueRegMatch = std::regex_match(standartValueNameArr[i], valueReg);
@@ -114,6 +120,8 @@ public:
             TS_ASSERT_EQUALS(keyRegMatch, true);
             TS_ASSERT_EQUALS(valueRegMatch, true);
             TS_ASSERT_EQUALS(parentNodeStr, standartParentNodeArr[i]);
+            TS_ASSERT_EQUALS(keyRegGroup, standartKeyRegGroup[i]);
+            TS_ASSERT_EQUALS(valueRegGroup, standartValueRegGroup[i]);
         }
 
     }

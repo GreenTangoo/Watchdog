@@ -5,6 +5,7 @@
 #include <memory>
 #include <mutex>
 #include <regex>
+#include <cstdlib>
 
 #include "../utility_module/json.hpp"
 #include "../utility_module/syntax_analyzer.hpp"
@@ -31,10 +32,14 @@ namespace description_space
 
 	struct AggregationInfoNode
 	{
+		int keyRegGroup;
+		int valueRegGrop;
 		typeNodeJSON typeNode;
 		std::string parentNode;
 		std::regex keyFindRegex;
 		std::regex valueFindRegex;
+
+		AggregationInfoNode();
 	};
 
 	struct AggregationInfo

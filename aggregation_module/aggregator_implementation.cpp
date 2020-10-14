@@ -9,6 +9,37 @@ static std::map<grabberCategory, std::string> categoryStringGrabMap =
     };
 
 /*-----------------------------------------------------------------*/
+/*----------------------SYMPTOM GRABBER----------------------------*/
+/*-----------------------------------------------------------------*/
+SymptomGrabber::SymptomGrabber(AggregationInfo const &info, grabberCategory grabType) :
+    m_grabType(grabType), m_info(info)
+{
+
+}
+
+SymptomGrabber::SymptomGrabber(SymptomGrabber const &other) :
+    m_grabType(other.m_grabType), m_info(other.m_info)
+{
+
+}
+
+SymptomGrabber::SymptomGrabber(SymptomGrabber &&other) :
+    m_grabType(std::move(other.m_grabType)), m_info(std::move(other.m_info))
+{
+
+}
+
+SymptomGrabber::~SymptomGrabber()
+{
+
+}
+
+bool SymptomGrabber::tryAggregationInfo()
+{
+
+}
+
+/*-----------------------------------------------------------------*/
 /*----------------------GRABBER GATEGORY RESOLVER------------------*/
 /*-----------------------------------------------------------------*/
 grabberCategory GrabberCategoryResolver::stringToGrabberCategory(std::string const &grabName)
