@@ -147,5 +147,6 @@ namespace utility_space
 
 utility_space::JsonObject getJsonData(std::string jsonFilename);
 utility_space::JsonObject getJsonData(std::stringstream &stream);
+utility_space::JsonObject getJsonData(std::fstream &stream);
 
 #endif

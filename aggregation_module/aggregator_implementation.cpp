@@ -2,29 +2,34 @@
 
 using namespace utility_space;
 using namespace aggregation_space;
+using namespace siem_ex_space;
+
+#define SOURCE_LOG_PATH "source_logs"
+
+typedef std::vector<std::unique_ptr<AggregationInfoNode>> AggregationNodes;
 
 static std::map<grabberCategory, std::string> categoryStringGrabMap = 
     {
-        {IPTABLES, "iptables"}
+        {IPTABLES, "iptables"}, {APACHE, "apache"}
     };
 
 /*-----------------------------------------------------------------*/
 /*----------------------SYMPTOM GRABBER----------------------------*/
 /*-----------------------------------------------------------------*/
 SymptomGrabber::SymptomGrabber(AggregationInfo const &info, grabberCategory grabType) :
-    m_grabType(grabType), m_info(info)
+    _grabType(grabType), _info(info)
 {
 
 }
 
 SymptomGrabber::SymptomGrabber(SymptomGrabber const &other) :
-    m_grabType(other.m_grabType), m_info(other.m_info)
+    _grabType(other._grabType), _info(other._info)
 {
 
 }
 
 SymptomGrabber::SymptomGrabber(SymptomGrabber &&other) :
-    m_grabType(std::move(other.m_grabType)), m_info(std::move(other.m_info))
+    _grabType(std::move(other._grabType)), _info(std::move(other._info))
 {
 
 }
@@ -34,9 +39,58 @@ SymptomGrabber::~SymptomGrabber()
 
 }
 
-bool SymptomGrabber::tryAggregationInfo()
+void SymptomGrabber::tryAggregationInfo()
 {
+    try
+    {
+        jsonFileStream.openFile(_info.jsonFilename, std::ios_base::in);
+        _parser = getJsonData(jsonFileStream.getStream());
 
+        logFileStream.openFile(_info.logFilename, std::ios_base::in);
+
+        for(AggregationNodes::const_iterator it = _info.aggregationsInfo.begin();
+            it != _info.aggregationsInfo.end(); it++)
+        {
+            aggregateOneInfoNode(it->get());
+        }
+
+        _parser.setJson(jsonFileStream.getStream());
+
+        jsonFileStream.closeFile();
+        logFileStream.closeFile();
+    }
+    catch(FilesystemSiemException const &ex)
+    {
+        std::string errMsg(ex.what());
+        int errCode = ex.getErrorCode();
+
+        throw AggregationException("Aggregation ecxeption: " + errMsg + 
+            " with code: " + std::to_string(errCode),
+             AggregationException::FAILED_AGGREGATION,
+             static_cast<int>(_grabType));
+    }
+    catch(std::regex_error const &ex)
+    {
+        std::string errMsg(ex.what());
+        int errCode = ex.code();
+
+        throw AggregationException("Aggregation exception: " + errMsg + 
+            " with code: " + std::to_string(errCode),
+            AggregationException::FAILED_AGGREGATION,
+            static_cast<int>(_grabType));
+    }
+}
+
+/*-----------------------------------------------------------------*/
+/*----------------------PRIVATE------------------------------------*/
+/*-----------------------------------------------------------------*/
+void SymptomGrabber::aggregateOneInfoNode(AggregationInfoNode const *nodePtr)
+{
+    /*TODO: 1)get line from logFileStream
+            2)find out node type
+            3)create node with type
+            4)search key with regex
+            5)search value with regex*/
 }
 
 /*-----------------------------------------------------------------*/
@@ -54,7 +108,8 @@ grabberCategory GrabberCategoryResolver::stringToGrabberCategory(std::string con
     }
 
     throw AggregationException("Invalid aggregation string parameter",
-        AggregationException::INCORRECT_AGGR_STRING);
+        AggregationException::INCORRECT_AGGR_STRING,
+        static_cast<int>(grabberCategory::GRAB_NONE_TYPE));
 }
 
 std::string GrabberCategoryResolver::grabberCategoryToString(grabberCategory grabCategory)
@@ -66,5 +121,6 @@ std::string GrabberCategoryResolver::grabberCategoryToString(grabberCategory gra
     }
 
     throw AggregationException("Invalid aggregation category parameter",
-        AggregationException::INCORRECT_AGGR_CATEGORY);
+        AggregationException::INCORRECT_AGGR_CATEGORY,
+        static_cast<int>(grabberCategory::GRAB_NONE_TYPE));
 }

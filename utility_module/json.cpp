@@ -882,3 +882,11 @@ utility_space::JsonObject getJsonData(std::stringstream &stream)
 
     return jsonObj;
 }
+
+utility_space::JsonObject getJsonData(std::fstream &stream)
+{
+    JsonObject readJsonObj;
+    readJsonObj.getJson(stream);
+
+    return readJsonObj;
+}

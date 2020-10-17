@@ -5,28 +5,34 @@
 
 #include "../utility_module/json.hpp"
 #include "../utility_module/encryption.hpp"
+#include "../utility_module/siem_filesystem.hpp"
 #include "../description_module/configuration.hpp"
+#include "../exception_module/exceptions.hpp"
 
 using namespace utility_space;
 using namespace description_space;
 
 namespace aggregation_space
 {
-    enum grabberCategory { IPTABLES = 0 };
+    enum grabberCategory { GRAB_NONE_TYPE = 0, IPTABLES, APACHE };
 
     class SymptomGrabber
     {
     private:
-        JsonObject m_parser;
-        std::unique_ptr<Encryption> m_encryptor; 
-        grabberCategory m_grabType;
-        AggregationInfo const &m_info;
+        JsonObject _parser;
+        std::unique_ptr<Encryption> _encryptor; 
+        grabberCategory _grabType;
+        AggregationInfo const &_info;
+        SiemFilesystem jsonFileStream;
+        SiemFilesystem logFileStream;
+    private:
+        void aggregateOneInfoNode(AggregationInfoNode const *nodePtr);
     public:
         SymptomGrabber(AggregationInfo const &info, grabberCategory grabType);
         SymptomGrabber(SymptomGrabber const &other);
         SymptomGrabber(SymptomGrabber &&other);
         ~SymptomGrabber();
-        bool tryAggregationInfo();
+        void tryAggregationInfo();
     };
 
     class GrabberCategoryResolver // STATIC CLASS

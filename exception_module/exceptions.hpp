@@ -104,21 +104,30 @@ namespace siem_ex_space
 
 	class AggregationException : public SIEMExecption
 	{
+	private:
+		int _grabCategory;
 	public:
-		enum AggregationErrorCode { INCORRECT_AGGR_CATEGORY = 0, INCORRECT_AGGR_STRING };
-		AggregationException(std::string const &exMsg, int errCode) :
-			SIEMExecption(exMsg, errCode) {}
+		enum AggregationErrorCode { INCORRECT_AGGR_CATEGORY = 0, INCORRECT_AGGR_STRING,
+									FAILED_AGGREGATION };
+		AggregationException(std::string const &exMsg, int errCode, int grabType) :
+			SIEMExecption(exMsg, errCode), _grabCategory(grabType) {}
 
-		AggregationException(std::string &&exMsg, int errCode) :
-			SIEMExecption(std::move(exMsg), errCode) {}
+		AggregationException(std::string &&exMsg, int errCode, int grabType) :
+			SIEMExecption(std::move(exMsg), errCode), _grabCategory(grabType) {}
 
 		~AggregationException() {}
+
+		int getGrabberType() const noexcept
+		{
+			return _grabCategory;
+		}
 	};
 
 	class CorrelationException : public SIEMExecption
 	{
 	public:
-		enum CorrelationErrorCode { INCORRECT_SEARCH_CATEGORY = 0, INCORRECT_SEARCH_STRING };
+		enum CorrelationErrorCode { INCORRECT_SEARCH_CATEGORY = 0, INCORRECT_SEARCH_STRING,
+									 };
 		CorrelationException(std::string const &exMsg, int errCode) :
 			SIEMExecption(exMsg, errCode) {}
 
@@ -126,6 +135,21 @@ namespace siem_ex_space
 			SIEMExecption(std::move(exMsg), errCode) {}
 
 		~CorrelationException() {}
+	};
+
+	class FilesystemSiemException : public SIEMExecption
+	{
+	public:
+		enum FilesystemErrorCode { INVALID_PATH = 0, PERMISSION_DENIED,
+								   STREAM_ALREADY_OPEN, STREAM_ALREADY_CLOSE,
+								   INTERNAL_ERROR };
+		FilesystemSiemException(std::string const &exMsg, int errCode) :
+			SIEMExecption(exMsg, errCode) {}
+
+		FilesystemSiemException(std::string &&exMsg, int errCode) : 
+			SIEMExecption(std::move(exMsg), errCode) {}
+
+		~FilesystemSiemException() {}
 	};
 }
 #endif // EXCEPTIONS_HPP
