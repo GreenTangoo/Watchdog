@@ -28,6 +28,7 @@ typedef std::map<grabberCategory, std::unique_ptr<AggregationInfo>>::iterator gr
 
 static std::shared_ptr<JsonContainer> guaranteeGetPtrByName(JsonObject const &obj, std::string nameStr);
 
+
 DescriptionTable::~DescriptionTable()
 {
 
@@ -183,7 +184,6 @@ void DescriptionTable::constructAggregationInfoStructures(JsonObject const &aggr
 std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject const &searchConfigObj, 
 	std::unique_ptr<SearchInfoNode> infoStruct)
 {
-	SyntaxAnalyzer analyzer;
 	std::shared_ptr<JsonContainer> relationshipNode;
 
 	try
@@ -200,7 +200,7 @@ std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject co
 		if(nodePtr)
 		{
 			std::string valueStr = nodePtr->keyValue.second;
-			compareCondition valueCondition = analyzer.tryFoundCompareCondition(valueStr);
+			compareCondition valueCondition = tryFoundCompareCondition(valueStr);
 
 			if(valueCondition == NO_CONDITION)
 			{
@@ -215,8 +215,7 @@ std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject co
 				std::pair<std::string, compareCondition>(valueWithoutCondition, valueCondition);
 		}
 
-		 relationshipNode = 
-			analyzer.tryFoundNextRelationship(searchConfigObj, 1);
+		 relationshipNode = tryFoundNextRelationship(searchConfigObj, 1);
 	}
 	catch(JsonException const &ex)
 	{
@@ -226,7 +225,7 @@ std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject co
 			", code: " + std::to_string(errCode),
 			DescriptionException::INVALID_SEARCH_CONFIG);
 	}
-	catch(SyntaxAnalyzeException const &ex)
+	catch(ConfigurationException const &ex)
 	{
 		std::string errMsg(ex.what());
 		int errCode = ex.getErrorCode();
@@ -242,8 +241,7 @@ std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject co
 
 		std::string relationshipStr = relationshipNode->keyValue.first;
 
-		additionalSearchNode->condition = 
-			analyzer.stringToRelationship(relationshipStr);
+		additionalSearchNode->condition = stringToRelationship(relationshipStr);
 
 		infoStruct->additionalSearchNode = 
 			addSearchingInfo(JsonObject(*relationshipNode.get()), 
@@ -268,36 +266,36 @@ std::unique_ptr<AggregationInfoNode> DescriptionTable::addAggrInfo(JsonObject co
 
 		nodePtr = guaranteeGetPtrByName(aggrConfigObj, KEY_NAME);
 		std::string keyNameRegStr = nodePtr->keyValue.second;
-		aggrStruct->keyFindRegex = std::regex(keyNameRegStr);
+		aggrStruct->regexInfo.keyFindRegex = std::regex(keyNameRegStr);
 
 		nodePtr = nodeObj.findNearElementByName(KEY_GROUP);
 		if(nodePtr)
 		{
 			std::string keyRegGroupStr = nodePtr->keyValue.second;
-			aggrStruct->keyRegGroup = std::atoi(keyRegGroupStr.c_str());
+			aggrStruct->regexInfo.keyRegGroup = std::atoi(keyRegGroupStr.c_str());
 		}
 
 		nodePtr = nodeObj.findNearElementByName(VALUE_NAME);
 		if(nodePtr)
 		{
 			std::string valueNameRegStr = nodePtr->keyValue.second;
-			aggrStruct->valueFindRegex = std::regex(valueNameRegStr);
+			aggrStruct->regexInfo.valueFindRegex = std::regex(valueNameRegStr);
 		}	
 		else
 		{
-			aggrStruct->valueFindRegex = std::regex(EMPTY_PATTERN);
+			aggrStruct->regexInfo.valueFindRegex = std::regex(EMPTY_PATTERN);
 		}
 
 		nodePtr = nodeObj.findNearElementByName(VALUE_GROUP);
 		if(nodePtr)
 		{
 			std::string valueRegGroupStr = nodePtr->keyValue.second;
-			aggrStruct->valueRegGrop = std::atoi(valueRegGroupStr.c_str());
+			aggrStruct->regexInfo.valueRegGroup = std::atoi(valueRegGroupStr.c_str());
 		}
 		
 		std::shared_ptr<JsonContainer> parentNodePtr = guaranteeGetPtrByName(aggrConfigObj, PARENT_NODE);
 		std::string parentNodeStr = parentNodePtr->keyValue.second;
-		aggrStruct->parentNode = parentNodeStr;
+		aggrStruct->parentNodePath = parentNodeStr;
 	}
 	catch(JsonException const &ex)
 	{
@@ -307,6 +305,9 @@ std::unique_ptr<AggregationInfoNode> DescriptionTable::addAggrInfo(JsonObject co
 	return aggrStruct;
 }
 
+/*--------------------------------------------------------------------------------------*/
+/*---------------------------------STATIC FUNCTIONS-------------------------------------*/
+/*--------------------------------------------------------------------------------------*/
 std::shared_ptr<JsonContainer> guaranteeGetPtrByName(JsonObject const &obj, std::string nameStr)
 {
 	std::shared_ptr<JsonContainer> foundedPtr = obj.findElementByName(nameStr);

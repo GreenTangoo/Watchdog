@@ -5,7 +5,6 @@
 
 #include "../utility_module/json.hpp"
 #include "../utility_module/encryption.hpp"
-#include "../utility_module/siem_filesystem.hpp"
 #include "../description_module/configuration.hpp"
 #include "../exception_module/exceptions.hpp"
 
@@ -23,10 +22,9 @@ namespace aggregation_space
         std::unique_ptr<Encryption> _encryptor; 
         grabberCategory _grabType;
         AggregationInfo const &_info;
-        SiemFilesystem jsonFileStream;
-        SiemFilesystem logFileStream;
     private:
-        void aggregateOneInfoNode(AggregationInfoNode const *nodePtr);
+        void aggregateOneInfoNode(std::string const &oneLogStr, 
+            AggregationInfoNode const &node);
     public:
         SymptomGrabber(AggregationInfo const &info, grabberCategory grabType);
         SymptomGrabber(SymptomGrabber const &other);

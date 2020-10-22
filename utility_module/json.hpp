@@ -143,10 +143,12 @@ namespace utility_space
         typeNodeJSON getNodeType(const std::string &nodeName);
         std::string getNodeName(const typeNodeJSON &typeNode);
     };
+
+    JsonObject getJsonData(std::string jsonFilename);
+    JsonObject getJsonData(std::stringstream &stream);
+    JsonObject getJsonData(std::fstream &stream);
 }
 
-utility_space::JsonObject getJsonData(std::string jsonFilename);
-utility_space::JsonObject getJsonData(std::stringstream &stream);
-utility_space::JsonObject getJsonData(std::fstream &stream);
+
 
 #endif

@@ -856,9 +856,9 @@ std::string JSONNodeTypeResolver::getNodeName(const typeNodeJSON &typeNode)
 }
 
 /*-------------------------------------------------------------------------------*/
-/*----------------------------------------FUNCTIONS------------------------------*/
+/*---------------------------------PUBLIC FUNCTIONS------------------------------*/
 /*-------------------------------------------------------------------------------*/
-utility_space::JsonObject getJsonData(std::string jsonFilename)
+JsonObject utility_space::getJsonData(std::string jsonFilename)
 {
     std::ifstream fin;
     fin.open(jsonFilename, std::ios_base::in);
@@ -875,7 +875,7 @@ utility_space::JsonObject getJsonData(std::string jsonFilename)
     return readJsonObj;
 }
 
-utility_space::JsonObject getJsonData(std::stringstream &stream)
+JsonObject utility_space::getJsonData(std::stringstream &stream)
 {
     JsonObject jsonObj;
     jsonObj.getJson(stream);
@@ -883,7 +883,7 @@ utility_space::JsonObject getJsonData(std::stringstream &stream)
     return jsonObj;
 }
 
-utility_space::JsonObject getJsonData(std::fstream &stream)
+JsonObject utility_space::getJsonData(std::fstream &stream)
 {
     JsonObject readJsonObj;
     readJsonObj.getJson(stream);

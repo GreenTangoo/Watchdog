@@ -8,7 +8,6 @@
 #include <cstdlib>
 
 #include "../utility_module/json.hpp"
-#include "../utility_module/syntax_analyzer.hpp"
 #include "../exception_module/exceptions.hpp"
 
 using namespace utility_space;
@@ -16,6 +15,9 @@ using namespace siem_ex_space;
 
 namespace description_space
 {
+	enum relationshipCondition { NO_RELATIONSHIP = 0, AND, OR, INNER };
+    enum compareCondition { NO_CONDITION = 0, EQ, NE, LT, LE, GT, GE }; 
+
 	struct SearchInfoNode
 	{
 		relationshipCondition condition;
@@ -30,14 +32,21 @@ namespace description_space
 		std::unique_ptr<SearchInfoNode> rootSearchConfigNode;
 	};
 
-	struct AggregationInfoNode
+	struct AggregationRegexInfo
 	{
 		int keyRegGroup;
-		int valueRegGrop;
-		typeNodeJSON typeNode;
-		std::string parentNode;
+		int valueRegGroup;
 		std::regex keyFindRegex;
 		std::regex valueFindRegex;
+
+		AggregationRegexInfo();
+	};
+
+	struct AggregationInfoNode
+	{
+		typeNodeJSON typeNode;
+		std::string parentNodePath;
+		AggregationRegexInfo regexInfo;
 
 		AggregationInfoNode();
 	};
@@ -61,6 +70,19 @@ namespace description_space
 		Configuration const& operator=(Configuration &&other);
 		JsonObject getConfiguration(std::string const &nameNode) const;
 	};
+
+	compareCondition tryFoundCompareCondition(std::string const &valueStr);
+
+	std::shared_ptr<JsonContainer> tryFoundNextRelationship(std::shared_ptr<JsonContainer> const ptr, 
+		int subNodeLevel);
+
+	std::shared_ptr<JsonContainer> tryFoundNextRelationship(JsonObject const &obj,
+		int subNodeLevel);
+
+	relationshipCondition stringToRelationship(std::string relationshipStr);
+	std::string relationshipToString(relationshipCondition relationship);
+	compareCondition stringToCompareCondition(std::string conditionStr);
+	std::string compareConditionToString(compareCondition condition);
 }
 
 #endif // CONFIGURATION_HPP

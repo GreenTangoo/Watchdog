@@ -62,7 +62,8 @@ namespace siem_ex_space
 	class ConfigurationException : public SIEMExecption
 	{
 	public:
-		enum ConfigErrorCode { BAD_SEARCH_STRUCTURE = 0, BAD_AGGR_STRUCTURE };
+		enum ConfigErrorCode { BAD_SEARCH_STRUCTURE = 0, BAD_AGGR_STRUCTURE, 
+							   BAD_SUBNODE_LEVEL };
 		ConfigurationException(std::string const &exMsg, int errCode) :
 			SIEMExecption(exMsg, errCode) {}
 
@@ -70,21 +71,6 @@ namespace siem_ex_space
 			SIEMExecption(std::move(exMsg), errCode) {}
 
 		~ConfigurationException() {}
-	};
-
-	class SyntaxAnalyzeException : public SIEMExecption
-	{
-	public:
-		enum SyntaxAnalyzerErrorCode { BAD_COMPARE_PARAMETER = 0, 
-									   BAD_RELATIONSHIP_PARAMETER, 
-									   BAD_SUBNODE_LEVEL };
-		SyntaxAnalyzeException(std::string const &exMsg, int errCode) : 
-			SIEMExecption(exMsg, errCode) {}
-
-		SyntaxAnalyzeException(std::string &&exMsg, int errCode) :
-			SIEMExecption(std::move(exMsg), errCode) {}
-
-		~SyntaxAnalyzeException() {}
 	};
 
 	class DescriptionException : public SIEMExecption
@@ -142,7 +128,7 @@ namespace siem_ex_space
 	public:
 		enum FilesystemErrorCode { INVALID_PATH = 0, PERMISSION_DENIED,
 								   STREAM_ALREADY_OPEN, STREAM_ALREADY_CLOSE,
-								   INTERNAL_ERROR };
+								   INTERNAL_ERROR, CANNOT_OPEN_FILE };
 		FilesystemSiemException(std::string const &exMsg, int errCode) :
 			SIEMExecption(exMsg, errCode) {}
 

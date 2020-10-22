@@ -3,7 +3,6 @@
 
 #include "utility_module/date_time.hpp"
 #include "utility_module/json.hpp"
-#include "utility_module/syntax_analyzer.hpp"
 #include "description_module/description_table.hpp"
 #include "description_module/configuration.hpp"
 

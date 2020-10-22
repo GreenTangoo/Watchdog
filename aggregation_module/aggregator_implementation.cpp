@@ -43,21 +43,37 @@ void SymptomGrabber::tryAggregationInfo()
 {
     try
     {
-        jsonFileStream.openFile(_info.jsonFilename, std::ios_base::in);
-        _parser = getJsonData(jsonFileStream.getStream());
-
-        logFileStream.openFile(_info.logFilename, std::ios_base::in);
-
-        for(AggregationNodes::const_iterator it = _info.aggregationsInfo.begin();
-            it != _info.aggregationsInfo.end(); it++)
+        std::fstream jsonFile(_info.jsonFilename, std::ios_base::in | std::ios_base::out);
+        if(!jsonFile.is_open())
         {
-            aggregateOneInfoNode(it->get());
+            throw FilesystemSiemException("Cannot open: " + _info.jsonFilename + " file.",
+                FilesystemSiemException::CANNOT_OPEN_FILE);
         }
 
-        _parser.setJson(jsonFileStream.getStream());
+        std::ifstream logFile(_info.logFilename, std::ios_base::in);
+        if(!logFile.is_open())
+        {
+            throw FilesystemSiemException("Cannot open: " + _info.logFilename + " file.",
+                FilesystemSiemException::CANNOT_OPEN_FILE);
+        }
 
-        jsonFileStream.closeFile();
-        logFileStream.closeFile();
+        _parser = getJsonData(jsonFile);
+
+        std::string readDataStr;
+        while(std::getline(logFile, readDataStr))
+        {
+            for(AggregationNodes::const_iterator it = _info.aggregationsInfo.begin();
+                it != _info.aggregationsInfo.end(); it++)
+            {
+                AggregationInfoNode const &nodeRef = *(it->get());
+                aggregateOneInfoNode(readDataStr, nodeRef);
+            }
+        }
+
+        _parser.setJson(jsonFile);
+
+        jsonFile.close();
+        logFile.close();
     }
     catch(FilesystemSiemException const &ex)
     {
@@ -82,15 +98,12 @@ void SymptomGrabber::tryAggregationInfo()
 }
 
 /*-----------------------------------------------------------------*/
-/*----------------------PRIVATE------------------------------------*/
+/*-----------------------PRIVATE-----------------------------------*/
 /*-----------------------------------------------------------------*/
-void SymptomGrabber::aggregateOneInfoNode(AggregationInfoNode const *nodePtr)
+void SymptomGrabber::aggregateOneInfoNode(std::string const &oneLogStr, 
+    AggregationInfoNode const &node)
 {
-    /*TODO: 1)get line from logFileStream
-            2)find out node type
-            3)create node with type
-            4)search key with regex
-            5)search value with regex*/
+
 }
 
 /*-----------------------------------------------------------------*/
