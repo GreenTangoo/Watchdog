@@ -5,12 +5,14 @@
 			"source-log":"iptables.log",
 			"result-json":"iptables_log.json",
 			"info-node":{
+				"id":"1",
 				"node-type":"object",
 				"key-name":"[regexp]",
 				"key-group":"1",
 				"parent-node":"root"
 			},
 			"info-node":{
+				"id":"2",
 				"node-type":"string",
 				"key-name":"amount_requests",
 				"value-name":"[regexp]",
@@ -18,6 +20,7 @@
 				"parent-node":"[ip_addr]"
 			},
 			"info-node":{
+				"id":"3",
 				"node-type":"string",
 				"key-name":"protocol",
 				"value-name":"[regexp]",

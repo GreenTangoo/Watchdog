@@ -19,6 +19,24 @@ namespace description_space
 		std::map<symptomCategory, std::unique_ptr<SearchInfo>> _descriptorSearching;
 		std::map<grabberCategory, std::unique_ptr<AggregationInfo>> _descriptorAggregation;
 	private:
+		void putTypeNode(std::unique_ptr<AggregationInfoNode> &aggrStruct, 
+			std::shared_ptr<JsonContainer> const &nodePtr);
+
+		void putKeyName(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+			std::shared_ptr<JsonContainer> const &nodePtr);
+
+		void putKeyGroup(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+			std::shared_ptr<JsonContainer> const &nodePtr);
+
+		void putValueName(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+			std::shared_ptr<JsonContainer> const &nodePtr);
+
+		void putValueGroup(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+			std::shared_ptr<JsonContainer> const &nodePtr);
+
+		void putParentPath(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+			std::shared_ptr<JsonContainer> const &nodePtr);
+	private:
 		DescriptionTable();	
 		DescriptionTable(DescriptionTable const &other) = delete;
 		DescriptionTable(DescriptionTable &&other) = delete;

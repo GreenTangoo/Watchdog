@@ -1,6 +1,7 @@
 #include "description_table.hpp"
 
 #define EMPTY_PATTERN ""
+#define EMPTY_GROUP -1
 
 #define SEARCH_CONFIGS "search-configs"
 #define AGGR_CONFIGS "aggregation-configs"
@@ -14,6 +15,7 @@
 #define SOURCE_LOG "source-log"
 #define RESULT_JSON "result-json"
 #define INFO_NODE "info-node"
+#define ID "id"
 #define TYPE_NODE "node-type"
 #define KEY_NAME "key-name"
 #define KEY_GROUP "key-group"
@@ -303,6 +305,42 @@ std::unique_ptr<AggregationInfoNode> DescriptionTable::addAggrInfo(JsonObject co
 	}
 
 	return aggrStruct;
+}
+
+void DescriptionTable::putTypeNode(std::unique_ptr<AggregationInfoNode> &aggrStruct, 
+	std::shared_ptr<JsonContainer> const &nodePtr)
+{
+
+}
+
+void DescriptionTable::putKeyName(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+	std::shared_ptr<JsonContainer> const &nodePtr)
+{
+
+}
+
+void DescriptionTable::putKeyGroup(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+	std::shared_ptr<JsonContainer> const &nodePtr)
+{
+
+}
+
+void DescriptionTable::putValueName(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+	std::shared_ptr<JsonContainer> const &nodePtr)
+{
+
+}
+
+void DescriptionTable::putValueGroup(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+	std::shared_ptr<JsonContainer> const &nodePtr)
+{
+
+}
+
+void DescriptionTable::putParentPath(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+	std::shared_ptr<JsonContainer> const &nodePtr)
+{
+
 }
 
 /*--------------------------------------------------------------------------------------*/
