@@ -125,17 +125,20 @@ namespace siem_ex_space
 
 	class FilesystemSiemException : public SIEMExecption
 	{
+	private:
+		int _errno;
 	public:
 		enum FilesystemErrorCode { INVALID_PATH = 0, PERMISSION_DENIED,
-								   STREAM_ALREADY_OPEN, STREAM_ALREADY_CLOSE,
-								   INTERNAL_ERROR, CANNOT_OPEN_FILE };
-		FilesystemSiemException(std::string const &exMsg, int errCode) :
-			SIEMExecption(exMsg, errCode) {}
+								   INTERNAL_ERROR, CANNOT_OPEN_FILE, BAD_SIGNATURE };
+		FilesystemSiemException(std::string const &exMsg, int errCode, int errnoCode = 0) :
+			SIEMExecption(exMsg, errCode), _errno(errnoCode) {}
 
-		FilesystemSiemException(std::string &&exMsg, int errCode) : 
-			SIEMExecption(std::move(exMsg), errCode) {}
+		FilesystemSiemException(std::string &&exMsg, int errCode, int errnoCode = 0) : 
+			SIEMExecption(std::move(exMsg), errCode), _errno(errnoCode) {}
 
 		~FilesystemSiemException() {}
+
+		int getErrno() { return _errno; }
 	};
 }
 #endif // EXCEPTIONS_HPP

@@ -33,12 +33,12 @@ using namespace correlation_space;
 
 #define AGGR_CONFIG_DATA "{\"aggregation-configs\":{\"one-config\":{"\
 "\"category\":\"iptables\",\"source-log\":\"iptables.log\","\
-"\"result-json\":\"iptables_log.json\",\"info-node\":{"\
+"\"result-json\":\"iptables_log.json\",\"info-node\":{ \"id\":\"1\","\
 "\"node-type\":\"object\",\"key-name\":\"regexp\",\"key-group\":\"1\","\
-"\"parent-node\":\"root\"},\"info-node\":{"\
+"\"parent-node\":\"root\"},\"info-node\":{ \"id\":\"2\","\
 "\"node-type\":\"string\",\"key-name\":\"amount_requests\","\
 "\"value-name\":\"regexp\",\"value-group\":\"1\",\"parent-node\":\"[ip_addr]\"},"\
-"\"info-node\":{\"node-type\":\"string\",\"key-name\":\"protocol\","\
+"\"info-node\":{ \"id\":\"3\",\"node-type\":\"string\",\"key-name\":\"protocol\","\
 "\"value-name\":\"regexp\",\"value-group\":\"1\",\"parent-node\":\"[ip_addr]\"}}}}"
 
 static JsonObject getSearchConfig();
@@ -91,6 +91,8 @@ public:
         TS_ASSERT_EQUALS(iptablesInfo.logFilename, "iptables.log");
         TS_ASSERT_EQUALS(iptablesInfo.jsonFilename, "iptables_log.json")
 
+		int standartIdArr[] = { 1, 2, 3 };
+
         typeNodeJSON standartTypeNodeArr[] = { OBJECT, STRING, STRING };
         std::string standartParentNodeArr[] = { "root", "[ip_addr]", "[ip_addr]" };
 
@@ -104,6 +106,7 @@ public:
 
         for(size_t i(0); i < iptablesInfo.aggregationsInfo.size(); i++)
         {
+			int id = iptablesInfo.aggregationsInfo[i].get()->nodeId;
             typeNodeJSON nodeType = iptablesInfo.aggregationsInfo[i].get()->typeNode;
             std::regex keyReg = iptablesInfo.aggregationsInfo[i].get()->regexInfo.keyFindRegex;
             std::regex valueReg = iptablesInfo.aggregationsInfo[i].get()->regexInfo.valueFindRegex;
@@ -114,6 +117,7 @@ public:
             bool keyRegMatch = std::regex_match(standartKeyNameArr[i], keyReg);
             bool valueRegMatch = std::regex_match(standartValueNameArr[i], valueReg);
 
+			TS_ASSERT_EQUALS(id, standartIdArr[i]);
             TS_ASSERT_EQUALS(nodeType, standartTypeNodeArr[i]);
             TS_ASSERT_EQUALS(keyRegMatch, true);
             TS_ASSERT_EQUALS(valueRegMatch, true);

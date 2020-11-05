@@ -15,7 +15,7 @@
 #define SOURCE_LOG "source-log"
 #define RESULT_JSON "result-json"
 #define INFO_NODE "info-node"
-#define ID "id"
+#define ID_NODE "id"
 #define TYPE_NODE "node-type"
 #define KEY_NAME "key-name"
 #define KEY_GROUP "key-group"
@@ -29,6 +29,16 @@ typedef std::map<symptomCategory, std::unique_ptr<SearchInfo>>::iterator searchI
 typedef std::map<grabberCategory, std::unique_ptr<AggregationInfo>>::iterator grabIterator;
 
 static std::shared_ptr<JsonContainer> guaranteeGetPtrByName(JsonObject const &obj, std::string nameStr);
+
+static void putIdNode(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj);
+static void putTypeNode(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj);
+static void putKeyName(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj);
+static void putKeyGroup(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj);
+static void putValueName(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj);
+static void putValueGroup(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj);
+static void putParentPath(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj);
+
+static void putValueNode(std::unique_ptr<SearchInfoNode> &infoStruct, JsonObject const &configObj);
 
 
 DescriptionTable::~DescriptionTable()
@@ -186,38 +196,30 @@ void DescriptionTable::constructAggregationInfoStructures(JsonObject const &aggr
 std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject const &searchConfigObj, 
 	std::unique_ptr<SearchInfoNode> infoStruct)
 {
-	std::shared_ptr<JsonContainer> relationshipNode;
-
 	try
 	{
 		std::shared_ptr<JsonContainer> nodePtr = 
 			guaranteeGetPtrByName(searchConfigObj, KEY_NODE);
 
 		infoStruct->keyNode = nodePtr->keyValue.second;
-
 		JsonObject nodeObj(*(nodePtr.get()));
 
-		nodePtr = nodeObj.findNearElementByName(VALUE_NODE);
+		putValueNode(infoStruct, nodeObj);
 
-		if(nodePtr)
+		std::shared_ptr<JsonContainer> relationshipNode = tryFoundNextRelationship(searchConfigObj, 1);
+
+		if(relationshipNode)
 		{
-			std::string valueStr = nodePtr->keyValue.second;
-			compareCondition valueCondition = tryFoundCompareCondition(valueStr);
+			std::unique_ptr<SearchInfoNode> additionalSearchNode = 
+				std::make_unique<SearchInfoNode>();
 
-			if(valueCondition == NO_CONDITION)
-			{
-				throw DescriptionException("Cannot get compare condition",
-					DescriptionException::INVALID_VALUE_STRING);
-			}
+			std::string relationshipStr = relationshipNode->keyValue.first;
+			additionalSearchNode->condition = stringToRelationship(relationshipStr);
 
-			std::string valueWithoutCondition = StringManager::getAfterSymbol(valueStr,
-				R_SQ_BRACKET);
-
-			infoStruct->searchDetail = 
-				std::pair<std::string, compareCondition>(valueWithoutCondition, valueCondition);
+			infoStruct->additionalSearchNode = 
+				addSearchingInfo(JsonObject(*relationshipNode.get()), 
+				std::move(additionalSearchNode));
 		}
-
-		 relationshipNode = tryFoundNextRelationship(searchConfigObj, 1);
 	}
 	catch(JsonException const &ex)
 	{
@@ -236,20 +238,6 @@ std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject co
 			DescriptionException::INVALID_PARAMETER);
 	}
 
-	if(relationshipNode)
-	{
-		std::unique_ptr<SearchInfoNode> additionalSearchNode = 
-			std::make_unique<SearchInfoNode>();
-
-		std::string relationshipStr = relationshipNode->keyValue.first;
-
-		additionalSearchNode->condition = stringToRelationship(relationshipStr);
-
-		infoStruct->additionalSearchNode = 
-			addSearchingInfo(JsonObject(*relationshipNode.get()), 
-			std::move(additionalSearchNode));
-	}
-
 	return infoStruct;
 }
 
@@ -258,46 +246,18 @@ std::unique_ptr<AggregationInfoNode> DescriptionTable::addAggrInfo(JsonObject co
 {
 	try
 	{
-		std::shared_ptr<JsonContainer> nodePtr = guaranteeGetPtrByName(aggrConfigObj, TYPE_NODE);
-		std::string typeNodeStr = nodePtr->keyValue.second;
+		std::shared_ptr<JsonContainer> nodePtr = guaranteeGetPtrByName(aggrConfigObj, INFO_NODE);
+		nodePtr = nodePtr->childNode;
 
 		JsonObject nodeObj(*(nodePtr.get()));
 
-		typeNodeJSON nodeType = JSONNodeTypeResolver::getInstance().getNodeType(typeNodeStr);
-		aggrStruct->typeNode = nodeType;
-
-		nodePtr = guaranteeGetPtrByName(aggrConfigObj, KEY_NAME);
-		std::string keyNameRegStr = nodePtr->keyValue.second;
-		aggrStruct->regexInfo.keyFindRegex = std::regex(keyNameRegStr);
-
-		nodePtr = nodeObj.findNearElementByName(KEY_GROUP);
-		if(nodePtr)
-		{
-			std::string keyRegGroupStr = nodePtr->keyValue.second;
-			aggrStruct->regexInfo.keyRegGroup = std::atoi(keyRegGroupStr.c_str());
-		}
-
-		nodePtr = nodeObj.findNearElementByName(VALUE_NAME);
-		if(nodePtr)
-		{
-			std::string valueNameRegStr = nodePtr->keyValue.second;
-			aggrStruct->regexInfo.valueFindRegex = std::regex(valueNameRegStr);
-		}	
-		else
-		{
-			aggrStruct->regexInfo.valueFindRegex = std::regex(EMPTY_PATTERN);
-		}
-
-		nodePtr = nodeObj.findNearElementByName(VALUE_GROUP);
-		if(nodePtr)
-		{
-			std::string valueRegGroupStr = nodePtr->keyValue.second;
-			aggrStruct->regexInfo.valueRegGroup = std::atoi(valueRegGroupStr.c_str());
-		}
-		
-		std::shared_ptr<JsonContainer> parentNodePtr = guaranteeGetPtrByName(aggrConfigObj, PARENT_NODE);
-		std::string parentNodeStr = parentNodePtr->keyValue.second;
-		aggrStruct->parentNodePath = parentNodeStr;
+		putIdNode(aggrStruct, nodeObj);
+		putTypeNode(aggrStruct, nodeObj);
+		putKeyName(aggrStruct, nodeObj);
+		putKeyGroup(aggrStruct, nodeObj);
+		putValueName(aggrStruct, nodeObj);
+		putValueGroup(aggrStruct, nodeObj);
+		putParentPath(aggrStruct, nodeObj);
 	}
 	catch(JsonException const &ex)
 	{
@@ -305,42 +265,6 @@ std::unique_ptr<AggregationInfoNode> DescriptionTable::addAggrInfo(JsonObject co
 	}
 
 	return aggrStruct;
-}
-
-void DescriptionTable::putTypeNode(std::unique_ptr<AggregationInfoNode> &aggrStruct, 
-	std::shared_ptr<JsonContainer> const &nodePtr)
-{
-
-}
-
-void DescriptionTable::putKeyName(std::unique_ptr<AggregationInfoNode> &aggrStruct,
-	std::shared_ptr<JsonContainer> const &nodePtr)
-{
-
-}
-
-void DescriptionTable::putKeyGroup(std::unique_ptr<AggregationInfoNode> &aggrStruct,
-	std::shared_ptr<JsonContainer> const &nodePtr)
-{
-
-}
-
-void DescriptionTable::putValueName(std::unique_ptr<AggregationInfoNode> &aggrStruct,
-	std::shared_ptr<JsonContainer> const &nodePtr)
-{
-
-}
-
-void DescriptionTable::putValueGroup(std::unique_ptr<AggregationInfoNode> &aggrStruct,
-	std::shared_ptr<JsonContainer> const &nodePtr)
-{
-
-}
-
-void DescriptionTable::putParentPath(std::unique_ptr<AggregationInfoNode> &aggrStruct,
-	std::shared_ptr<JsonContainer> const &nodePtr)
-{
-
 }
 
 /*--------------------------------------------------------------------------------------*/
@@ -357,4 +281,99 @@ std::shared_ptr<JsonContainer> guaranteeGetPtrByName(JsonObject const &obj, std:
 	}
 
 	return foundedPtr;
+}
+
+void putIdNode(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+	JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> idPtr = guaranteeGetPtrByName(configObj, ID_NODE);
+	std::string nodeIdStr = idPtr->keyValue.second;
+
+	aggrStruct->nodeId = atoi(nodeIdStr.c_str());
+}
+
+void putTypeNode(std::unique_ptr<AggregationInfoNode> &aggrStruct, 
+	JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> nodePtr = guaranteeGetPtrByName(configObj, TYPE_NODE);
+	std::string typeNodeStr = nodePtr->keyValue.second;
+
+	typeNodeJSON nodeType = JSONNodeTypeResolver::getInstance().getNodeType(typeNodeStr);
+	aggrStruct->typeNode = nodeType;
+}
+
+void putKeyName(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+	JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> nodePtr = guaranteeGetPtrByName(configObj, KEY_NAME);
+	std::string keyNameRegStr = nodePtr->keyValue.second;
+	aggrStruct->regexInfo.keyFindRegex = std::regex(keyNameRegStr);
+}
+
+void putKeyGroup(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+	JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> nodePtr = configObj.findNearElementByName(KEY_GROUP);
+	if(nodePtr)
+	{
+		std::string keyRegGroupStr = nodePtr->keyValue.second;
+		aggrStruct->regexInfo.keyRegGroup = std::atoi(keyRegGroupStr.c_str());
+	}
+}
+
+void putValueName(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+	JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> nodePtr = configObj.findNearElementByName(VALUE_NAME);
+	if(nodePtr)
+	{
+		std::string valueNameRegStr = nodePtr->keyValue.second;
+		aggrStruct->regexInfo.valueFindRegex = std::regex(valueNameRegStr);
+	}	
+	else
+	{
+		aggrStruct->regexInfo.valueFindRegex = std::regex(EMPTY_PATTERN);
+	}
+}
+
+void putValueGroup(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+	JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> nodePtr = configObj.findNearElementByName(VALUE_GROUP);
+	if(nodePtr)
+	{
+		std::string valueRegGroupStr = nodePtr->keyValue.second;
+		aggrStruct->regexInfo.valueRegGroup = std::atoi(valueRegGroupStr.c_str());
+	}
+}
+
+void putParentPath(std::unique_ptr<AggregationInfoNode> &aggrStruct,
+	JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> parentNodePtr = guaranteeGetPtrByName(configObj, PARENT_NODE);
+	std::string parentNodeStr = parentNodePtr->keyValue.second;
+	aggrStruct->parentNodePath = parentNodeStr;
+}
+
+void putValueNode(std::unique_ptr<SearchInfoNode> &infoStruct, JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> nodePtr = configObj.findNearElementByName(VALUE_NODE);
+
+	if(nodePtr)
+	{
+		std::string valueStr = nodePtr->keyValue.second;
+		compareCondition valueCondition = tryFoundCompareCondition(valueStr);
+
+		if(valueCondition == NO_CONDITION)
+		{
+			throw DescriptionException("Cannot get compare condition",
+				DescriptionException::INVALID_VALUE_STRING);
+		}
+
+		std::string valueWithoutCondition = StringManager::getAfterSymbol(valueStr,
+			R_SQ_BRACKET);
+
+		infoStruct->searchDetail = 
+			std::pair<std::string, compareCondition>(valueWithoutCondition, valueCondition);
+	}
 }

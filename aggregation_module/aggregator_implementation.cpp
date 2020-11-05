@@ -43,37 +43,7 @@ void SymptomGrabber::tryAggregationInfo()
 {
     try
     {
-        std::fstream jsonFile(_info.jsonFilename, std::ios_base::in | std::ios_base::out);
-        if(!jsonFile.is_open())
-        {
-            throw FilesystemSiemException("Cannot open: " + _info.jsonFilename + " file.",
-                FilesystemSiemException::CANNOT_OPEN_FILE);
-        }
 
-        std::ifstream logFile(_info.logFilename, std::ios_base::in);
-        if(!logFile.is_open())
-        {
-            throw FilesystemSiemException("Cannot open: " + _info.logFilename + " file.",
-                FilesystemSiemException::CANNOT_OPEN_FILE);
-        }
-
-        _parser = getJsonData(jsonFile);
-
-        std::string readDataStr;
-        while(std::getline(logFile, readDataStr))
-        {
-            for(AggregationNodes::const_iterator it = _info.aggregationsInfo.begin();
-                it != _info.aggregationsInfo.end(); it++)
-            {
-                AggregationInfoNode const &nodeRef = *(it->get());
-                aggregateOneInfoNode(readDataStr, nodeRef);
-            }
-        }
-
-        _parser.setJson(jsonFile);
-
-        jsonFile.close();
-        logFile.close();
     }
     catch(FilesystemSiemException const &ex)
     {

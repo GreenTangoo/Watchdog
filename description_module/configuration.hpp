@@ -44,6 +44,7 @@ namespace description_space
 
 	struct AggregationInfoNode
 	{
+		int nodeId;
 		typeNodeJSON typeNode;
 		std::string parentNodePath;
 		AggregationRegexInfo regexInfo;
