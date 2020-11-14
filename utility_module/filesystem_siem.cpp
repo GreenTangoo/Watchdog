@@ -11,51 +11,117 @@ static std::mutex mapFileObjectsMut;
 /*---------------------------------------------------------------*/
 /*----------------------FILE OBJECT------------------------------*/
 /*---------------------------------------------------------------*/
-FileObject::FileObject(std::string const &filePath, std::ios_base::open_mode mode)
+FileObject::FileObject(std::string const &filePath, std::ios_base::openmode mode)
 {
-
+	_fileStream.open(filePath, mode);
 }
 
 FileObject::~FileObject()
 {
-
+	_fileStream.close();
 }
 
-fileOpResultCode FileObject::write(char const *buf, size_t amountBytes)
+operationState FileObject::write(char const *buf, size_t amountBytes)
+{
+	std::lock_guard<std::mutex> streamOperationGuard(_fileStreamMut);
+	_fileStream.write(buf, amountBytes);
+	
+	return _fileStream.rdstate();
+}
+
+operationState FileObject::write(void const *buf, size_t blockSize, size_t amountBlocks)
 {
 
 }
 
-fileOpResultCode FileObject::write(void const *buf, size_t blockSize, size_t amountBlocks)
+operationState FileObject::writeLine(std::string const &line)
+{
+	std::lock_guard<std::mutex> streamOperationGuard(_fileStreamMut);
+	_fileStream.write(line.c_str(), line.size());
+
+	return _fileStream.rdstate();
+}
+
+operationState FileObject::read(char *buf, size_t amountBytes)
+{
+	std::lock_guard<std::mutex> streamOperationGuard(_fileStreamMut);
+	_fileStream.readsome(buf, amountBytes);
+
+	return _fileStream.rdstate();
+}
+
+operationState FileObject::read(void *buf, size_t blockSize, size_t amountBlocks)
 {
 
 }
 
-fileOpResultCode FileObject::writeLine(std::string const &line)
+operationState FileObject::readLine(std::string &line)
 {
+	std::lock_guard<std::mutex> streamOperationGuard(_fileStreamMut);
+	std::getline(_fileStream, line);
 
-}
-
-fileOpResultCode FileObject::read(char *buf, size_t amountBytes)
-{
-
-}
-
-fileOpResultCode FileObject::read(void *buf, size_t blockSize, size_t amountBlocks)
-{
-
-}
-
-fileOpResultCode FileObject::readLine(std::string &line)
-{
-
+	return _fileStream.rdstate();
 }
 
 /*---------------------------------------------------------------*/
 /*----------------------FILE MANIPULATOR-------------------------*/
 /*---------------------------------------------------------------*/
+FileManipulator::FileManipulator() : _isClosed(true)
+{
+
+}
+
 FileManipulator::FileManipulator(std::string const &filePath)
 {
+	this->openManipulator(filePath);
+}
+
+FileManipulator::FileManipulator(FileManipulator const &other)
+{
+	std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
+	_fileSignature = other._fileSignature;
+	_filePtr = other._filePtr;
+}
+
+FileManipulator::FileManipulator(FileManipulator &&other)
+{
+	std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
+	_fileSignature = other._fileSignature;
+	_filePtr = other._filePtr;
+	other._filePtr.reset();
+}
+
+FileManipulator const& FileManipulator::operator=(FileManipulator const &other)
+{
+	std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
+	_fileSignature = other._fileSignature;
+	_filePtr = other._filePtr;
+
+	return *this;
+}
+
+FileManipulator const& FileManipulator::operator=(FileManipulator &&other)
+{
+	std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
+	_fileSignature = other._fileSignature;
+	_filePtr = other._filePtr;
+	other._filePtr.reset();
+
+	return *this;
+}
+
+std::shared_ptr<FileObject> FileManipulator::operator->()
+{
+	return _filePtr;
+}
+
+void FileManipulator::openManipulator(std::string const &filePath)
+{
+	if(!_isClosed)
+	{
+		return;
+	}
+
 	int fileDescriptor = open(filePath.c_str(), O_RDONLY);
 	if(fileDescriptor == -1)
 	{
@@ -74,7 +140,7 @@ FileManipulator::FileManipulator(std::string const &filePath)
 	_fileSignature = fileStat.st_ino;
 	close(fileDescriptor);
 
-	mapFileObjectsMut.lock();
+	std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
 
 	std::map<ino_t, std::shared_ptr<FileObject>>::iterator it = 
 		fileObjectsMap.find(_fileSignature);
@@ -91,47 +157,28 @@ FileManipulator::FileManipulator(std::string const &filePath)
 		_filePtr = fileObjectsMap[_fileSignature];
 	}
 
-	mapFileObjectsMut.unlock();
+	_isClosed = true;
 }
 
-FileManipulator::FileManipulator(FileManipulator const &other)
+void FileManipulator::closeManipulator()
 {
+	if(_isClosed)
+	{
+		return;
+	}
 
-}
-
-FileManipulator::FileManipulator(FileManipulator &&other)
-{
-
-}
-
-FileManipulator const& FileManipulator::operator=(FileManipulator const &other)
-{
-
-}
-
-FileManipulator const& FileManipulator::operator=(FileManipulator &&other)
-{
-
-}
-
-std::shared_ptr<FileObject> FileManipulator::operator->()
-{
-	return _filePtr;
-}
-
-FileManipulator::~FileManipulator()
-{
-	mapFileObjectsMut.lock();
+	std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
 
 	long amountRefs = _filePtr.use_count();
+	_filePtr.reset();
+
 	if(amountRefs == AMOUNT_TO_DELETE)
 	{
 		fileObjectsMap.erase(_fileSignature);
 	}
-	else
-	{
-		_filePtr.reset();
-	}
+}
 
-	mapFileObjectsMut.unlock();
+FileManipulator::~FileManipulator()
+{
+	this->closeManipulator();
 }
