@@ -33,7 +33,7 @@ namespace siem_ex_space
 	class DateTimeException : public SIEMExecption
 	{
 	public:
-		enum DateTimeErrorCode { BAD_MONTH = 0,  BAD_DAY, BAD_HOUR, BAD_MINUTE,
+		enum DateTimeErrorCode { BAD_MONTH = 1,  BAD_DAY, BAD_HOUR, BAD_MINUTE,
 								 BAD_SECOND, BAD_MILLISECOND, INCOMPITABLE_MONTH_DAY,
 								 BAD_FORMAT_SYMBOL, BAD_FORMAT_STRING, INCOMPITABLE_STRINGS,
 								 BAD_TIME_STRING, BAD_MATH_OPERATION, BAD_DATETIME_FORMAT };
@@ -49,7 +49,7 @@ namespace siem_ex_space
 	class JsonException : public SIEMExecption
 	{
 	public:
-		enum JsonErrorCode { BAD_PATH = 0, BAD_NAME, BAD_NODE, EMPTY_CONTAINER };
+		enum JsonErrorCode { BAD_PATH = 1, BAD_NAME, BAD_NODE, EMPTY_CONTAINER };
 		JsonException(std::string const &exMsg, int errCode) : 
 			SIEMExecption(exMsg, errCode) {}
 
@@ -62,7 +62,7 @@ namespace siem_ex_space
 	class ConfigurationException : public SIEMExecption
 	{
 	public:
-		enum ConfigErrorCode { BAD_SEARCH_STRUCTURE = 0, BAD_AGGR_STRUCTURE, 
+		enum ConfigErrorCode { BAD_SEARCH_STRUCTURE = 1, BAD_AGGR_STRUCTURE, 
 							   BAD_SUBNODE_LEVEL };
 		ConfigurationException(std::string const &exMsg, int errCode) :
 			SIEMExecption(exMsg, errCode) {}
@@ -76,7 +76,7 @@ namespace siem_ex_space
 	class DescriptionException : public SIEMExecption
 	{
 	public:
-		enum DescriptionErrorCode { INVALID_SEARCH_CONFIG = 0, INVALID_AGGREGATION_CONFIG,
+		enum DescriptionErrorCode { INVALID_SEARCH_CONFIG = 1, INVALID_AGGREGATION_CONFIG,
 									INVALID_VALUE_STRING, NOT_FOUND_JSONLOGFILE, 
 									NOT_FOUND_NODE, INVALID_CONFIG_TYPE, INVALID_PARAMETER };
 		DescriptionException(std::string const &exMsg, int errCode) : 
@@ -93,7 +93,7 @@ namespace siem_ex_space
 	private:
 		int _grabCategory;
 	public:
-		enum AggregationErrorCode { INCORRECT_AGGR_CATEGORY = 0, INCORRECT_AGGR_STRING,
+		enum AggregationErrorCode { INCORRECT_AGGR_CATEGORY = 1, INCORRECT_AGGR_STRING,
 									FAILED_AGGREGATION };
 		AggregationException(std::string const &exMsg, int errCode, int grabType) :
 			SIEMExecption(exMsg, errCode), _grabCategory(grabType) {}
@@ -112,7 +112,7 @@ namespace siem_ex_space
 	class CorrelationException : public SIEMExecption
 	{
 	public:
-		enum CorrelationErrorCode { INCORRECT_SEARCH_CATEGORY = 0, INCORRECT_SEARCH_STRING,
+		enum CorrelationErrorCode { INCORRECT_SEARCH_CATEGORY = 1, INCORRECT_SEARCH_STRING,
 									 };
 		CorrelationException(std::string const &exMsg, int errCode) :
 			SIEMExecption(exMsg, errCode) {}
@@ -121,24 +121,6 @@ namespace siem_ex_space
 			SIEMExecption(std::move(exMsg), errCode) {}
 
 		~CorrelationException() {}
-	};
-
-	class FilesystemSiemException : public SIEMExecption
-	{
-	private:
-		int _errno;
-	public:
-		enum FilesystemErrorCode { INVALID_PATH = 0, PERMISSION_DENIED,
-								   INTERNAL_ERROR, CANNOT_OPEN_FILE, BAD_SIGNATURE };
-		FilesystemSiemException(std::string const &exMsg, int errCode, int errnoCode = 0) :
-			SIEMExecption(exMsg, errCode), _errno(errnoCode) {}
-
-		FilesystemSiemException(std::string &&exMsg, int errCode, int errnoCode = 0) : 
-			SIEMExecption(std::move(exMsg), errCode), _errno(errnoCode) {}
-
-		~FilesystemSiemException() {}
-
-		int getErrno() { return _errno; }
 	};
 }
 #endif // EXCEPTIONS_HPP

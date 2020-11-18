@@ -20,5 +20,11 @@ cxxtestgen --error-printer -o runner.cpp description_table_test.hpp
 g++ -std=c++17 -I . runner.cpp -o runner
 ./runner
 
+echo "Start filesystem_siem test"
+cxxtestgen --error-printer -o runner.cpp filesystem_siem_test.hpp
+g++ -std=c++17 -lpthread -I . runner.cpp -o runner
+./runner
+rm file.txt
+
 rm runner.cpp
 rm runner

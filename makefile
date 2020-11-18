@@ -1,6 +1,7 @@
 CC=g++
 CDFLAGS=-c -g -Wall -std=c++17
 CRFLAGS=-c -std=c++17
+LIBS=-lpthread -lstdc++fs
 
 ODIR=build-WideProtectSIEM
 
@@ -18,7 +19,7 @@ AGGREGATION_OBJ = $(addprefix $(ODIR)/, $(AGGREGATION_SOURCE:.cpp=.o))
 
 all: creation $(UTILITY_OBJ) $(DESCRIPTION_OBJ) $(CORRELATION_OBJ) $(AGGREGATION_OBJ)
 	$(CC) $(CDFLAGS) main.cpp -o $(ODIR)/main.o
-	$(CC) -g $(UTILITY_OBJ) $(DESCRIPTION_OBJ) \
+	$(CC) -g $(LIBS) $(UTILITY_OBJ) $(DESCRIPTION_OBJ) \
 		$(CORRELATION_OBJ) $(AGGREGATION_OBJ) \
 		$(ODIR)/main.o -o $(ODIR)/main
 

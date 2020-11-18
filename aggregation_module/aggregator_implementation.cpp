@@ -41,30 +41,7 @@ SymptomGrabber::~SymptomGrabber()
 
 void SymptomGrabber::tryAggregationInfo()
 {
-    try
-    {
 
-    }
-    catch(FilesystemSiemException const &ex)
-    {
-        std::string errMsg(ex.what());
-        int errCode = ex.getErrorCode();
-
-        throw AggregationException("Aggregation ecxeption: " + errMsg + 
-            " with code: " + std::to_string(errCode),
-             AggregationException::FAILED_AGGREGATION,
-             static_cast<int>(_grabType));
-    }
-    catch(std::regex_error const &ex)
-    {
-        std::string errMsg(ex.what());
-        int errCode = ex.code();
-
-        throw AggregationException("Aggregation exception: " + errMsg + 
-            " with code: " + std::to_string(errCode),
-            AggregationException::FAILED_AGGREGATION,
-            static_cast<int>(_grabType));
-    }
 }
 
 /*-----------------------------------------------------------------*/
