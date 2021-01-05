@@ -890,3 +890,10 @@ JsonObject utility_space::getJsonData(std::fstream &stream)
 
     return readJsonObj;
 }
+
+void utility_space::setJsonData(std::fstream &stream, JsonObject const &jsonObj)
+{
+    std::shared_ptr<JsonContainer> rootNode = jsonObj.findElementByName("root");
+
+    JsonStreamParser::getInstance().putToStream(stream, rootNode);
+}

@@ -8,15 +8,19 @@
 #include <cstdlib>
 
 #include "../utility_module/json.hpp"
+#include "../utility_module/regex_siem.hpp"
 #include "../exception_module/exceptions.hpp"
 
 using namespace utility_space;
 using namespace siem_ex_space;
 
+#define EMPTY_REGEX_GROUP -1
+
 namespace description_space
 {
 	enum relationshipCondition { NO_RELATIONSHIP = 0, AND, OR, INNER };
     enum compareCondition { NO_CONDITION = 0, EQ, NE, LT, LE, GT, GE }; 
+	enum aggrType { NO_AGGR_TYPE = 0, FINDER, COUNTER };
 
 	struct SearchInfoNode
 	{
@@ -36,8 +40,8 @@ namespace description_space
 	{
 		int keyRegGroup;
 		int valueRegGroup;
-		std::regex keyFindRegex;
-		std::regex valueFindRegex;
+		RegexSiem keyFindRegex;
+		RegexSiem valueFindRegex;
 
 		AggregationRegexInfo();
 	};
@@ -46,6 +50,7 @@ namespace description_space
 	{
 		int nodeId;
 		typeNodeJSON typeNode;
+		aggrType grabType;
 		std::string parentNodePath;
 		AggregationRegexInfo regexInfo;
 
@@ -56,7 +61,7 @@ namespace description_space
 	{
 		std::string logFilename;
 		std::string jsonFilename;
-		std::vector<std::unique_ptr<AggregationInfoNode>> aggregationsInfo;
+		std::vector<std::unique_ptr<AggregationInfoNode>> aggregationsInfoCfg;
 	};
 
 	class Configuration
@@ -84,6 +89,8 @@ namespace description_space
 	std::string relationshipToString(relationshipCondition relationship);
 	compareCondition stringToCompareCondition(std::string conditionStr);
 	std::string compareConditionToString(compareCondition condition);
+	std::string aggregationTypeToString(aggrType grabType);
+	aggrType stringToAggregationType(std::string aggrTypeStr);
 }
 
 #endif // CONFIGURATION_HPP

@@ -12,8 +12,7 @@ StringManager::~StringManager()
 
 }
 
-std::string StringManager::getStrBetweenSymbols(std::string const &sourceStr, 
-	unsigned char first, unsigned char second)
+std::string StringManager::getStrBetweenSymbols(std::string const &sourceStr, char first, char second)
 {
 	size_t firstSymbolPos = sourceStr.find(first);
 	if(firstSymbolPos == std::string::npos)
@@ -35,6 +34,11 @@ std::string StringManager::getStrBetweenSymbols(std::string const &sourceStr,
 	}
 
 	return sourceStr.substr(firstSymbolPos + 1, secondSymbolPos - firstSymbolPos - 1);
+}
+
+std::vector<std::string> StringManager::getVecStrBetweenSymbols(std::string const &sourceStr, char first, char second)
+{
+
 }
 
 std::vector<std::string> StringManager::parseByDelimiter(std::string const &sourceStr, std::string const &delimiter)
@@ -163,4 +167,24 @@ std::string StringManager::constructPath(symbolType delimPath, std::vector<std::
 	}
 
 	return pathStr;
+}
+
+std::string StringManager::getSubstring(std::string const &sourceStr, std::string const &subStr)
+{
+	std::string resultStr;
+
+	size_t foundedPos = sourceStr.find(subStr);
+	if(foundedPos != std::string::npos)
+	{
+		resultStr = sourceStr.substr(foundedPos, subStr.size());
+	}
+
+	return resultStr;
+}
+
+bool StringManager::isSubstrIn(std::string const &sourceStr, std::string const &subStr)
+{
+	size_t pos = sourceStr.find(subStr);
+
+	return pos != std::string::npos ? true : false;
 }

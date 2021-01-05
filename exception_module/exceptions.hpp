@@ -88,27 +88,6 @@ namespace siem_ex_space
 		~DescriptionException() {}
 	};
 
-	class AggregationException : public SIEMExecption
-	{
-	private:
-		int _grabCategory;
-	public:
-		enum AggregationErrorCode { INCORRECT_AGGR_CATEGORY = 1, INCORRECT_AGGR_STRING,
-									FAILED_AGGREGATION };
-		AggregationException(std::string const &exMsg, int errCode, int grabType) :
-			SIEMExecption(exMsg, errCode), _grabCategory(grabType) {}
-
-		AggregationException(std::string &&exMsg, int errCode, int grabType) :
-			SIEMExecption(std::move(exMsg), errCode), _grabCategory(grabType) {}
-
-		~AggregationException() {}
-
-		int getGrabberType() const noexcept
-		{
-			return _grabCategory;
-		}
-	};
-
 	class CorrelationException : public SIEMExecption
 	{
 	public:

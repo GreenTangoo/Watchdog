@@ -4,7 +4,6 @@ using namespace utility_space;
 using namespace siem_ex_space;
 
 #define AMOUNT_TO_DELETE 2
-#define VALID_FLAGS true
 
 static std::map<ino_t, std::shared_ptr<FileObject>> fileObjectsMap;
 static std::mutex mapFileObjectsMut;
@@ -61,6 +60,11 @@ void FileObject::synchronizationStream()
 	_fileStream.sync();
 }
 
+std::fstream& FileObject::getStream()
+{
+	return _fileStream;
+}
+
 /*---------------------------------------------------------------*/
 /*----------------------FILE MANIPULATOR-------------------------*/
 /*---------------------------------------------------------------*/
@@ -72,7 +76,7 @@ FileManipulator::FileManipulator() : _isClosed(true)
 FileManipulator::FileManipulator(std::string const &filePath, openOption flags) :
 	_isClosed(true)
 {
-	if(this->validateFlags(flags) != VALID_FLAGS)
+	if(!(this->isValidFlags(flags)))
 	{
 		throw FilesystemSiemException("Incorrect flags.", 
 			FilesystemSiemException::BAD_FLAGS,
@@ -202,9 +206,9 @@ FileManipulator::~FileManipulator()
 /*----------------------------------------------------------------*/
 /*-----------------FILE MANIPULATOR(PRIVATE)----------------------*/
 /*----------------------------------------------------------------*/
-bool FileManipulator::validateFlags(openOption flags)
+bool FileManipulator::isValidFlags(openOption flags)
 {
-	bool isValidFlags = false;
+	bool validFlags = false;
 
 	do
 	{
@@ -215,10 +219,10 @@ bool FileManipulator::validateFlags(openOption flags)
 		if((flags & READ_WRITE) && ((flags & READONLY) || (flags & WRITEONLY)))
 			break;
 
-		isValidFlags = true;
+		validFlags = true;
 	} while (false);
 	
-	return isValidFlags;
+	return validFlags;
 }
 
 /*---------------------------------------------------------------*/

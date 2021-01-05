@@ -104,15 +104,15 @@ public:
 
         int standartValueRegGroup[] = {-1, 1, 1 };
 
-        for(size_t i(0); i < iptablesInfo.aggregationsInfo.size(); i++)
+        for(size_t i(0); i < iptablesInfo.aggregationsInfoCfg.size(); i++)
         {
-			int id = iptablesInfo.aggregationsInfo[i].get()->nodeId;
-            typeNodeJSON nodeType = iptablesInfo.aggregationsInfo[i].get()->typeNode;
-            std::regex keyReg = iptablesInfo.aggregationsInfo[i].get()->regexInfo.keyFindRegex;
-            std::regex valueReg = iptablesInfo.aggregationsInfo[i].get()->regexInfo.valueFindRegex;
-            std::string parentNodeStr = iptablesInfo.aggregationsInfo[i].get()->parentNodePath;
-            int keyRegGroup = iptablesInfo.aggregationsInfo[i].get()->regexInfo.keyRegGroup;
-            int valueRegGroup = iptablesInfo.aggregationsInfo[i].get()->regexInfo.valueRegGroup;
+			int id = iptablesInfo.aggregationsInfoCfg[i].get()->nodeId;
+            typeNodeJSON nodeType = iptablesInfo.aggregationsInfoCfg[i].get()->typeNode;
+            std::regex keyReg = iptablesInfo.aggregationsInfoCfg[i].get()->regexInfo.keyFindRegex;
+            std::regex valueReg = iptablesInfo.aggregationsInfoCfg[i].get()->regexInfo.valueFindRegex;
+            std::string parentNodeStr = iptablesInfo.aggregationsInfoCfg[i].get()->parentNodePath;
+            int keyRegGroup = iptablesInfo.aggregationsInfoCfg[i].get()->regexInfo.keyRegGroup;
+            int valueRegGroup = iptablesInfo.aggregationsInfoCfg[i].get()->regexInfo.valueRegGroup;
             
             bool keyRegMatch = std::regex_match(standartKeyNameArr[i], keyReg);
             bool valueRegMatch = std::regex_match(standartValueNameArr[i], valueReg);

@@ -39,6 +39,7 @@ namespace utility_space
 		operationState read(void *buf, size_t blockSize, size_t amountBlocks);
 		operationState readLine(std::string &line);
 		void synchronizationStream();
+		std::fstream& getStream();
 	private:
 		std::fstream _fileStream;
 		std::mutex _fileStreamMut;
@@ -80,7 +81,7 @@ namespace utility_space
 			std::vector<manipulateOption> separateFlags();
 		};
 	private:
-		bool validateFlags(openOption flags);
+		bool isValidFlags(openOption flags);
 	private:
 		bool _isClosed;
 		ino_t _fileSignature;

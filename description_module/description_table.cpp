@@ -16,6 +16,7 @@
 #define RESULT_JSON "result-json"
 #define INFO_NODE "info-node"
 #define ID_NODE "id"
+#define AGGR_TYPE "aggr-type"
 #define TYPE_NODE "node-type"
 #define KEY_NAME "key-name"
 #define KEY_GROUP "key-group"
@@ -31,6 +32,7 @@ typedef std::map<grabberCategory, std::unique_ptr<AggregationInfo>>::iterator gr
 static std::shared_ptr<JsonContainer> guaranteeGetPtrByName(JsonObject const &obj, std::string nameStr);
 
 static void putIdNode(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj);
+static void putAggrType(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj);
 static void putTypeNode(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj);
 static void putKeyName(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj);
 static void putKeyGroup(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj);
@@ -171,7 +173,7 @@ void DescriptionTable::constructAggregationInfoStructures(JsonObject const &aggr
 				std::unique_ptr<AggregationInfoNode> oneInfoNode = std::make_unique<AggregationInfoNode>();
 				oneInfoNode = addAggrInfo(*(infoNodes[j].get()), std::move(oneInfoNode));
 
-				oneGrabConfig->aggregationsInfo.push_back(std::move(oneInfoNode));
+				oneGrabConfig->aggregationsInfoCfg.push_back(std::move(oneInfoNode));
 			}
 
 			std::shared_ptr<JsonContainer> categoryNodePtr = guaranteeGetPtrByName(configObj, CATEGORY);
@@ -252,6 +254,7 @@ std::unique_ptr<AggregationInfoNode> DescriptionTable::addAggrInfo(JsonObject co
 		JsonObject nodeObj(*(nodePtr.get()));
 
 		putIdNode(aggrStruct, nodeObj);
+		putAggrType(aggrStruct, nodeObj);
 		putTypeNode(aggrStruct, nodeObj);
 		putKeyName(aggrStruct, nodeObj);
 		putKeyGroup(aggrStruct, nodeObj);
@@ -292,6 +295,15 @@ void putIdNode(std::unique_ptr<AggregationInfoNode> &aggrStruct,
 	aggrStruct->nodeId = atoi(nodeIdStr.c_str());
 }
 
+void putAggrType(std::unique_ptr<AggregationInfoNode> &aggrStruct, JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> aggrTypePtr = guaranteeGetPtrByName(configObj, AGGR_TYPE);
+	std::string aggrTypeStr = aggrTypePtr->keyValue.second;
+
+	aggrType grabType = description_space::stringToAggregationType(aggrTypeStr);
+	aggrStruct->grabType = grabType;
+}
+
 void putTypeNode(std::unique_ptr<AggregationInfoNode> &aggrStruct, 
 	JsonObject const &configObj)
 {
@@ -307,7 +319,7 @@ void putKeyName(std::unique_ptr<AggregationInfoNode> &aggrStruct,
 {
 	std::shared_ptr<JsonContainer> nodePtr = guaranteeGetPtrByName(configObj, KEY_NAME);
 	std::string keyNameRegStr = nodePtr->keyValue.second;
-	aggrStruct->regexInfo.keyFindRegex = std::regex(keyNameRegStr);
+	aggrStruct->regexInfo.keyFindRegex = keyNameRegStr;
 }
 
 void putKeyGroup(std::unique_ptr<AggregationInfoNode> &aggrStruct,
@@ -328,11 +340,11 @@ void putValueName(std::unique_ptr<AggregationInfoNode> &aggrStruct,
 	if(nodePtr)
 	{
 		std::string valueNameRegStr = nodePtr->keyValue.second;
-		aggrStruct->regexInfo.valueFindRegex = std::regex(valueNameRegStr);
+		aggrStruct->regexInfo.valueFindRegex = valueNameRegStr;
 	}	
 	else
 	{
-		aggrStruct->regexInfo.valueFindRegex = std::regex(EMPTY_PATTERN);
+		aggrStruct->regexInfo.valueFindRegex = EMPTY_PATTERN;
 	}
 }
 

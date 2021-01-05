@@ -11,6 +11,8 @@ using namespace description_space;
 #define GREATER_EQUAL ">="
 #define LESS_THAN "<"
 #define LESS_EQUAL "<="
+#define FIND_TYPE "find"
+#define COUNT_TYPE "count"
 
 
 static std::map<compareCondition, std::string> const compareStringMap = 
@@ -30,10 +32,16 @@ static std::map<relationshipCondition, std::string> const relationshipStringMap 
                                                     {INNER, INNER_CONDITION}
                                                 };
 
+static std::map<aggrType, std::string> const aggregationTypeStringMap = 
+                                                {
+                                                    {FINDER, FIND_TYPE},
+                                                    {COUNTER, COUNT_TYPE}
+                                                };
+
 static bool isRelationShipNode(std::string const &keyStr);
 
 AggregationRegexInfo::AggregationRegexInfo() :
-	keyRegGroup(-1), valueRegGroup(-1)
+	keyRegGroup(EMPTY_REGEX_GROUP), valueRegGroup(EMPTY_REGEX_GROUP)
 {}
 
 AggregationInfoNode::AggregationInfoNode() :
@@ -79,8 +87,7 @@ Configuration const& Configuration::operator=(Configuration &&other)
 JsonObject Configuration::getConfiguration(std::string const &nameNode) const 
 {
 	JsonObject configNodeObj;
-	std::shared_ptr<JsonContainer> foundedContainer = 
-		_configurationFileParser.findElementByName(nameNode);
+	std::shared_ptr<JsonContainer> foundedContainer = _configurationFileParser.findElementByName(nameNode);
 	
 	if(foundedContainer == nullptr)
 	{
@@ -100,8 +107,7 @@ JsonObject Configuration::getConfiguration(std::string const &nameNode) const
 /*--------------------------------------------------------------------------*/
 compareCondition description_space::tryFoundCompareCondition(std::string const &valueStr)
 {
-	std::string conditionStr = StringManager::getStrBetweenSymbols(valueStr, 
-        L_SQ_BRACKET, R_SQ_BRACKET);
+	std::string conditionStr = StringManager::getStrBetweenSymbols(valueStr, L_SQ_BRACKET, R_SQ_BRACKET);
     
     return description_space::stringToCompareCondition(conditionStr);
 }
@@ -201,6 +207,35 @@ std::string description_space::compareConditionToString(compareCondition conditi
     }
     
 	return std::string("");
+}
+
+ std::string description_space::aggregationTypeToString(aggrType grabType)
+{
+    auto it = aggregationTypeStringMap.find(grabType);
+    if(it != aggregationTypeStringMap.end())
+    {
+        return it->second;
+    }
+
+    return std::string("");
+    
+}
+
+aggrType description_space::stringToAggregationType(std::string aggrTypeStr)
+{
+    aggrType storeAggrType = NO_AGGR_TYPE;
+    
+    for(std::map<aggrType, std::string>::const_iterator it = aggregationTypeStringMap.begin();
+        it != aggregationTypeStringMap.end(); it++)
+    {
+        if(it->second == aggrTypeStr)
+        {
+            storeAggrType = it->first;
+            break;
+        }
+    }
+
+    return storeAggrType;
 }
 
 /*--------------------------------------------------------------------------*/
