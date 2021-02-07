@@ -7,7 +7,7 @@
 #include "utility_module/json.hpp"
 #include "description_module/configuration.hpp"
 #include "description_module/description_table.hpp"
-#include "aggregation_module/aggregator_implementation.hpp"
+#include "aggregation_module/symptom_grabber.hpp"
 
 using namespace utility_space;
 using namespace description_space;

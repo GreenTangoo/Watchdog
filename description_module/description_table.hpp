@@ -4,7 +4,7 @@
 #include <map>
 
 #include "../correlation_module/symptom_implementation.hpp"
-#include "../aggregation_module/aggregator_implementation.hpp"
+#include "../aggregation_module/symptom_grabber.hpp"
 #include "../exception_module/exceptions.hpp"
 
 using namespace correlation_space;

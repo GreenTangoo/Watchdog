@@ -1,13 +1,13 @@
 #ifndef AGGREGATOR_IMPLEMENTATION_HPP
 #define AGGREGATOR_IMPLEMENTATION_HPP
 
-#include <map>
-#include <memory>
+#include <string>
 
 #include "../utility_module/json.hpp"
 #include "../utility_module/encryption.hpp"
 #include "../utility_module/filesystem_siem.hpp"
 #include "../utility_module/regex_siem.hpp"
+#include "../utility_module/format_string.hpp"
 #include "../description_module/configuration.hpp"
 #include "../exception_module/exceptions.hpp"
 
@@ -17,61 +17,61 @@ using namespace siem_ex_space;
 
 namespace aggregation_space
 {
-    namespace details
+    struct AggregationResult
     {
-        struct AggregationInfoNodeBuffer
-        {
-            int nodeId;
-            aggrType grabType;
-            typeNodeJSON typeNode;
-            std::string parentPath;
-            std::string keyName;
-            std::string valueName;
-        };
-    }
+        typeNodeJSON jsonNode;
+        std::string key;
+        std::string value;
+        std::string parentPath;
 
-    enum grabberCategory { GRAB_NONE_TYPE = 0, IPTABLES, APACHE };
+        AggregationResult() : jsonNode(typeNodeJSON::NONE) {}
 
-    class SymptomGrabber
-    {
-    public:
-        SymptomGrabber(AggregationInfo const &info, grabberCategory grabType);
-        SymptomGrabber(SymptomGrabber const &other);
-        SymptomGrabber(SymptomGrabber &&other);
-        ~SymptomGrabber();
-        void tryAggregationInfo();
-    public:
-        class AggregationException : public SIEMExecption
-        {
-        private:
-            int _grabCategory;
-        public:
-            enum AggregationErrorCode { INCORRECT_AGGR_CATEGORY = 1, INCORRECT_AGGR_STRING,
-                                        FAILED_AGGREGATION };
-            AggregationException(std::string const &exMsg, int errCode, int grabType);
-            AggregationException(std::string &&exMsg, int errCode, int grabType);
-            ~AggregationException();
-            int getGrabberType() const noexcept;
-        };
-    private:
-        std::unique_ptr<std::vector<details::AggregationInfoNodeBuffer>> getFilledCfgBuf(FileManipulator &fileManip);
-
-        details::AggregationInfoNodeBuffer getAggrInfoBuf(std::string const &oneLogStr, 
-            std::vector<std::unique_ptr<AggregationInfoNode>> const &infoAggrVec);
-
-        void putAggrInfoToJson(details::AggregationInfoNodeBuffer const &oneAggrInfo);
-    private:
-        JsonObject _parser;
-        std::unique_ptr<Encryption> _encryptor; 
-        grabberCategory _grabType;
-        AggregationInfo const &_info;
+        AggregationResult(AggregationResult const &other) : 
+            jsonNode(other.jsonNode), key(other.key), value(other.value), parentPath(other.parentPath)
+        {}
     };
 
-    class GrabberCategoryResolver // STATIC CLASS
+    class IAggregator
     {
     public:
-        static grabberCategory stringToGrabberCategory(std::string const &grabName);
-        static std::string grabberCategoryToString(grabberCategory grabCatebory);   
+        virtual ~IAggregator();
+        virtual void tryAggregation(std::string const &logStr) = 0;
+    };
+
+    class AggregatorImpl : public IAggregator
+    {
+    public:
+        explicit AggregatorImpl(AggregationInfoNode const &nodeInfo);
+        explicit AggregatorImpl(AggregatorImpl const &other);
+        AggregatorImpl(AggregatorImpl &&other) = delete;
+        virtual ~AggregatorImpl();
+        AggregatorImpl const& operator=(AggregatorImpl const &other) = delete;
+        AggregatorImpl const& operator=(AggregatorImpl &&other) = delete;
+        virtual void tryAggregation(std::string const &logStr) = 0;
+        AggregationResult getAggrResult();
+        AggregationResult& getAggreResultRef();
+        int getNodeId();
+    protected:
+        AggregationInfoNode const &_nodeInfo;
+        AggregationResult _grabResult;
+    };
+
+    class AggregatorCounter : public AggregatorImpl
+    {
+    public:
+        AggregatorCounter(AggregationInfoNode const &infoNode);
+        virtual ~AggregatorCounter();
+        virtual void tryAggregation(std::string const &logStr) override;
+    };
+
+    class AggregatorFounder : public AggregatorImpl
+    {
+    public:
+        AggregatorFounder(AggregationInfoNode const &infoNode);
+        virtual ~AggregatorFounder();
+        virtual void tryAggregation(std::string const &logStr) override;
+    private:
+        bool _isFound;
     };
 }
 

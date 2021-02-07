@@ -21,6 +21,7 @@ namespace description_space
 	enum relationshipCondition { NO_RELATIONSHIP = 0, AND, OR, INNER };
     enum compareCondition { NO_CONDITION = 0, EQ, NE, LT, LE, GT, GE }; 
 	enum aggrType { NO_AGGR_TYPE = 0, FINDER, COUNTER };
+	enum serializerType { NONE_SERIALIZER = 0, JSON_SERIALIZER, XML_SERIALIZER };
 
 	struct SearchInfoNode
 	{
@@ -60,7 +61,8 @@ namespace description_space
 	struct AggregationInfo
 	{
 		std::string logFilename;
-		std::string jsonFilename;
+		std::string resultFilename;
+		std::vector<serializerType> additionalSerializeFormats;
 		std::vector<std::unique_ptr<AggregationInfoNode>> aggregationsInfoCfg;
 	};
 

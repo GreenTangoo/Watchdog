@@ -2,8 +2,9 @@
     "aggregation-configs":{
 		"one-config":{
 			"category":"iptables",
+			"additional-serialize":"[xml]",
 			"source-log":"iptables.log",
-			"result-json":"iptables_log.json",
+			"result-log":"iptables_log.json",
 			"info-node":{
 				"id":"1",
 				"aggr-type":"find",
