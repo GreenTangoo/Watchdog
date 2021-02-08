@@ -1,8 +1,8 @@
 {
     "aggregation-configs":{
 		"one-config":{
+			"aggr-behaviour" : "json",
 			"category":"iptables",
-			"additional-serialize":"[xml]",
 			"source-log":"iptables.log",
 			"result-log":"iptables_log.json",
 			"info-node":{

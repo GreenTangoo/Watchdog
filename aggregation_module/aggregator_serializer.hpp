@@ -1,7 +1,7 @@
 #ifndef AGGREGATOR_SERIALIZER_HPP
 #define AGGREGATOR_SERIALIZER_HPP
 
-#include "aggregator_implementation.hpp"
+#include "aggr_type_implementaion.hpp"
 
 namespace aggregation_space
 {
@@ -27,7 +27,7 @@ namespace aggregation_space
         private:
             int _serializeType;
         public:
-            enum SerializationErrorCode { INCORRECT_SERIALIZE_TYPE = 1, INCORRECT_SERIALIZE_STRING,
+            enum SerializationErrorCode { INCORRECT_BEHAVIOUR_TYPE = 1, INCORRECT_BEHAVIOUR_STRING,
                                         FAILED_SERIALIZATION };
             SerializationException(std::string const &exMsg, int errCode, int saveType);
             SerializationException(std::string &&exMsg, int errCode, int saveType);
@@ -47,15 +47,13 @@ namespace aggregation_space
         virtual void serialize();
     };
 
-    class SerializeTypeResolver // STATIC CLASS
+    class BehaviourTypeResolver // STATIC CLASS
     {
     public:
-        static serializerType stringToSerializerType(std::string const &serializerName);
-        static std::string serializerTypeToString(serializerType type);   
+        static behaviourType stringToSerializerType(std::string const &serializerName);
+        static std::string serializerTypeToString(behaviourType type);   
     };
 
-    std::shared_ptr<AggregatorSerializerImpl> createSerializer(AggrResultVec const &grabResultVec, serializerType serializer, 
-        std::string const &filename);
 }
 
 

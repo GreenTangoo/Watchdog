@@ -2,8 +2,8 @@
 
 using namespace aggregation_space;
 
-static std::map<serializerType, std::string> serializerTypeStringMap = 
-    { {JSON_SERIALIZER, "json"}, {XML_SERIALIZER, "xml"} };
+static std::map<behaviourType, std::string> serializerTypeStringMap = 
+    { {JSON_BEHAVIOUR, "json"}, {XML_BEHAVIOUR, "xml"} };
 
 /*-----------------------------------------------------------------*/
 /*----------------------IAGGREGATOR SERIALIZER---------------------*/
@@ -79,9 +79,9 @@ int AggregatorSerializerImpl::SerializationException::getSerializationType() con
 /*-----------------------------------------------------------------*/
 /*----------------SERIALIZE TYPE RESOLVER--------------------------*/
 /*-----------------------------------------------------------------*/
-serializerType SerializeTypeResolver::stringToSerializerType(std::string const &serializerName)
+behaviourType BehaviourTypeResolver::stringToSerializerType(std::string const &serializerName)
 {
-    for(std::map<serializerType, std::string>::const_iterator it = serializerTypeStringMap.begin();
+    for(std::map<behaviourType, std::string>::const_iterator it = serializerTypeStringMap.begin();
         it != serializerTypeStringMap.end(); it++)
     {
         if(it->second == serializerName)
@@ -91,11 +91,11 @@ serializerType SerializeTypeResolver::stringToSerializerType(std::string const &
     }
 
     throw AggregatorSerializerImpl::SerializationException("Invalid serializer name",
-        AggregatorSerializerImpl::SerializationException::INCORRECT_SERIALIZE_STRING,
-        static_cast<int>(serializerType::NONE_SERIALIZER));
+        AggregatorSerializerImpl::SerializationException::INCORRECT_BEHAVIOUR_STRING,
+        static_cast<int>(behaviourType::NONE_BEHAVIOUR));
 }
 
-std::string SerializeTypeResolver::serializerTypeToString(serializerType type)
+std::string BehaviourTypeResolver::serializerTypeToString(behaviourType type)
 {
     auto it = serializerTypeStringMap.find(type);
     if(it != serializerTypeStringMap.end())
@@ -103,25 +103,7 @@ std::string SerializeTypeResolver::serializerTypeToString(serializerType type)
         return it->second;
     }
 
-    throw AggregatorSerializerImpl::SerializationException("Invalid serialization type",
-        AggregatorSerializerImpl::SerializationException::INCORRECT_SERIALIZE_TYPE,
+    throw AggregatorSerializerImpl::SerializationException("Invalid behaviour type",
+        AggregatorSerializerImpl::SerializationException::INCORRECT_BEHAVIOUR_TYPE,
         static_cast<int>(type));
 }
-
-/*-----------------------------------------------------------------*/
-/*----------------------SERIALIZE CREATOR--------------------------*/
-/*-----------------------------------------------------------------*/
-std::shared_ptr<AggregatorSerializerImpl> aggregation_space::createSerializer(AggrResultVec const &grabResultVec, serializerType serializer, 
-    std::string const &filename)
-{
-    switch(serializer)
-    {
-    case serializerType::JSON_SERIALIZER:
-    {
-        return std::make_shared<AggregatorJsonSerializer>(grabResultVec, filename);
-    }
-        break;
-    }
-}
-
-

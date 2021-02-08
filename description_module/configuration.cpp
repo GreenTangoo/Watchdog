@@ -44,7 +44,20 @@ AggregationRegexInfo::AggregationRegexInfo() :
 	keyRegGroup(EMPTY_REGEX_GROUP), valueRegGroup(EMPTY_REGEX_GROUP)
 {}
 
-AggregationInfoNode::AggregationInfoNode() :
+AggregationInfo::AggregationInfo() :
+    aggregationBehaviour(NONE_BEHAVIOUR)
+{}
+
+AggregationInfo::~AggregationInfo()
+{}
+
+AggregationJsonInfo::AggregationJsonInfo()
+{}
+
+AggregationJsonInfo::~AggregationJsonInfo()
+{}
+
+AggregationJsonInfoNode::AggregationJsonInfoNode() :
 	typeNode(NONE)
 {}
 

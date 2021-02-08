@@ -41,7 +41,7 @@ namespace aggregation_space
     class AggregatorImpl : public IAggregator
     {
     public:
-        explicit AggregatorImpl(AggregationInfoNode const &nodeInfo);
+        explicit AggregatorImpl();
         explicit AggregatorImpl(AggregatorImpl const &other);
         AggregatorImpl(AggregatorImpl &&other) = delete;
         virtual ~AggregatorImpl();
@@ -52,14 +52,13 @@ namespace aggregation_space
         AggregationResult& getAggreResultRef();
         int getNodeId();
     protected:
-        AggregationInfoNode const &_nodeInfo;
         AggregationResult _grabResult;
     };
 
     class AggregatorCounter : public AggregatorImpl
     {
     public:
-        AggregatorCounter(AggregationInfoNode const &infoNode);
+        AggregatorCounter();
         virtual ~AggregatorCounter();
         virtual void tryAggregation(std::string const &logStr) override;
     };
@@ -67,7 +66,7 @@ namespace aggregation_space
     class AggregatorFounder : public AggregatorImpl
     {
     public:
-        AggregatorFounder(AggregationInfoNode const &infoNode);
+        AggregatorFounder();
         virtual ~AggregatorFounder();
         virtual void tryAggregation(std::string const &logStr) override;
     private:

@@ -78,20 +78,6 @@ void SymptomGrabber::tryAggregationInfo()
     this->resolveFormatValues();
 
     logFile->synchronizationStream();
-
-    AggrResultVec aggregationResult;
-    std::transform(_aggregators.begin(), _aggregators.end(), std::back_inserter(aggregationResult),
-        [](std::shared_ptr<AggregatorImpl> const &aggregator) -> std::shared_ptr<AggregationResult>
-    {
-        return std::make_shared<AggregationResult>(aggregator->getAggrResult()); 
-    });
-
-    for(serializerType saveOption : _info.additionalSerializeFormats)
-    {
-        std::shared_ptr<AggregatorSerializerImpl> serializer = createSerializer(aggregationResult, saveOption, _info.resultFilename);
-
-        serializer->serialize();
-    }
 }
 
 std::shared_ptr<AggregatorImpl> SymptomGrabber::createAggregator(AggregationInfoNode const &infoNode)
@@ -100,12 +86,12 @@ std::shared_ptr<AggregatorImpl> SymptomGrabber::createAggregator(AggregationInfo
     {
     case aggrType::COUNTER:
     {
-        return std::make_shared<AggregatorCounter>(infoNode);
+        return std::make_shared<AggregatorCounter>();
     }
         break;
     case aggrType::FINDER:
     {
-        return std::make_shared<AggregatorFounder>(infoNode);
+        return std::make_shared<AggregatorFounder>();
     }
         break;
     }

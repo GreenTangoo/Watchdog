@@ -13,11 +13,48 @@ using namespace siem_ex_space;
 
 namespace description_space
 {
+	class IDescriptorFiller
+	{
+	public:
+		virtual ~IDescriptorFiller();
+		virtual std::shared_ptr<AggregationInfo> getAggrInfo(JsonObject const &aggrConfigObj) = 0;
+	};
+
+	class DescriptorFillerImpl : public IDescriptorFiller
+	{
+	public:
+		DescriptorFillerImpl();
+		virtual ~DescriptorFillerImpl();
+		virtual std::shared_ptr<AggregationInfo> getAggrInfo(JsonObject const &aggrConfigObj);
+		void setAggrInfoPtr(std::shared_ptr<AggregationInfo> cfgDesc);
+	private:
+		std::shared_ptr<AggregationInfo> _cfgDesc;
+	};
+
+	class JsonDescriptorFiller : public DescriptorFillerImpl
+	{
+	public:
+		JsonDescriptorFiller(behaviourType aggrBehaivour);
+		virtual ~JsonDescriptorFiller();
+		virtual std::shared_ptr<AggregationInfo> getAggrInfo(JsonObject const &aggrConfigObj);
+	private:
+		void putIdNode(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
+		void putAggrType(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
+		void putTypeNode(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
+		void putKeyName(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
+		void putKeyGroup(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
+		void putValueName(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
+		void putValueGroup(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
+		void putParentPath(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
+	private:
+		std::shared_ptr<AggregationJsonInfo> _cfgJsonDesc;
+	};
+
 	class DescriptionTable
 	{
 	private:
 		std::map<symptomCategory, std::unique_ptr<SearchInfo>> _descriptorSearching;
-		std::map<grabberCategory, std::unique_ptr<AggregationInfo>> _descriptorAggregation;
+		std::map<grabberCategory, std::shared_ptr<AggregationInfo>> _aggregationDescriptors;
 	private:
 		DescriptionTable();	
 		DescriptionTable(DescriptionTable const &other) = delete;
@@ -26,8 +63,6 @@ namespace description_space
 		DescriptionTable const& operator=(DescriptionTable &&other) = delete;
 		std::unique_ptr<SearchInfoNode> addSearchingInfo(JsonObject const &searchConfigObj, 
 			std::unique_ptr<SearchInfoNode> infoStruct);
-		std::unique_ptr<AggregationInfoNode> addAggrInfo(JsonObject const &aggrConfigObj, 
-			std::unique_ptr<AggregationInfoNode> aggrStruct);
 		void constructSearchInfoStructures(JsonObject const &searchJsonObj);
 		void constructAggregationInfoStructures(JsonObject const &aggregationJsonObj);
 	public:
@@ -38,6 +73,8 @@ namespace description_space
 		AggregationInfo const& getAggrStructure(grabberCategory grabType);
 		void tuneFromConfig(Configuration const &config, configType typeConfig);
 	};
+
+	std::shared_ptr<DescriptorFillerImpl> createDescriptorFiller(behaviourType behaviourAggr);
 }
 
 #endif // DESCRIPTION_TABLE_HPP

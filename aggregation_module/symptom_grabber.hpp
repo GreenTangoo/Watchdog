@@ -5,7 +5,7 @@
 #include <memory>
 #include <algorithm>
 
-#include "aggregator_implementation.hpp"
+#include "aggr_type_implementaion.hpp"
 #include "aggregator_serializer.hpp"
 
 using namespace utility_space;
