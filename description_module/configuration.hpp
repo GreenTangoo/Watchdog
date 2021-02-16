@@ -7,9 +7,9 @@
 #include <regex>
 #include <cstdlib>
 
+#include "types_resolver.hpp"
 #include "../utility_module/json.hpp"
 #include "../utility_module/regex_siem.hpp"
-#include "../exception_module/exceptions.hpp"
 
 using namespace utility_space;
 using namespace siem_ex_space;
@@ -20,8 +20,7 @@ namespace description_space
 {
 	enum relationshipCondition { NO_RELATIONSHIP = 0, AND, OR, INNER };
     enum compareCondition { NO_CONDITION = 0, EQ, NE, LT, LE, GT, GE }; 
-	enum aggrType { NO_AGGR_TYPE = 0, FINDER, COUNTER };
-	enum behaviourType { NONE_BEHAVIOUR = 0, JSON_BEHAVIOUR, XML_BEHAVIOUR };
+
 
 	struct SearchInfoNode
 	{
@@ -45,6 +44,19 @@ namespace description_space
 		RegexSiem valueFindRegex;
 
 		AggregationRegexInfo();
+		AggregationRegexInfo(AggregationRegexInfo const &other);
+	};
+
+	struct AggregationJsonInfoNode
+	{
+		int nodeId;
+		typeNodeJSON typeNode;
+		aggrType grabType;
+		std::string parentNodePath;
+		AggregationRegexInfo regexInfo;
+
+		AggregationJsonInfoNode();
+		AggregationJsonInfoNode(AggregationJsonInfoNode const &other);
 	};
 
 	struct AggregationInfo
@@ -63,17 +75,6 @@ namespace description_space
 
 		AggregationJsonInfo();
 		virtual ~AggregationJsonInfo();
-	};
-
-	struct AggregationJsonInfoNode
-	{
-		int nodeId;
-		typeNodeJSON typeNode;
-		aggrType grabType;
-		std::string parentNodePath;
-		AggregationRegexInfo regexInfo;
-
-		AggregationJsonInfoNode();
 	};
 
 	class Configuration

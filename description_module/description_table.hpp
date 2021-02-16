@@ -70,7 +70,7 @@ namespace description_space
 		~DescriptionTable();
 		static DescriptionTable& getInstance();
 		SearchInfo const& getSearchStructure(symptomCategory sympType);
-		AggregationInfo const& getAggrStructure(grabberCategory grabType);
+		std::shared_ptr<AggregationInfo const> getAggrStructure(grabberCategory grabType);
 		void tuneFromConfig(Configuration const &config, configType typeConfig);
 	};
 

@@ -7,11 +7,6 @@ using namespace siem_ex_space;
 #define SOURCE_LOG_PATH "source_logs"
 #define ID_STR "id"
 
-static std::map<grabberCategory, std::string> categoryStringGrabMap = 
-    {
-        {IPTABLES, "iptables"}, {APACHE, "apache"}
-    };
-
 namespace 
 {
     std::vector<int> getNodesIdFromFormatStr(std::string const &formatStr)
@@ -47,22 +42,22 @@ namespace
 /*-----------------------------------------------------------------*/
 /*----------------------SYMPTOM GRABBER----------------------------*/
 /*-----------------------------------------------------------------*/
-SymptomGrabber::SymptomGrabber(AggregationInfo const &info, grabberCategory grabType) :
-    _grabType(grabType), _info(info)
+SymptomGrabber::SymptomGrabber(std::shared_ptr<AggregationInfo const> infoPtr, grabberCategory grabType) :
+    _grabType(grabType)
 {
-    this->initializeAggregators();
+    create_aggregator(infoPtr);
 }
 
 SymptomGrabber::SymptomGrabber(SymptomGrabber const &other) :
-    _grabType(other._grabType), _info(other._info)
+    _grabType(other._grabType), _aggregator(other._aggregator)
 {
-    this->initializeAggregators();
+
 }
 
 SymptomGrabber::SymptomGrabber(SymptomGrabber &&other) :
-    _grabType(std::move(other._grabType)), _info(std::move(other._info))
+    _grabType(std::move(other._grabType)), _aggregator(other._aggregator)
 {
-    this->initializeAggregators();
+
 }
 
 SymptomGrabber::~SymptomGrabber()
@@ -72,66 +67,9 @@ SymptomGrabber::~SymptomGrabber()
 
 void SymptomGrabber::tryAggregationInfo()
 {
-    FileManipulator logFile(_info.logFilename, FileManipulator::READONLY | FileManipulator::LARGE_FILE);
+    //FileManipulator logFile(_infoPtr->logFilename, FileManipulator::READONLY | FileManipulator::LARGE_FILE);
     
-    this->startAggregate(logFile);
-    this->resolveFormatValues();
-
-    logFile->synchronizationStream();
-}
-
-std::shared_ptr<AggregatorImpl> SymptomGrabber::createAggregator(AggregationInfoNode const &infoNode)
-{
-    switch(infoNode.grabType)
-    {
-    case aggrType::COUNTER:
-    {
-        return std::make_shared<AggregatorCounter>();
-    }
-        break;
-    case aggrType::FINDER:
-    {
-        return std::make_shared<AggregatorFounder>();
-    }
-        break;
-    }
-}
-
-void SymptomGrabber::initializeAggregators()
-{
-    _aggregators.clear();
-
-    for(size_t i(0); i < _info.aggregationsInfoCfg.size(); i++)
-    {
-        std::unique_ptr<AggregationInfoNode> const &aggrCfg = _info.aggregationsInfoCfg[i];
-        _aggregators.push_back(this->createAggregator(*(aggrCfg.get())));
-    }
-}
-
-void SymptomGrabber::startAggregate(FileManipulator file)
-{
-    std::string fileStr;
-    while(file->readLine(fileStr) == std::ifstream::goodbit)
-    {
-        for(std::shared_ptr<AggregatorImpl> aggregator : _aggregators)
-        {
-            aggregator->tryAggregation(fileStr);
-        }
-    } 
-}
-
-void SymptomGrabber::resolveFormatValues()
-{
-    for(std::shared_ptr<AggregatorImpl> aggregator : _aggregators)
-    {
-        AggregationResult &aggrRes = aggregator->getAggreResultRef();
-
-
-        FormatString parentPathFormat(aggrRes.parentPath);
-        Attributes filterAttrs = parentPathFormat.getFilterAttributes(FORMAT_ATTR_ID);
-        /*TODO: Отрезолвить по отфильтрованным аттрибутам строки std::string parentPath*/
-        
-    }
+    //logFile->synchronizationStream();
 }
 
 /*-----------------------------------------------------------------*/
@@ -160,33 +98,18 @@ int SymptomGrabber::AggregationException::getGrabberType() const noexcept
 }
 
 /*-----------------------------------------------------------------*/
-/*----------------------GRABBER GATEGORY RESOLVER------------------*/
+/*--------------------------FUNCTIONS------------------------------*/
 /*-----------------------------------------------------------------*/
-grabberCategory GrabberCategoryResolver::stringToGrabberCategory(std::string const &grabName)
+std::shared_ptr<AggregatorImpl> aggregation_space::create_aggregator(std::shared_ptr<AggregationInfo const> infoPtr)
 {
-    for(std::map<grabberCategory, std::string>::const_iterator it = categoryStringGrabMap.begin();
-        it != categoryStringGrabMap.end(); it++)
+    switch(infoPtr->aggregationBehaviour)
     {
-        if(it->second == grabName)
-        {
-            return it->first;
-        }
-    }
-
-    throw SymptomGrabber::AggregationException("Invalid aggregation string parameter",
-        SymptomGrabber::AggregationException::INCORRECT_AGGR_STRING,
-        static_cast<int>(grabberCategory::GRAB_NONE_TYPE));
-}
-
-std::string GrabberCategoryResolver::grabberCategoryToString(grabberCategory grabCategory)
-{
-	auto it = categoryStringGrabMap.find(grabCategory);
-    if(it != categoryStringGrabMap.end())
+    case behaviourType::JSON_BEHAVIOUR:
     {
-        return it->second;
+        return std::make_shared<AggregatorJson>(infoPtr);
     }
-
-    throw SymptomGrabber::AggregationException("Invalid aggregation category parameter",
-        SymptomGrabber::AggregationException::INCORRECT_AGGR_CATEGORY,
-        static_cast<int>(grabberCategory::GRAB_NONE_TYPE));
+        break;
+    default:
+        break;
+    }
 }

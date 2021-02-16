@@ -44,6 +44,11 @@ AggregationRegexInfo::AggregationRegexInfo() :
 	keyRegGroup(EMPTY_REGEX_GROUP), valueRegGroup(EMPTY_REGEX_GROUP)
 {}
 
+AggregationRegexInfo::AggregationRegexInfo(AggregationRegexInfo const &other) :
+    keyRegGroup(other.keyRegGroup), valueRegGroup(other.valueRegGroup),
+    keyFindRegex(other.keyFindRegex), valueFindRegex(other.valueFindRegex)
+{}
+
 AggregationInfo::AggregationInfo() :
     aggregationBehaviour(NONE_BEHAVIOUR)
 {}
@@ -59,6 +64,11 @@ AggregationJsonInfo::~AggregationJsonInfo()
 
 AggregationJsonInfoNode::AggregationJsonInfoNode() :
 	typeNode(NONE)
+{}
+
+AggregationJsonInfoNode::AggregationJsonInfoNode(AggregationJsonInfoNode const &other) : 
+    nodeId(other.nodeId), typeNode(other.typeNode), grabType(other.grabType), 
+    parentNodePath(other.parentNodePath), regexInfo(other.regexInfo)
 {}
 
 Configuration::Configuration(JsonObject configJson) : 

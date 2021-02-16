@@ -31,6 +31,7 @@ typedef std::map<symptomCategory, std::unique_ptr<SearchInfo>>::iterator searchI
 typedef std::map<grabberCategory, std::shared_ptr<AggregationInfo>>::iterator grabIterator;
 
 static std::shared_ptr<JsonContainer> guaranteeGetPtrByName(JsonObject const &obj, std::string nameStr);
+static void putValueNode(std::unique_ptr<SearchInfoNode> &infoStruct, JsonObject const &configObj);
 
 /*-----------------------------------------------------------------*/
 /*----------------------IDESCRIPTOR FILLER-------------------------*/
@@ -64,7 +65,8 @@ std::shared_ptr<AggregationInfo> DescriptorFillerImpl::getAggrInfo(JsonObject co
 
 void DescriptorFillerImpl::setAggrInfoPtr(std::shared_ptr<AggregationInfo> cfgDesc)
 {
-	
+	_cfgDesc.reset();
+	_cfgDesc = cfgDesc;
 }
 
 /*-----------------------------------------------------------------*/
@@ -87,7 +89,22 @@ std::shared_ptr<AggregationInfo> JsonDescriptorFiller::getAggrInfo(JsonObject co
 	std::vector<std::shared_ptr<JsonContainer>> infoNodes = aggrConfigObj.findElementsByName(INFO_NODE);
 	for(size_t j(0); j < infoNodes.size(); j++)
 	{
-		
+		std::shared_ptr<JsonContainer> nodePtr = guaranteeGetPtrByName(aggrConfigObj, INFO_NODE);
+		nodePtr = nodePtr->childNode;
+
+		JsonObject nodeObj(*(nodePtr.get()));
+		AggregationJsonInfoNode oneJsonCfgInfo;
+
+		this->putIdNode(oneJsonCfgInfo, nodeObj);
+		this->putAggrType(oneJsonCfgInfo, nodeObj);
+		this->putTypeNode(oneJsonCfgInfo, nodeObj);
+		this->putKeyName(oneJsonCfgInfo, nodeObj);
+		this->putKeyGroup(oneJsonCfgInfo, nodeObj);
+		this->putValueName(oneJsonCfgInfo, nodeObj);
+		this->putValueGroup(oneJsonCfgInfo, nodeObj);
+		this->putParentPath(oneJsonCfgInfo, nodeObj);
+
+		_cfgJsonDesc->aggregationsInfoCfg.push_back(oneJsonCfgInfo);
 	}
 }
 
@@ -214,7 +231,7 @@ SearchInfo const& DescriptionTable::getSearchStructure(symptomCategory sympType)
 	return *searchingConfigStruct;
 }
 
-AggregationInfo const& DescriptionTable::getAggrStructure(grabberCategory grabType)
+std::shared_ptr<AggregationInfo const> DescriptionTable::getAggrStructure(grabberCategory grabType)
 {
 	grabIterator structureIt = _aggregationDescriptors.find(grabType);
 	if(structureIt == _aggregationDescriptors.end())
@@ -223,9 +240,8 @@ AggregationInfo const& DescriptionTable::getAggrStructure(grabberCategory grabTy
 			+ GrabberCategoryResolver::grabberCategoryToString(grabType),
 			ConfigurationException::BAD_AGGR_STRUCTURE);
 	}
-
-	AggregationInfo *aggregatingConfigStruct = structureIt->second.get();
-	return *aggregatingConfigStruct;
+	
+	return structureIt->second;
 }
 
 /*-------------------------------------------------------------------*/
@@ -286,14 +302,19 @@ void DescriptionTable::constructAggregationInfoStructures(JsonObject const &aggr
 			JsonObject configObj(*(aggrConfigs[i].get()));
 
 			std::shared_ptr<JsonContainer> behaivorNodePtr = guaranteeGetPtrByName(configObj, AGGR_BEHAVIOUR);
+			std::string behaviourStr = behaivorNodePtr->keyValue.second;
+			behaviourType aggregationBehaviour = BehaviourTypeResolver::stringToSerializerType(behaviourStr);
+
+			std::shared_ptr<DescriptorFillerImpl> descriptor = createDescriptorFiller(aggregationBehaviour);
 			
+			std::shared_ptr<AggregationInfo> grabConfigInfo = descriptor->getAggrInfo(configObj);
 			
 			std::shared_ptr<JsonContainer> categoryNodePtr = guaranteeGetPtrByName(configObj, CATEGORY);
 			std::string grabberCategoryStr = categoryNodePtr->keyValue.second;
 			grabberCategory grabCategory = GrabberCategoryResolver::stringToGrabberCategory(grabberCategoryStr);
 
-			_aggregationDescriptors.insert(std::pair<grabberCategory, std::unique_ptr<AggregationInfo>>(
-				grabCategory, std::move(oneGrabConfig)));
+			_aggregationDescriptors.insert(std::pair<grabberCategory, std::shared_ptr<AggregationInfo>>(
+				grabCategory, std::move(grabConfigInfo)));
 		}
 		catch(DescriptionException const &ex)
 		{
@@ -354,36 +375,16 @@ std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject co
 	return infoStruct;
 }
 
-std::unique_ptr<AggregationInfoNode> DescriptionTable::addAggrInfo(JsonObject const &aggrConfigObj, 
-	std::unique_ptr<AggregationInfoNode> aggrStruct)
-{
-	try
-	{
-		std::shared_ptr<JsonContainer> nodePtr = guaranteeGetPtrByName(aggrConfigObj, INFO_NODE);
-		nodePtr = nodePtr->childNode;
-
-		JsonObject nodeObj(*(nodePtr.get()));
-
-		/*putIdNode(aggrStruct, nodeObj);
-		putAggrType(aggrStruct, nodeObj);
-		putTypeNode(aggrStruct, nodeObj);
-		putKeyName(aggrStruct, nodeObj);
-		putKeyGroup(aggrStruct, nodeObj);
-		putValueName(aggrStruct, nodeObj);
-		putValueGroup(aggrStruct, nodeObj);
-		putParentPath(aggrStruct, nodeObj);*/
-	}
-	catch(JsonException const &ex)
-	{
-		throw DescriptionException(ex.what(), DescriptionException::NOT_FOUND_NODE);
-	}
-
-	return aggrStruct;
-}
-
 std::shared_ptr<DescriptorFillerImpl> description_space::createDescriptorFiller(behaviourType behaviourAggr)
 {
-
+	switch(behaviourAggr)
+	{
+	case behaviourType::JSON_BEHAVIOUR:
+	{
+		return std::make_shared<JsonDescriptorFiller>(behaviourAggr);
+	}
+	break;
+	}
 }
 
 /*--------------------------------------------------------------------------------------*/

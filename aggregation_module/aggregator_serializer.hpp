@@ -1,11 +1,35 @@
 #ifndef AGGREGATOR_SERIALIZER_HPP
 #define AGGREGATOR_SERIALIZER_HPP
 
-#include "aggr_type_implementaion.hpp"
+#include <vector>
+#include <memory>
+
+#include "../exception_module/exceptions.hpp"
+#include "../utility_module/json.hpp"
+
+using namespace siem_ex_space;
+using namespace utility_space;
 
 namespace aggregation_space
 {
-    typedef std::vector<std::shared_ptr<AggregationResult>> AggrResultVec;
+    struct AggregationJsonResult; 
+
+    typedef std::vector<std::shared_ptr<AggregationJsonResult>> AggrResultVec;
+
+    struct AggregationJsonResult
+    {
+        int nodeId;
+        typeNodeJSON jsonNode;
+        std::string key;
+        std::string value;
+        std::string parentPath;
+
+        AggregationJsonResult() : nodeId(-1), jsonNode(typeNodeJSON::NONE) {}
+
+        AggregationJsonResult(AggregationJsonResult const &other) : 
+            nodeId(other.nodeId), jsonNode(other.jsonNode), key(other.key), value(other.value), parentPath(other.parentPath)
+        {}
+    };
 
     class IAggregatorSerializer
     {
@@ -24,15 +48,11 @@ namespace aggregation_space
     public:
         class SerializationException : public SIEMExecption
         {
-        private:
-            int _serializeType;
         public:
-            enum SerializationErrorCode { INCORRECT_BEHAVIOUR_TYPE = 1, INCORRECT_BEHAVIOUR_STRING,
-                                        FAILED_SERIALIZATION };
-            SerializationException(std::string const &exMsg, int errCode, int saveType);
-            SerializationException(std::string &&exMsg, int errCode, int saveType);
+            enum SerializationErrorCode { FAILED_SERIALIZATION = 1 };
+            SerializationException(std::string const &exMsg, int errCode);
+            SerializationException(std::string &&exMsg, int errCode);
             ~SerializationException();
-            int getSerializationType() const noexcept;
         };
     protected:
         AggrResultVec const &_aggrsVec;
@@ -45,13 +65,6 @@ namespace aggregation_space
         AggregatorJsonSerializer(AggrResultVec const &aggrsVec, std::string const &resultFilename);
         virtual ~AggregatorJsonSerializer();
         virtual void serialize();
-    };
-
-    class BehaviourTypeResolver // STATIC CLASS
-    {
-    public:
-        static behaviourType stringToSerializerType(std::string const &serializerName);
-        static std::string serializerTypeToString(behaviourType type);   
     };
 
 }

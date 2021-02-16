@@ -1,11 +1,11 @@
-#include "aggr_type_implementaion.hpp"
+#include "aggr_type_implementation.hpp"
 
 using namespace aggregation_space;
 
 /*-----------------------------------------------------------------*/
 /*----------------------IAGGREGATOR--------------------------------*/
 /*-----------------------------------------------------------------*/
-IAggregator::~IAggregator()
+IAggregatorType::~IAggregatorType()
 {
 
 }
@@ -13,50 +13,30 @@ IAggregator::~IAggregator()
 /*-----------------------------------------------------------------*/
 /*----------------------AGGREGATOR IMPL----------------------------*/
 /*-----------------------------------------------------------------*/
-AggregatorImpl::AggregatorImpl()
+AggregatorTypeImpl::AggregatorTypeImpl()
 {
 
 }
 
-AggregatorImpl::AggregatorImpl(AggregatorImpl const &other) : _grabResult(other._grabResult)
-{
-    
-}
-
-AggregatorImpl::~AggregatorImpl()
+AggregatorTypeImpl::~AggregatorTypeImpl()
 {
 
-}
-
-AggregationResult AggregatorImpl::getAggrResult()
-{
-    return _grabResult;
-}
-
-AggregationResult& AggregatorImpl::getAggreResultRef()
-{
-    return _grabResult;
-}
-
-int AggregatorImpl::getNodeId()
-{
-   
 }
 
 /*-----------------------------------------------------------------*/
 /*----------------------AGGREGATOR COUNTER-------------------------*/
 /*-----------------------------------------------------------------*/
-AggregatorCounter::AggregatorCounter()
+AggregatorTypeCounter::AggregatorTypeCounter()
 {
 
 }
 
-AggregatorCounter::~AggregatorCounter()
+AggregatorTypeCounter::~AggregatorTypeCounter()
 {
 
 }
 
-void AggregatorCounter::tryAggregation(std::string const &logStr)
+void AggregatorTypeCounter::tryAggregation(std::string const &logStr)
 {
 
 }
@@ -64,16 +44,24 @@ void AggregatorCounter::tryAggregation(std::string const &logStr)
 /*-----------------------------------------------------------------*/
 /*----------------------AGGREGATOR FOUNDER-------------------------*/
 /*-----------------------------------------------------------------*/
-AggregatorFounder::AggregatorFounder() : _isFound(false)
+AggregatorTypeFounder::AggregatorTypeFounder() : _isFound(false)
 {
 
 }
 
-AggregatorFounder::~AggregatorFounder()
+AggregatorTypeFounder::~AggregatorTypeFounder()
 {
 
 }
 
-void AggregatorFounder::tryAggregation(std::string const &logStr)
+void AggregatorTypeFounder::tryAggregation(std::string const &logStr)
 {
+}
+
+/*-----------------------------------------------------------------*/
+/*--------------------------FREE FUNCTIONS-------------------------*/
+/*-----------------------------------------------------------------*/
+std::shared_ptr<AggregatorTypeImpl> aggregation_space::create_aggregator_type(AggregationJsonInfoNode const &jsonGrabInfoNode)
+{
+
 }

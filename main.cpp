@@ -22,7 +22,7 @@ int main()
 
 	confTable.tuneFromConfig(aggrConfig, DescriptionTable::AGGREGATION_CONFIG);
 
-	AggregationInfo const &grabInfo = confTable.getAggrStructure(grabberCategory::IPTABLES);
+	std::shared_ptr<AggregationInfo const> grabInfo = confTable.getAggrStructure(grabberCategory::IPTABLES);
 	SymptomGrabber grabber(grabInfo, grabberCategory::IPTABLES);
 	grabber.tryAggregationInfo();
 
