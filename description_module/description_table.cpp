@@ -56,17 +56,81 @@ DescriptorFillerImpl::~DescriptorFillerImpl()
 
 std::shared_ptr<AggregationInfo> DescriptorFillerImpl::getAggrInfo(JsonObject const &aggrConfigObj)
 {
-	std::shared_ptr<JsonContainer> sourceLogNode = guaranteeGetPtrByName(aggrConfigObj, SOURCE_LOG);
-	_cfgDesc->logFilename = sourceLogNode->keyValue.second;
-
-	std::shared_ptr<JsonContainer> resultLogNode = guaranteeGetPtrByName(aggrConfigObj, RESULT_LOG);
-	_cfgDesc->resultFilename = resultLogNode->keyValue.second;
+	this->putLogInfo(_cfgDesc, aggrConfigObj);
+	return _cfgDesc;
 }
 
 void DescriptorFillerImpl::setAggrInfoPtr(std::shared_ptr<AggregationInfo> cfgDesc)
 {
 	_cfgDesc.reset();
 	_cfgDesc = cfgDesc;
+}
+
+void DescriptorFillerImpl::putLogInfo(std::shared_ptr<AggregationInfo> aggrInfo, JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> sourceLogNode = guaranteeGetPtrByName(configObj, SOURCE_LOG);
+	aggrInfo->logFilename = sourceLogNode->keyValue.second;
+
+	std::shared_ptr<JsonContainer> resultLogNode = guaranteeGetPtrByName(configObj, RESULT_LOG);
+	aggrInfo->resultFilename = resultLogNode->keyValue.second;
+}
+
+void DescriptorFillerImpl::putIdNode(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> idPtr = guaranteeGetPtrByName(configObj, ID_NODE);
+	std::string nodeIdStr = idPtr->keyValue.second;
+
+	jsonAggrNodeInfo.nodeId = atoi(nodeIdStr.c_str());
+}
+
+void DescriptorFillerImpl::putAggrType(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> aggrTypePtr = guaranteeGetPtrByName(configObj, AGGR_TYPE);
+	std::string aggrTypeStr = aggrTypePtr->keyValue.second;
+
+	aggrType grabType = description_space::stringToAggregationType(aggrTypeStr);
+	jsonAggrNodeInfo.grabType = grabType;
+}
+
+void DescriptorFillerImpl::putKeyName(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> nodePtr = guaranteeGetPtrByName(configObj, KEY_NAME);
+	std::string keyNameRegStr = nodePtr->keyValue.second;
+	jsonAggrNodeInfo.regexInfo.keyFindRegex = keyNameRegStr;
+}
+
+void DescriptorFillerImpl::putKeyGroup(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> nodePtr = configObj.findNearElementByName(KEY_GROUP);
+	if(nodePtr)
+	{
+		std::string keyRegGroupStr = nodePtr->keyValue.second;
+		jsonAggrNodeInfo.regexInfo.keyRegGroup = std::atoi(keyRegGroupStr.c_str());
+	}
+}
+
+void DescriptorFillerImpl::putValueName(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> nodePtr = configObj.findNearElementByName(VALUE_NAME);
+	if(nodePtr)
+	{
+		std::string valueNameRegStr = nodePtr->keyValue.second;
+		jsonAggrNodeInfo.regexInfo.valueFindRegex = valueNameRegStr;
+	}	
+	else
+	{
+		jsonAggrNodeInfo.regexInfo.valueFindRegex = EMPTY_PATTERN;
+	}
+}
+
+void DescriptorFillerImpl::putValueGroup(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
+{
+	std::shared_ptr<JsonContainer> nodePtr = configObj.findNearElementByName(VALUE_GROUP);
+	if(nodePtr)
+	{
+		std::string valueRegGroupStr = nodePtr->keyValue.second;
+		jsonAggrNodeInfo.regexInfo.valueRegGroup = std::atoi(valueRegGroupStr.c_str());
+	}
 }
 
 /*-----------------------------------------------------------------*/
@@ -95,34 +159,17 @@ std::shared_ptr<AggregationInfo> JsonDescriptorFiller::getAggrInfo(JsonObject co
 		JsonObject nodeObj(*(nodePtr.get()));
 		AggregationJsonInfoNode oneJsonCfgInfo;
 
-		this->putIdNode(oneJsonCfgInfo, nodeObj);
-		this->putAggrType(oneJsonCfgInfo, nodeObj);
+		DescriptorFillerImpl::putIdNode(oneJsonCfgInfo, nodeObj);
+		DescriptorFillerImpl::putAggrType(oneJsonCfgInfo, nodeObj);
+		DescriptorFillerImpl::putKeyName(oneJsonCfgInfo, nodeObj);
+		DescriptorFillerImpl::putKeyGroup(oneJsonCfgInfo, nodeObj);
+		DescriptorFillerImpl::putValueName(oneJsonCfgInfo, nodeObj);
+		DescriptorFillerImpl::putValueGroup(oneJsonCfgInfo, nodeObj);
 		this->putTypeNode(oneJsonCfgInfo, nodeObj);
-		this->putKeyName(oneJsonCfgInfo, nodeObj);
-		this->putKeyGroup(oneJsonCfgInfo, nodeObj);
-		this->putValueName(oneJsonCfgInfo, nodeObj);
-		this->putValueGroup(oneJsonCfgInfo, nodeObj);
 		this->putParentPath(oneJsonCfgInfo, nodeObj);
 
 		_cfgJsonDesc->aggregationsInfoCfg.push_back(oneJsonCfgInfo);
 	}
-}
-
-void JsonDescriptorFiller::putIdNode(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
-{
-	std::shared_ptr<JsonContainer> idPtr = guaranteeGetPtrByName(configObj, ID_NODE);
-	std::string nodeIdStr = idPtr->keyValue.second;
-
-	jsonAggrNodeInfo.nodeId = atoi(nodeIdStr.c_str());
-}
-
-void JsonDescriptorFiller::putAggrType(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
-{
-	std::shared_ptr<JsonContainer> aggrTypePtr = guaranteeGetPtrByName(configObj, AGGR_TYPE);
-	std::string aggrTypeStr = aggrTypePtr->keyValue.second;
-
-	aggrType grabType = description_space::stringToAggregationType(aggrTypeStr);
-	jsonAggrNodeInfo.grabType = grabType;
 }
 
 void JsonDescriptorFiller::putTypeNode(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
@@ -132,47 +179,6 @@ void JsonDescriptorFiller::putTypeNode(AggregationJsonInfoNode &jsonAggrNodeInfo
 
 	typeNodeJSON nodeType = JSONNodeTypeResolver::getInstance().getNodeType(typeNodeStr);
 	jsonAggrNodeInfo.typeNode = nodeType;
-}
-
-void JsonDescriptorFiller::putKeyName(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
-{
-	std::shared_ptr<JsonContainer> nodePtr = guaranteeGetPtrByName(configObj, KEY_NAME);
-	std::string keyNameRegStr = nodePtr->keyValue.second;
-	jsonAggrNodeInfo.regexInfo.keyFindRegex = keyNameRegStr;
-}
-
-void JsonDescriptorFiller::putKeyGroup(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
-{
-	std::shared_ptr<JsonContainer> nodePtr = configObj.findNearElementByName(KEY_GROUP);
-	if(nodePtr)
-	{
-		std::string keyRegGroupStr = nodePtr->keyValue.second;
-		jsonAggrNodeInfo.regexInfo.keyRegGroup = std::atoi(keyRegGroupStr.c_str());
-	}
-}
-
-void JsonDescriptorFiller::putValueName(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
-{
-	std::shared_ptr<JsonContainer> nodePtr = configObj.findNearElementByName(VALUE_NAME);
-	if(nodePtr)
-	{
-		std::string valueNameRegStr = nodePtr->keyValue.second;
-		jsonAggrNodeInfo.regexInfo.valueFindRegex = valueNameRegStr;
-	}	
-	else
-	{
-		jsonAggrNodeInfo.regexInfo.valueFindRegex = EMPTY_PATTERN;
-	}
-}
-
-void JsonDescriptorFiller::putValueGroup(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)
-{
-	std::shared_ptr<JsonContainer> nodePtr = configObj.findNearElementByName(VALUE_GROUP);
-	if(nodePtr)
-	{
-		std::string valueRegGroupStr = nodePtr->keyValue.second;
-		jsonAggrNodeInfo.regexInfo.valueRegGroup = std::atoi(valueRegGroupStr.c_str());
-	}
 }
 
 void JsonDescriptorFiller::putParentPath(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)

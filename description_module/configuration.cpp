@@ -40,6 +40,18 @@ static std::map<aggrType, std::string> const aggregationTypeStringMap =
 
 static bool isRelationShipNode(std::string const &keyStr);
 
+AggregationCondition::AggregationCondition() : 
+    aggrConditonType(NO_RELATIONSHIP), idAggregationNode(-1)
+{
+
+}
+
+AggregationCondition::AggregationCondition(AggregationCondition const &other) : 
+    aggrConditonType(other.aggrConditonType), idAggregationNode(other.idAggregationNode)
+{
+
+}
+
 AggregationRegexInfo::AggregationRegexInfo() :
 	keyRegGroup(EMPTY_REGEX_GROUP), valueRegGroup(EMPTY_REGEX_GROUP)
 {}
@@ -62,14 +74,28 @@ AggregationJsonInfo::AggregationJsonInfo()
 AggregationJsonInfo::~AggregationJsonInfo()
 {}
 
+AggregationInfoNode::AggregationInfoNode()
+{
+
+}
+
+AggregationInfoNode::AggregationInfoNode(AggregationInfoNode const &other) : 
+    nodeId(other.nodeId), grabType(other.grabType), regexInfo(other.regexInfo)
+{
+
+}
+
 AggregationJsonInfoNode::AggregationJsonInfoNode() :
-	typeNode(NONE)
-{}
+	AggregationInfoNode(), typeNode(NONE)
+{
+
+}
 
 AggregationJsonInfoNode::AggregationJsonInfoNode(AggregationJsonInfoNode const &other) : 
-    nodeId(other.nodeId), typeNode(other.typeNode), grabType(other.grabType), 
-    parentNodePath(other.parentNodePath), regexInfo(other.regexInfo)
-{}
+    AggregationInfoNode(other), typeNode(other.typeNode), parentNodePath(other.parentNodePath)
+{
+
+}
 
 Configuration::Configuration(JsonObject configJson) : 
 	_configurationFileParser(configJson)

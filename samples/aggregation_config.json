@@ -1,0 +1,27 @@
+{
+    "aggregation-configs":{
+		"one-config":{
+            "aggr-behaviour":"json",
+			"category":"iptables",
+			"source-log":"logfile.txt",
+            "result-log":"log.json",
+            "info-node":{
+                "id":"1",
+                "aggr-type":"find",
+                "key-name":"(\\d+\\.\\d+\\.\\d+\\.\\d+)",
+                "key-group":"1",
+                "parent-node":"root"
+            },
+            "info-node":{
+                "id":"2",
+                "aggr-type":"count",
+                "key-name":"amount_failed",
+                "key-group":"-1",
+                "value-name":"(Failed)",
+                "value-group":"1",
+                "parent-node":"root/[1]",
+                "condition":"and=[1,key]"
+            }
+        }
+	}
+}

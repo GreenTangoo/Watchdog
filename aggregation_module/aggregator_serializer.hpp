@@ -6,6 +6,7 @@
 
 #include "../exception_module/exceptions.hpp"
 #include "../utility_module/json.hpp"
+#include "../utility_module/filesystem_siem.hpp"
 
 using namespace siem_ex_space;
 using namespace utility_space;
@@ -14,21 +15,33 @@ namespace aggregation_space
 {
     struct AggregationJsonResult; 
 
-    typedef std::vector<std::shared_ptr<AggregationJsonResult>> AggrResultVec;
+    typedef std::vector<AggregationJsonResult> AggrJsonResultVec;
 
-    struct AggregationJsonResult
+    struct AggregationResult
     {
         int nodeId;
-        typeNodeJSON jsonNode;
         std::string key;
         std::string value;
+
+        AggregationResult();
+        AggregationResult(int nodeId);
+        AggregationResult(AggregationResult const &other);
+        AggregationResult(AggregationResult &&other);
+        AggregationResult& operator=(AggregationResult const &other);
+        AggregationResult& operator=(AggregationResult &&other);
+    };
+
+    struct AggregationJsonResult : public AggregationResult
+    {
+        typeNodeJSON jsonNode;
         std::string parentPath;
 
-        AggregationJsonResult() : nodeId(-1), jsonNode(typeNodeJSON::NONE) {}
-
-        AggregationJsonResult(AggregationJsonResult const &other) : 
-            nodeId(other.nodeId), jsonNode(other.jsonNode), key(other.key), value(other.value), parentPath(other.parentPath)
-        {}
+        AggregationJsonResult();
+        AggregationJsonResult(int nodeId, typeNodeJSON jsonNode, std::string parentPath);
+        AggregationJsonResult(AggregationJsonResult const &other);
+        AggregationJsonResult(AggregationJsonResult &&other);
+        AggregationJsonResult& operator=(AggregationJsonResult const &other);
+        AggregationJsonResult& operator=(AggregationJsonResult &&other);
     };
 
     class IAggregatorSerializer
@@ -41,7 +54,7 @@ namespace aggregation_space
     class AggregatorSerializerImpl : public IAggregatorSerializer
     {
     public:
-        AggregatorSerializerImpl(AggrResultVec const &aggrsVec, std::string const &resultFilename);
+        AggregatorSerializerImpl(std::string const &resultFilename);
         virtual ~AggregatorSerializerImpl();
         virtual void serialize() = 0;
         void setResultFilename(std::string const filename);
@@ -55,19 +68,20 @@ namespace aggregation_space
             ~SerializationException();
         };
     protected:
-        AggrResultVec const &_aggrsVec;
         std::string _resultFilename;
     };
 
     class AggregatorJsonSerializer : public AggregatorSerializerImpl
     {
     public:
-        AggregatorJsonSerializer(AggrResultVec const &aggrsVec, std::string const &resultFilename);
+        AggregatorJsonSerializer(AggrJsonResultVec const &aggrsVec, std::string const &resultFilename);
         virtual ~AggregatorJsonSerializer();
-        virtual void serialize();
+        virtual void serialize() override;
+    private:
+        AggrJsonResultVec const &_aggrsVec;
+        JsonObject _aggrJson;
     };
 
 }
-
 
 #endif // AGGREGATOR_SERIALIZER_HPP

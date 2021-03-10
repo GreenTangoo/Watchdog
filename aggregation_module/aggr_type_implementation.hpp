@@ -7,7 +7,6 @@
 #include "../utility_module/encryption.hpp"
 #include "../utility_module/filesystem_siem.hpp"
 #include "../utility_module/regex_siem.hpp"
-#include "../utility_module/format_string.hpp"
 #include "../description_module/configuration.hpp"
 #include "../exception_module/exceptions.hpp"
 
@@ -17,6 +16,8 @@ using namespace siem_ex_space;
 
 namespace aggregation_space
 {
+    class AggrTypeManager;
+
     class IAggregatorType
     {
     public:
@@ -27,21 +28,31 @@ namespace aggregation_space
     class AggregatorTypeImpl : public IAggregatorType
     {
     public:
-        explicit AggregatorTypeImpl();
-        explicit AggregatorTypeImpl(AggregatorTypeImpl const &other) = default;
+        explicit AggregatorTypeImpl(std::pair<RegexSiem, int> keyRegex, std::pair<RegexSiem, int> valueRegex,
+            AggrTypeManager &manager, AggregationInfoNode const &infoNode);
+        explicit AggregatorTypeImpl(AggregatorTypeImpl const &other);
         AggregatorTypeImpl(AggregatorTypeImpl &&other) = delete;
         virtual ~AggregatorTypeImpl();
         AggregatorTypeImpl const& operator=(AggregatorTypeImpl const &other) = delete;
         AggregatorTypeImpl const& operator=(AggregatorTypeImpl &&other) = delete;
         virtual void tryAggregation(std::string const &logStr) = 0;
+        virtual std::pair<std::string, std::string> getResult() = 0;
+    protected:
+        std::pair<RegexSiem, int> _keyRegexInfo;
+        std::pair<RegexSiem, int> _valueRegexInfo;
+        bool _isFoundKey;
+        AggrTypeManager &_manager;
+        AggregationInfoNode const &_infoNode;
     };
 
     class AggregatorTypeCounter : public AggregatorTypeImpl
     {
     public:
-        AggregatorTypeCounter();
+        AggregatorTypeCounter(std::pair<RegexSiem, int> keyRegex, std::pair<RegexSiem, int> valueRegex,
+            AggrTypeManager &manager, AggregationInfoNode const &infoNode);
         virtual ~AggregatorTypeCounter();
         virtual void tryAggregation(std::string const &logStr) override;
+        virtual std::pair<std::string, std::string> getResult() override;
     private:
         std::pair<std::string, int> _grabResult;
     };
@@ -49,15 +60,18 @@ namespace aggregation_space
     class AggregatorTypeFounder : public AggregatorTypeImpl
     {
     public:
-        AggregatorTypeFounder();
+        AggregatorTypeFounder(std::pair<RegexSiem, int> keyRegex, std::pair<RegexSiem, int> valueRegex,
+            AggrTypeManager &manager, AggregationInfoNode const &infoNode);
         virtual ~AggregatorTypeFounder();
         virtual void tryAggregation(std::string const &logStr) override;
+        virtual std::pair<std::string, std::string> getResult() override;
+        inline bool isFound();
     private:
-        bool _isFound;
+        bool _isFoundValue;
         std::pair<std::string, std::string> _grabResult;
     };
 
-    std::shared_ptr<AggregatorTypeImpl> create_aggregator_type(AggregationJsonInfoNode const &jsonGrabInfoNode);
+    
 }
 
 #endif // AGGREGATOR_IMPLEMENTATION_HPP

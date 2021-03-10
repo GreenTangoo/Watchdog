@@ -34,21 +34,27 @@ RegexSiem const& RegexSiem::operator=(std::string const &str)
 {
     std::regex::operator=(str.c_str());
     expression = str;
+
+    return *this;
 }
 
 RegexSiem const& RegexSiem::operator=(RegexSiem const &other)
 {
     std::regex::operator=(other);
     expression = other.expression;
+
+    return *this;
 }
 
 RegexSiem const& RegexSiem::operator=(RegexSiem &&other)
 {
     std::regex::operator=(std::move(other));
     expression = std::move(other.expression);
+
+    return *this;
 }
 
-inline std::string RegexSiem::getExpresison()
+std::string RegexSiem::getExpressison()
 {
     return expression;
 }

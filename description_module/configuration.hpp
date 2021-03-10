@@ -36,6 +36,16 @@ namespace description_space
 		std::unique_ptr<SearchInfoNode> rootSearchConfigNode;
 	};
 
+	struct AggregationCondition
+	{
+		relationshipCondition aggrConditonType;
+		int idAggregationNode;
+		std::string infoNodeMember;
+
+		AggregationCondition();
+		AggregationCondition(AggregationCondition const &other);
+	};
+
 	struct AggregationRegexInfo
 	{
 		int keyRegGroup;
@@ -47,13 +57,21 @@ namespace description_space
 		AggregationRegexInfo(AggregationRegexInfo const &other);
 	};
 
-	struct AggregationJsonInfoNode
+	struct AggregationInfoNode
 	{
 		int nodeId;
-		typeNodeJSON typeNode;
 		aggrType grabType;
-		std::string parentNodePath;
 		AggregationRegexInfo regexInfo;
+		std::vector<AggregationCondition> additionalConditions;
+
+		AggregationInfoNode();
+		AggregationInfoNode(AggregationInfoNode const &other);
+	};
+
+	struct AggregationJsonInfoNode : public AggregationInfoNode
+	{
+		typeNodeJSON typeNode;
+		std::string parentNodePath;
 
 		AggregationJsonInfoNode();
 		AggregationJsonInfoNode(AggregationJsonInfoNode const &other);

@@ -18,7 +18,7 @@ namespace utility_space
         RegexSiem const& operator=(std::string const &str);
         RegexSiem const& operator=(RegexSiem const &other);
         RegexSiem const& operator=(RegexSiem &&other);
-        std::string getExpresison();
+        std::string getExpressison();
     private:
         std::string expression;
     };

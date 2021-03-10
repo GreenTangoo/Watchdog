@@ -35,8 +35,7 @@ namespace aggregation_space
         };
     private:
         grabberCategory _grabType;
-        std::shared_ptr<AggregatorImpl> _aggregator;
-        std::unique_ptr<Encryption> _encryptor; 
+        std::shared_ptr<IAggregator> _aggregator;
     };
 
     std::shared_ptr<AggregatorImpl> create_aggregator(std::shared_ptr<AggregationInfo const> infoPtr);
