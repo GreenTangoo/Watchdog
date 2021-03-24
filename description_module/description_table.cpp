@@ -15,6 +15,7 @@
 #define SOURCE_LOG "source-log"
 #define RESULT_LOG "result-log"
 #define AGGR_BEHAVIOUR "aggr-behaviour"
+#define CONDITION "condition"
 #define INFO_NODE "info-node"
 #define ID_NODE "id"
 #define AGGR_TYPE "aggr-type"
@@ -133,6 +134,32 @@ void DescriptorFillerImpl::putValueGroup(AggregationJsonInfoNode &jsonAggrNodeIn
 	}
 }
 
+void DescriptorFillerImpl::putAdditionalConditions(AggregationInfoNode &aggrNodeInfo, JsonObject const &configObj)
+{
+	std::vector<std::shared_ptr<JsonContainer>> conditiondsVec = configObj.findElementsByName(CONDITION);
+	
+	for(std::shared_ptr<JsonContainer> condition : conditiondsVec)
+	{
+		std::string conditionStr = condition->keyValue.second;
+		aggrNodeInfo.additionalConditions.push_back(this->parseConditionStr(conditionStr));
+	}
+}
+
+AggregationCondition DescriptorFillerImpl::parseConditionStr(std::string const &conditionStr)
+{
+	AggregationCondition conditionInfo;
+	std::vector<std::string> conditionDetails = StringManager::parseByDelimiter(conditionStr, "=");
+	
+	std::string nodeDetailsStr = StringManager::getStrBetweenSymbols(conditionDetails[1], '[', ']');
+	std::vector<std::string> nodeDetails = StringManager::parseByDelimiter(nodeDetailsStr, ",");
+
+	conditionInfo.aggrConditonType = stringToRelationship(conditionDetails[0]);
+	conditionInfo.idAggregationNode = std::atoi(nodeDetails[0].c_str());
+	conditionInfo.infoNodeMember = stringToAggrMember(nodeDetails[1]);
+
+	return conditionInfo;
+}
+
 /*-----------------------------------------------------------------*/
 /*----------------------JSON DESCRIPTOR FILLER---------------------*/
 /*-----------------------------------------------------------------*/
@@ -165,11 +192,14 @@ std::shared_ptr<AggregationInfo> JsonDescriptorFiller::getAggrInfo(JsonObject co
 		DescriptorFillerImpl::putKeyGroup(oneJsonCfgInfo, nodeObj);
 		DescriptorFillerImpl::putValueName(oneJsonCfgInfo, nodeObj);
 		DescriptorFillerImpl::putValueGroup(oneJsonCfgInfo, nodeObj);
+		DescriptorFillerImpl::putAdditionalConditions(oneJsonCfgInfo, nodeObj);
 		this->putTypeNode(oneJsonCfgInfo, nodeObj);
 		this->putParentPath(oneJsonCfgInfo, nodeObj);
 
 		_cfgJsonDesc->aggregationsInfoCfg.push_back(oneJsonCfgInfo);
 	}
+
+	return _cfgJsonDesc;
 }
 
 void JsonDescriptorFiller::putTypeNode(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj)

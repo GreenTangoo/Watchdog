@@ -26,6 +26,7 @@ namespace description_space
 		DescriptorFillerImpl();
 		virtual ~DescriptorFillerImpl();
 		virtual std::shared_ptr<AggregationInfo> getAggrInfo(JsonObject const &aggrConfigObj);
+	protected:
 		void setAggrInfoPtr(std::shared_ptr<AggregationInfo> cfgDesc);
 		void putLogInfo(std::shared_ptr<AggregationInfo> aggrInfo, JsonObject const &configObj);
 		void putIdNode(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
@@ -34,6 +35,9 @@ namespace description_space
 		void putKeyGroup(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
 		void putValueName(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
 		void putValueGroup(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
+		void putAdditionalConditions(AggregationInfoNode &aggrNodeInfo, JsonObject const &configObj);
+	private:
+		AggregationCondition parseConditionStr(std::string const &conditionStr);
 	private:
 		std::shared_ptr<AggregationInfo> _cfgDesc;
 	};
@@ -44,7 +48,6 @@ namespace description_space
 		JsonDescriptorFiller(behaviourType aggrBehaivour);
 		virtual ~JsonDescriptorFiller();
 		virtual std::shared_ptr<AggregationInfo> getAggrInfo(JsonObject const &aggrConfigObj);
-	private:
 		void putTypeNode(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
 		void putParentPath(AggregationJsonInfoNode &jsonAggrNodeInfo, JsonObject const &configObj);
 	private:

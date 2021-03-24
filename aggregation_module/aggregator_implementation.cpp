@@ -6,40 +6,6 @@ using namespace aggregation_space;
 /*-----------------------------------------------------------------*/
 /*-------------------------IAGGREGATOR-----------------------------*/
 /*-----------------------------------------------------------------*/
-AggrTypeManager::AggrTypeManager(std::vector<GrabTypeResultPair> &subAggregatorsResultVec) : 
-    _subAggregatorsResultVec(subAggregatorsResultVec)
-{
-
-}
-
-AggrTypeManager::~AggrTypeManager()
-{
-
-}
-
-std::string AggrTypeManager::getKey(int idNode)
-{
-
-}
-
-std::string AggrTypeManager::getValue(int idNode)
-{
-
-}
-
-void AggrTypeManager::setKey(int idNode, std::string newKey)
-{
-
-}
-
-void AggrTypeManager::setValue(int idNode, std::string newValue)
-{
-
-}
-
-/*-----------------------------------------------------------------*/
-/*-------------------------IAGGREGATOR-----------------------------*/
-/*-----------------------------------------------------------------*/
 IAggregator::IAggregator()
 {
 
@@ -131,7 +97,7 @@ void AggregatorJson::initializeAggrTypeVec()
         std::shared_ptr<AggregationJsonResult> aggrResPtr = 
             std::make_shared<AggregationJsonResult>(oneCfg.nodeId, oneCfg.typeNode, oneCfg.parentNodePath);
 
-        std::shared_ptr<AggregatorTypeImpl> aggregatorTypeObj = create_aggregator_type(oneCfg, *_manager, oneCfg);
+        std::shared_ptr<AggregatorTypeImpl> aggregatorTypeObj = create_aggregator_type(*_manager, oneCfg);
 
         _subAggregatorsResultVec.push_back({aggregatorTypeObj, aggrResPtr});
     }
@@ -175,7 +141,7 @@ std::vector<std::pair<RegexSiem, std::string>> AggregatorJson::generateRegexVec(
 
     for(int i(0); i < idValues.size(); i++)
     {
-        int id = idValues.at(i);
+        int id = idValues[i];
 
         auto it = std::find_if(_subAggregatorsResultVec.begin(), _subAggregatorsResultVec.end(),
             [id](GrabTypeResultPair const &AggrResultPair) -> bool
@@ -219,15 +185,15 @@ AggregatorJson::AggregatorJsonException::~AggregatorJsonException()
 /*-----------------------------------------------------------------*/
 /*--------------------------FREE FUNCTIONS-------------------------*/
 /*-----------------------------------------------------------------*/
-std::shared_ptr<AggregatorTypeImpl> aggregation_space::create_aggregator_type(AggregationInfoNode const &jsonGrabInfoNode, 
+std::shared_ptr<AggregatorTypeImpl> aggregation_space::create_aggregator_type( 
     AggrTypeManager &manager, AggregationInfoNode const &infoNode)
 {
-    AggregationRegexInfo const &regexInfo = jsonGrabInfoNode.regexInfo;
+    AggregationRegexInfo const &regexInfo = infoNode.regexInfo;
 
     std::pair<RegexSiem, int> keyRegex({regexInfo.keyFindRegex, regexInfo.keyRegGroup});
     std::pair<RegexSiem, int> valueRegex({regexInfo.valueFindRegex, regexInfo.valueRegGroup});
     
-    switch(jsonGrabInfoNode.grabType)
+    switch(infoNode.grabType)
     {
     case aggrType::FINDER:
     {

@@ -20,6 +20,7 @@ namespace description_space
 {
 	enum relationshipCondition { NO_RELATIONSHIP = 0, AND, OR, INNER };
     enum compareCondition { NO_CONDITION = 0, EQ, NE, LT, LE, GT, GE }; 
+	enum aggregationConditionMember {NO_MEMBER = 0, KEY_MEMBER, VALUE_MEMBER };
 
 
 	struct SearchInfoNode
@@ -40,10 +41,11 @@ namespace description_space
 	{
 		relationshipCondition aggrConditonType;
 		int idAggregationNode;
-		std::string infoNodeMember;
+		aggregationConditionMember infoNodeMember;
 
 		AggregationCondition();
 		AggregationCondition(AggregationCondition const &other);
+		AggregationCondition const& operator=(AggregationCondition const &other);
 	};
 
 	struct AggregationRegexInfo
@@ -66,6 +68,7 @@ namespace description_space
 
 		AggregationInfoNode();
 		AggregationInfoNode(AggregationInfoNode const &other);
+		virtual ~AggregationInfoNode();
 	};
 
 	struct AggregationJsonInfoNode : public AggregationInfoNode
@@ -75,6 +78,7 @@ namespace description_space
 
 		AggregationJsonInfoNode();
 		AggregationJsonInfoNode(AggregationJsonInfoNode const &other);
+		virtual ~AggregationJsonInfoNode();
 	};
 
 	struct AggregationInfo
@@ -118,10 +122,15 @@ namespace description_space
 
 	relationshipCondition stringToRelationship(std::string relationshipStr);
 	std::string relationshipToString(relationshipCondition relationship);
+
 	compareCondition stringToCompareCondition(std::string conditionStr);
 	std::string compareConditionToString(compareCondition condition);
-	std::string aggregationTypeToString(aggrType grabType);
+
 	aggrType stringToAggregationType(std::string aggrTypeStr);
+	std::string aggregationTypeToString(aggrType grabType);
+
+	aggregationConditionMember stringToAggrMember(std::string memberStr);
+	std::string aggrMemberToString(aggregationConditionMember memberCondition);
 }
 
 #endif // CONFIGURATION_HPP

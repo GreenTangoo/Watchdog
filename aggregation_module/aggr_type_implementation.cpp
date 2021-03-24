@@ -5,7 +5,45 @@ using namespace aggregation_space;
 #define EMPTY_REGEX -1
 
 /*-----------------------------------------------------------------*/
-/*----------------------IAGGREGATOR--------------------------------*/
+/*---------------------AGGR TYPE MANAGER---------------------------*/
+/*-----------------------------------------------------------------*/
+AggrTypeManager::AggrTypeManager(std::vector<GrabTypeResultPair> &subAggregatorsResultVec) : 
+    _subAggregatorsResultVec(subAggregatorsResultVec)
+{
+
+}
+
+AggrTypeManager::~AggrTypeManager()
+{
+
+}
+
+std::pair<std::string, std::string> AggrTypeManager::getResultById(int idNode)
+{
+    std::vector<GrabTypeResultPair>::iterator pairIt = this->getResultPairById(idNode);
+    if(pairIt != _subAggregatorsResultVec.end())
+    {
+        return pairIt->first->getResult();
+    }
+    else
+    {
+        //THROW
+    }
+}
+
+std::vector<GrabTypeResultPair>::iterator AggrTypeManager::getResultPairById(int idNode)
+{
+    auto it = std::find_if(_subAggregatorsResultVec.begin(), _subAggregatorsResultVec.end(), 
+        [&idNode](GrabTypeResultPair const &aggregationResultElem) -> bool
+    {
+        return aggregationResultElem.second->nodeId == idNode;
+    });
+
+    return it;
+}
+
+/*-----------------------------------------------------------------*/
+/*----------------------IAGGREGATOR TYPE---------------------------*/
 /*-----------------------------------------------------------------*/
 IAggregatorType::~IAggregatorType()
 {
@@ -13,7 +51,7 @@ IAggregatorType::~IAggregatorType()
 }
 
 /*-----------------------------------------------------------------*/
-/*----------------------AGGREGATOR IMPL----------------------------*/
+/*----------------------AGGREGATOR TYPE IMPL-----------------------*/
 /*-----------------------------------------------------------------*/
 AggregatorTypeImpl::AggregatorTypeImpl(std::pair<RegexSiem, int> keyRegex, std::pair<RegexSiem, int> valueRegex,
     AggrTypeManager &manager, AggregationInfoNode const &infoNode) : 
@@ -35,8 +73,45 @@ AggregatorTypeImpl::AggregatorTypeImpl(AggregatorTypeImpl const &other) :
 
 }
 
+bool AggregatorTypeImpl::isPassConditions(std::vector<AggregationCondition> const &conditions)
+{
+    bool isFailed = false;
+
+    for(AggregationCondition const &condition : conditions)
+    {
+        if(condition.aggrConditonType == relationshipCondition::AND)
+        {
+            if(!isValidCondition(condition))
+            {
+                isFailed = true;
+                break;
+            }
+        }
+        else if(condition.aggrConditonType == relationshipCondition::OR)
+        {
+            if(isValidCondition(condition))
+            {
+                break;
+            }
+        }
+    }
+
+    return !isFailed;
+}
+
+bool AggregatorTypeImpl::isValidCondition(AggregationCondition const &condition)
+{
+    int idNode = condition.idAggregationNode;
+
+    std::pair<std::string, std::string> result = _manager.getResultById(idNode); 
+
+    std::string conditionMember = condition.infoNodeMember == KEY_MEMBER ? result.first : result.second;
+
+    return static_cast<bool>(conditionMember.size());
+}
+
 /*-----------------------------------------------------------------*/
-/*----------------------AGGREGATOR COUNTER-------------------------*/
+/*-------------------AGGREGATOR TYPE COUNTER-----------------------*/
 /*-----------------------------------------------------------------*/
 AggregatorTypeCounter::AggregatorTypeCounter(std::pair<RegexSiem, int> keyRegex, std::pair<RegexSiem, int> valueRegex,
     AggrTypeManager &manager, AggregationInfoNode const &infoNode) : 
@@ -68,7 +143,7 @@ std::pair<std::string, std::string> AggregatorTypeCounter::getResult()
 }
 
 /*-----------------------------------------------------------------*/
-/*----------------------AGGREGATOR FOUNDER-------------------------*/
+/*---------------------AGGREGATOR TYPE FOUNDER---------------------*/
 /*-----------------------------------------------------------------*/
 AggregatorTypeFounder::AggregatorTypeFounder(std::pair<RegexSiem, int> keyRegex, std::pair<RegexSiem, int> valueRegex,
     AggrTypeManager &manager, AggregationInfoNode const &infoNode) : 
@@ -103,8 +178,15 @@ void AggregatorTypeFounder::tryAggregation(std::string const &logStr)
         std::string valueRegResult = findByRegex(logStr, _valueRegexInfo.first, _valueRegexInfo.second);
         if(valueRegResult.length())
         {
-            _grabResult.second = valueRegResult;
-            _isFoundValue;
+            std::vector<AggregationCondition> const &conditions = _infoNode.additionalConditions;
+
+            bool passResult = this->isPassConditions(conditions);
+
+            if(passResult)
+            {
+                _grabResult.second = valueRegResult;
+                _isFoundValue = true;
+            }
         }
     }
 }

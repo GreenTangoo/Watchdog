@@ -4,31 +4,11 @@
 #include <memory>
 
 #include "aggr_type_implementation.hpp"
-#include "aggregator_serializer.hpp"
 
 using namespace description_space;
 
 namespace aggregation_space
 {
-    typedef std::pair<std::shared_ptr<AggregatorTypeImpl>, std::shared_ptr<AggregationJsonResult>> GrabTypeResultPair;
-
-    class AggrTypeManager
-    {
-    public:
-        AggrTypeManager(std::vector<GrabTypeResultPair> &subAggregatorsResultVec);
-        AggrTypeManager(AggrTypeManager const &other) = delete;
-        AggrTypeManager(AggrTypeManager &&other) = delete;
-        AggrTypeManager const& operator=(AggrTypeManager const &other) = delete;
-        AggrTypeManager const& operator=(AggrTypeManager &&other) = delete;
-        ~AggrTypeManager();
-        std::string getKey(int idNode);
-        std::string getValue(int idNode);
-        void setKey(int idNode, std::string newKey);
-        void setValue(int idNode, std::string newValue);
-    private:
-        std::vector<GrabTypeResultPair> &_subAggregatorsResultVec;
-    };
-
     class IAggregator
     {
     public:
@@ -76,8 +56,7 @@ namespace aggregation_space
         std::shared_ptr<AggrTypeManager> _manager;
     };
 
-    std::shared_ptr<AggregatorTypeImpl> create_aggregator_type(AggregationInfoNode const &jsonGrabInfoNode,
-        AggrTypeManager &manager, AggregationInfoNode const &infoNode);
+    std::shared_ptr<AggregatorTypeImpl> create_aggregator_type(AggrTypeManager &manager, AggregationInfoNode const &infoNode);
 }
 
 #endif // AGGREGATOR_IMPLEMENTATION

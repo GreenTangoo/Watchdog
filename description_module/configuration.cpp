@@ -5,14 +5,19 @@ using namespace description_space;
 #define AND_CONDITION "and"
 #define OR_CONDITION "or"
 #define INNER_CONDITION "inner"
+
 #define EQUAL "="
 #define NOT_EQUAL "!="
 #define GREATER_THAN ">"
 #define GREATER_EQUAL ">="
 #define LESS_THAN "<"
 #define LESS_EQUAL "<="
+
 #define FIND_TYPE "find"
 #define COUNT_TYPE "count"
+
+#define KEY_MEMBER_CONDITION "key"
+#define VALUE_MEMBER_CONDITION "value"
 
 
 static std::map<compareCondition, std::string> const compareStringMap = 
@@ -38,6 +43,12 @@ static std::map<aggrType, std::string> const aggregationTypeStringMap =
                                                     {COUNTER, COUNT_TYPE}
                                                 };
 
+static std::map<aggregationConditionMember, std::string> const aggrCondMemberStringMap = 
+                                                {
+                                                    {KEY_MEMBER, KEY_MEMBER_CONDITION},
+                                                    {VALUE_MEMBER, VALUE_MEMBER_CONDITION}
+                                                };
+
 static bool isRelationShipNode(std::string const &keyStr);
 
 AggregationCondition::AggregationCondition() : 
@@ -50,6 +61,18 @@ AggregationCondition::AggregationCondition(AggregationCondition const &other) :
     aggrConditonType(other.aggrConditonType), idAggregationNode(other.idAggregationNode)
 {
 
+}
+
+AggregationCondition const& AggregationCondition::operator=(AggregationCondition const &other)
+{
+    if(this != &other)
+    {
+        this->aggrConditonType = other.aggrConditonType;
+        this->idAggregationNode = other.idAggregationNode;
+        this->infoNodeMember = other.infoNodeMember;
+    }
+
+    return *this;
 }
 
 AggregationRegexInfo::AggregationRegexInfo() :
@@ -79,6 +102,11 @@ AggregationInfoNode::AggregationInfoNode()
 
 }
 
+AggregationInfoNode::~AggregationInfoNode()
+{
+
+}
+
 AggregationInfoNode::AggregationInfoNode(AggregationInfoNode const &other) : 
     nodeId(other.nodeId), grabType(other.grabType), regexInfo(other.regexInfo)
 {
@@ -87,6 +115,11 @@ AggregationInfoNode::AggregationInfoNode(AggregationInfoNode const &other) :
 
 AggregationJsonInfoNode::AggregationJsonInfoNode() :
 	AggregationInfoNode(), typeNode(NONE)
+{
+
+}
+
+AggregationJsonInfoNode::~AggregationJsonInfoNode()
 {
 
 }
@@ -258,18 +291,6 @@ std::string description_space::compareConditionToString(compareCondition conditi
 	return std::string("");
 }
 
- std::string description_space::aggregationTypeToString(aggrType grabType)
-{
-    auto it = aggregationTypeStringMap.find(grabType);
-    if(it != aggregationTypeStringMap.end())
-    {
-        return it->second;
-    }
-
-    return std::string("");
-    
-}
-
 aggrType description_space::stringToAggregationType(std::string aggrTypeStr)
 {
     aggrType storeAggrType = NO_AGGR_TYPE;
@@ -285,6 +306,46 @@ aggrType description_space::stringToAggregationType(std::string aggrTypeStr)
     }
 
     return storeAggrType;
+}
+
+std::string description_space::aggregationTypeToString(aggrType grabType)
+{
+    auto it = aggregationTypeStringMap.find(grabType);
+    if(it != aggregationTypeStringMap.end())
+    {
+        return it->second;
+    }
+
+    return std::string("");
+    
+}
+
+aggregationConditionMember description_space::stringToAggrMember(std::string memberStr)
+{
+    aggregationConditionMember storeAggrMemberCond = NO_MEMBER;
+    
+    for(std::map<aggregationConditionMember, std::string>::const_iterator it = aggrCondMemberStringMap.begin();
+        it != aggrCondMemberStringMap.end(); it++)
+    {
+        if(it->second == memberStr)
+        {
+            storeAggrMemberCond = it->first;
+            break;
+        }
+    }
+
+    return storeAggrMemberCond;
+}
+
+std::string description_space::aggrMemberToString(aggregationConditionMember memberCondition)
+{
+    auto it = aggrCondMemberStringMap.find(memberCondition);
+    if(it != aggrCondMemberStringMap.end())
+    {
+        return it->second;
+    }
+
+    return std::string("");
 }
 
 /*--------------------------------------------------------------------------*/
