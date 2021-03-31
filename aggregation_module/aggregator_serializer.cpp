@@ -184,6 +184,7 @@ void AggregatorJsonSerializer::serialize()
         catch(JsonException const &ex)
         {
             //DEBUG
+            abort();
         }
     }
 
