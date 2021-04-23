@@ -144,6 +144,7 @@ namespace utility_space
         std::string getNodeName(const typeNodeJSON &typeNode);
     };
 
+    std::shared_ptr<JsonContainer> guaranteeGetPtrByName(JsonObject const &obj, std::string nameStr);
     JsonObject getJsonData(std::string jsonFilename);
     JsonObject getJsonData(std::stringstream &stream);
     JsonObject getJsonData(std::fstream &stream);

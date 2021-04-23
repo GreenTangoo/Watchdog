@@ -3,17 +3,19 @@
 		"one-config":{
             "aggr-behaviour":"json",
 			"category":"iptables",
-			"source-log":"logfile.txt",
-            "result-log":"log.json",
+			"source-log":"ssh.log",
+            "result-log":"ssh.json",
             "info-node":{
                 "id":"1",
+                "node-type":"object",
                 "aggr-type":"find",
-                "key-name":"(\\d+\\.\\d+\\.\\d+\\.\\d+)",
+                "key-name":"(\d+\.\d+\.\d+\.\d+)",
                 "key-group":"1",
                 "parent-node":"root"
             },
             "info-node":{
                 "id":"2",
+                "node-type":"string",
                 "aggr-type":"count",
                 "key-name":"amount_failed",
                 "key-group":"-1",

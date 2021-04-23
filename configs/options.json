@@ -1,0 +1,7 @@
+{
+    "startup":{
+        "amount_aggr_threads" : "4",
+        "amount_corr_threads" : "4",
+        "correlation_module" : "statistic"
+    }
+}

@@ -50,7 +50,7 @@ namespace aggregation_space
     {
     public:
         explicit AggregatorTypeImpl(std::pair<RegexSiem, int> keyRegex, std::pair<RegexSiem, int> valueRegex,
-            AggrTypeManager &manager, AggregationInfoNode const &infoNode);
+            AggrTypeManager &manager, std::shared_ptr<AggregationInfoNode> infoNode);
         explicit AggregatorTypeImpl(AggregatorTypeImpl const &other);
         AggregatorTypeImpl(AggregatorTypeImpl &&other) = delete;
         virtual ~AggregatorTypeImpl();
@@ -67,14 +67,14 @@ namespace aggregation_space
         std::pair<RegexSiem, int> _valueRegexInfo;
         bool _isFoundKey;
         AggrTypeManager &_manager;
-        AggregationInfoNode const &_infoNode;
+        std::shared_ptr<AggregationInfoNode> _infoNode;
     };
 
     class AggregatorTypeCounter : public AggregatorTypeImpl
     {
     public:
         AggregatorTypeCounter(std::pair<RegexSiem, int> keyRegex, std::pair<RegexSiem, int> valueRegex,
-            AggrTypeManager &manager, AggregationInfoNode const &infoNode);
+            AggrTypeManager &manager, std::shared_ptr<AggregationInfoNode> infoNode);
         virtual ~AggregatorTypeCounter();
         virtual void tryAggregation(std::string const &logStr) override;
         virtual std::pair<std::string, std::string> getResult() override;
@@ -86,7 +86,7 @@ namespace aggregation_space
     {
     public:
         AggregatorTypeFounder(std::pair<RegexSiem, int> keyRegex, std::pair<RegexSiem, int> valueRegex,
-            AggrTypeManager &manager, AggregationInfoNode const &infoNode);
+            AggrTypeManager &manager, std::shared_ptr<AggregationInfoNode> infoNode);
         virtual ~AggregatorTypeFounder();
         virtual void tryAggregation(std::string const &logStr) override;
         virtual std::pair<std::string, std::string> getResult() override;

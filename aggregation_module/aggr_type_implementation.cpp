@@ -54,7 +54,7 @@ IAggregatorType::~IAggregatorType()
 /*----------------------AGGREGATOR TYPE IMPL-----------------------*/
 /*-----------------------------------------------------------------*/
 AggregatorTypeImpl::AggregatorTypeImpl(std::pair<RegexSiem, int> keyRegex, std::pair<RegexSiem, int> valueRegex,
-    AggrTypeManager &manager, AggregationInfoNode const &infoNode) : 
+    AggrTypeManager &manager, std::shared_ptr<AggregationInfoNode> infoNode) : 
     _keyRegexInfo(keyRegex), _valueRegexInfo(valueRegex), _isFoundKey(false), _manager(manager), _infoNode(infoNode)
 {
     if(_keyRegexInfo.second == EMPTY_REGEX)
@@ -114,7 +114,7 @@ bool AggregatorTypeImpl::isValidCondition(AggregationCondition const &condition)
 /*-------------------AGGREGATOR TYPE COUNTER-----------------------*/
 /*-----------------------------------------------------------------*/
 AggregatorTypeCounter::AggregatorTypeCounter(std::pair<RegexSiem, int> keyRegex, std::pair<RegexSiem, int> valueRegex,
-    AggrTypeManager &manager, AggregationInfoNode const &infoNode) : 
+    AggrTypeManager &manager, std::shared_ptr<AggregationInfoNode> infoNode) : 
     AggregatorTypeImpl(keyRegex, valueRegex, manager, infoNode)
 {
     if(_isFoundKey)
@@ -146,7 +146,7 @@ std::pair<std::string, std::string> AggregatorTypeCounter::getResult()
 /*---------------------AGGREGATOR TYPE FOUNDER---------------------*/
 /*-----------------------------------------------------------------*/
 AggregatorTypeFounder::AggregatorTypeFounder(std::pair<RegexSiem, int> keyRegex, std::pair<RegexSiem, int> valueRegex,
-    AggrTypeManager &manager, AggregationInfoNode const &infoNode) : 
+    AggrTypeManager &manager, std::shared_ptr<AggregationInfoNode> infoNode) : 
     AggregatorTypeImpl(keyRegex, valueRegex, manager, infoNode), _isFoundValue(false)
 {
     if(_isFoundKey)
@@ -178,7 +178,7 @@ void AggregatorTypeFounder::tryAggregation(std::string const &logStr)
         std::string valueRegResult = findByRegex(logStr, _valueRegexInfo.first, _valueRegexInfo.second);
         if(valueRegResult.length())
         {
-            std::vector<AggregationCondition> const &conditions = _infoNode.additionalConditions;
+            std::vector<AggregationCondition> const &conditions = _infoNode->additionalConditions;
 
             bool passResult = this->isPassConditions(conditions);
 

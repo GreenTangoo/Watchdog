@@ -13,6 +13,9 @@ using namespace utility_space;
 using namespace description_space;
 using namespace aggregation_space;
 
+std::vector<std::string> vec;
+std::vector<int> intVec;
+
 int main()
 {
 	std::string filepath = "aggregation_config.json";

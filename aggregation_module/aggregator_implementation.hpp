@@ -51,12 +51,13 @@ namespace aggregation_space
         void resolveFormatParams();
         std::vector<std::pair<RegexSiem, std::string>> generateRegexVec(std::vector<int> const &idValues);
     private:
-        std::shared_ptr<AggregationJsonInfo const> _jsonInfoPtr;
+        std::shared_ptr<AggregationInfo const> _jsonInfoPtr;
         std::vector<GrabTypeResultPair> _subAggregatorsResultVec;
         std::shared_ptr<AggrTypeManager> _manager;
     };
 
-    std::shared_ptr<AggregatorTypeImpl> create_aggregator_type(AggrTypeManager &manager, AggregationInfoNode const &infoNode);
+    std::shared_ptr<AggregatorTypeImpl> create_aggregator_type(AggrTypeManager &manager, 
+        std::shared_ptr<AggregationInfoNode>infoNode);
 }
 
 #endif // AGGREGATOR_IMPLEMENTATION

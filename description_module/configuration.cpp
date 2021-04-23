@@ -58,7 +58,8 @@ AggregationCondition::AggregationCondition() :
 }
 
 AggregationCondition::AggregationCondition(AggregationCondition const &other) : 
-    aggrConditonType(other.aggrConditonType), idAggregationNode(other.idAggregationNode)
+    aggrConditonType(other.aggrConditonType), idAggregationNode(other.idAggregationNode),
+    infoNodeMember(other.infoNodeMember)
 {
 
 }
@@ -89,12 +90,6 @@ AggregationInfo::AggregationInfo() :
 {}
 
 AggregationInfo::~AggregationInfo()
-{}
-
-AggregationJsonInfo::AggregationJsonInfo()
-{}
-
-AggregationJsonInfo::~AggregationJsonInfo()
 {}
 
 AggregationInfoNode::AggregationInfoNode()

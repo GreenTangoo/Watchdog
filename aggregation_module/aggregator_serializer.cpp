@@ -147,8 +147,9 @@ void AggregatorJsonSerializer::serialize()
 {
     AggrJsonResultVec copyAggrVec(_aggrsVec.begin(), _aggrsVec.end());
 
-    FileManipulator jsonManip(_resultFilename, FileManipulator::READ_WRITE | FileManipulator::LARGE_FILE);
-    _aggrJson = getJsonData(jsonManip->getStream());
+    FileManipulator jsonManip(_resultFilename, FileManipulator::CREATE | FileManipulator::READ_WRITE);
+    
+    _aggrJson = getJsonData(_resultFilename);
 
     std::sort(copyAggrVec.begin(), copyAggrVec.end(), 
         [](AggregationJsonResult &first, AggregationJsonResult &second) -> bool

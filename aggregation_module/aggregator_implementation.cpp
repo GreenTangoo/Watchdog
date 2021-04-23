@@ -33,7 +33,7 @@ AggregatorImpl::~AggregatorImpl()
 /*-----------------------AGGREGATOR JSON---------------------------*/
 /*-----------------------------------------------------------------*/
 AggregatorJson::AggregatorJson(std::shared_ptr<AggregationInfo const> infoPtr) :
-    _jsonInfoPtr(std::dynamic_pointer_cast<AggregationJsonInfo const>(infoPtr))
+    _jsonInfoPtr(infoPtr)
 {
     
 }
@@ -90,12 +90,17 @@ void AggregatorJson::initializeAggrTypeVec()
     _manager.reset();
     _manager = std::make_shared<AggrTypeManager>(_subAggregatorsResultVec);
 
-    std::vector<AggregationJsonInfoNode> const &aggrJsonNodesCfgs = _jsonInfoPtr->aggregationsInfoCfg;
+    std::vector<std::shared_ptr<AggregationJsonInfoNode>> aggrJsonNodesCfgs;
+    std::transform(_jsonInfoPtr->aggregationsInfoCfg.begin(), _jsonInfoPtr->aggregationsInfoCfg.end(),
+        std::back_inserter(aggrJsonNodesCfgs), [](std::shared_ptr<AggregationInfoNode> cfgInfoNodePtr)
+    {
+        return std::dynamic_pointer_cast<AggregationJsonInfoNode>(cfgInfoNodePtr);
+    });
 
-    for(AggregationJsonInfoNode const &oneCfg : aggrJsonNodesCfgs)
+    for(std::shared_ptr<AggregationJsonInfoNode> oneCfg : aggrJsonNodesCfgs)
     {
         std::shared_ptr<AggregationJsonResult> aggrResPtr = 
-            std::make_shared<AggregationJsonResult>(oneCfg.nodeId, oneCfg.typeNode, oneCfg.parentNodePath);
+            std::make_shared<AggregationJsonResult>(oneCfg->nodeId, oneCfg->typeNode, oneCfg->parentNodePath);
 
         std::shared_ptr<AggregatorTypeImpl> aggregatorTypeObj = create_aggregator_type(*_manager, oneCfg);
 
@@ -186,14 +191,14 @@ AggregatorJson::AggregatorJsonException::~AggregatorJsonException()
 /*--------------------------FREE FUNCTIONS-------------------------*/
 /*-----------------------------------------------------------------*/
 std::shared_ptr<AggregatorTypeImpl> aggregation_space::create_aggregator_type( 
-    AggrTypeManager &manager, AggregationInfoNode const &infoNode)
+    AggrTypeManager &manager, std::shared_ptr<AggregationInfoNode> infoNode)
 {
-    AggregationRegexInfo const &regexInfo = infoNode.regexInfo;
+    AggregationRegexInfo const &regexInfo = infoNode->regexInfo;
 
     std::pair<RegexSiem, int> keyRegex({regexInfo.keyFindRegex, regexInfo.keyRegGroup});
     std::pair<RegexSiem, int> valueRegex({regexInfo.valueFindRegex, regexInfo.valueRegGroup});
     
-    switch(infoNode.grabType)
+    switch(infoNode->grabType)
     {
     case aggrType::FINDER:
     {

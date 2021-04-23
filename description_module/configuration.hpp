@@ -86,17 +86,10 @@ namespace description_space
 		std::string logFilename;
 		std::string resultFilename;
 		behaviourType aggregationBehaviour;
+		std::vector<std::shared_ptr<AggregationInfoNode>> aggregationsInfoCfg;
 		
 		AggregationInfo();
 		virtual ~AggregationInfo();
-	};
-
-	struct AggregationJsonInfo : public AggregationInfo
-	{
-		std::vector<AggregationJsonInfoNode> aggregationsInfoCfg;
-
-		AggregationJsonInfo();
-		virtual ~AggregationJsonInfo();
 	};
 
 	class Configuration

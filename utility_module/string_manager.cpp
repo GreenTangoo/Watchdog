@@ -38,7 +38,25 @@ std::string StringManager::getStrBetweenSymbols(std::string const &sourceStr, ch
 
 std::vector<std::string> StringManager::getVecStrBetweenSymbols(std::string const &sourceStr, char first, char second)
 {
+	std::vector<std::string> res;
 
+	std::string sourceStrCopy = sourceStr;
+	size_t secondSymbolPos = sourceStrCopy.find(second);
+
+	while(secondSymbolPos != std::string::npos)
+	{
+		std::string retStr = StringManager::getStrBetweenSymbols(sourceStrCopy, first, second);
+
+		if(!retStr.length())
+			return res;
+
+		res.push_back(retStr);
+
+		sourceStrCopy = sourceStrCopy.substr(secondSymbolPos + 1, sourceStrCopy.length() - 1);
+		secondSymbolPos = sourceStrCopy.find(second);
+	}
+
+	return res;
 }
 
 std::vector<std::string> StringManager::parseByDelimiter(std::string const &sourceStr, std::string const &delimiter)

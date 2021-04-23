@@ -67,11 +67,11 @@ std::string utility_space::findByRegex(std::string const &line, std::regex const
     std::smatch matchArr;
     std::string matchStr;
 
-    std::regex_match(line, matchArr, reg);
+    std::regex_search(line, matchArr, reg);
 
-    if(static_cast<int>(matchArr.size()) > regGroup)
+    if(static_cast<int>(matchArr.size()) > (regGroup - 1))
     {
-        matchStr = matchArr[regGroup].str();
+        matchStr = matchArr[regGroup - 1].str();
     }
 
     return matchStr;

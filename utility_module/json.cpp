@@ -858,6 +858,19 @@ std::string JSONNodeTypeResolver::getNodeName(const typeNodeJSON &typeNode)
 /*-------------------------------------------------------------------------------*/
 /*---------------------------------PUBLIC FUNCTIONS------------------------------*/
 /*-------------------------------------------------------------------------------*/
+std::shared_ptr<JsonContainer> utility_space::guaranteeGetPtrByName(JsonObject const &obj, std::string nameStr)
+{
+	std::shared_ptr<JsonContainer> foundedPtr = obj.findElementByName(nameStr);
+
+	if(!foundedPtr)
+	{
+		throw JsonException("Node name: " + nameStr + " doesn't exists", 
+			JsonException::BAD_NODE);
+	}
+
+	return foundedPtr;
+}
+
 JsonObject utility_space::getJsonData(std::string jsonFilename)
 {
     std::ifstream fin;
