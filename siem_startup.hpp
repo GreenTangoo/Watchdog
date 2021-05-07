@@ -1,8 +1,9 @@
 #ifndef SIEM_STARTUP_HPP
 #define SIEM_STARTUP_HPP
 
-#include <thread>
 #include <string>
+#include <vector>
+#include <algorithm>
 
 #include "utility_module/json.hpp"
 #include "description_module/configuration.hpp"
@@ -24,18 +25,20 @@ namespace main_siem_space
         ~SettingsSIEM() = default;
         SettingsSIEM const& operator=(SettingsSIEM const &other);
         SettingsSIEM const& operator=(SettingsSIEM &&other);
+        size_t getAmountAggregationThreads() const { return _amountAggrThreads; };
+        size_t getAmountCorrelationThreads() const { return _amountCorrThreads; };
+        std::string getAggregationConfigPath() const { return _aggregationConfigPath; };
+        std::string getCorrelationConfigPath() const { return _correlationConfigPath; }; 
+        std::vector<correlationModule> getCorrelationModuleType() const { return _kindCorrelation; };
     private:
         void tuneFromConfig();
     private:
         Configuration _startupSettings;
         size_t _amountAggrThreads;
         size_t _amountCorrThreads;
-        correlationModule _kindCorrelation;
-    };
-
-    class WorkDemonSIEM
-    {
-
+        std::string _aggregationConfigPath;
+        std::string _correlationConfigPath;
+        std::vector<correlationModule> _kindCorrelation;
     };
 
     correlationModule stringToCorrelationModule(std::string correlationModuleStr);

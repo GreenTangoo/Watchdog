@@ -28,13 +28,13 @@ namespace description_space
 		relationshipCondition condition;
 		std::string keyNode;
 		std::pair<std::string, compareCondition> searchDetail;
-		std::unique_ptr<SearchInfoNode> additionalSearchNode;
+		std::shared_ptr<SearchInfoNode> additionalSearchNode;
 	};
 
 	struct SearchInfo
 	{
 		std::string jsonFilename;
-		std::unique_ptr<SearchInfoNode> rootSearchConfigNode;
+		std::shared_ptr<SearchInfoNode> rootSearchConfigNode;
 	};
 
 	struct AggregationCondition

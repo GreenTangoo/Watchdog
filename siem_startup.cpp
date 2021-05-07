@@ -49,7 +49,7 @@ SettingsSIEM::SettingsSIEM(SettingsSIEM &&other) :
 {
     other._amountAggrThreads = 0;
     other._amountCorrThreads = 0;
-    other._kindCorrelation = correlationModule::NONE_CORRELATION;
+    other._kindCorrelation.clear();
 }
 
 SettingsSIEM const& SettingsSIEM::operator=(SettingsSIEM const &other)
@@ -86,8 +86,15 @@ void SettingsSIEM::tuneFromConfig()
     _amountCorrThreads = static_cast<size_t>(std::atoi(amountCorrThreadsStr.c_str()));
 
     std::shared_ptr<JsonContainer> correlationKindPtr = guaranteeGetPtrByName(configObject, CORRELATION_MODULE);
-    std::string kindCorrelationStr = correlationKindPtr->keyValue.second;
-    _kindCorrelation = main_siem_space::stringToCorrelationModule(kindCorrelationStr);
+
+    std::vector<std::string> correlationModuleStrs = 
+        StringManager::parseByDelimiter(correlationKindPtr->keyValue.second, "|");
+
+    std::transform(correlationModuleStrs.begin(), correlationModuleStrs.end(), std::back_inserter(_kindCorrelation),
+        [](std::string const &correlationType) -> correlationModule
+    {
+        return main_siem_space::stringToCorrelationModule(correlationType);
+    });
 }
 
 /*---------------------------------------------------------------*/

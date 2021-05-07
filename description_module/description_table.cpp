@@ -28,10 +28,10 @@
 
 using namespace description_space;
 
-typedef std::map<symptomCategory, std::unique_ptr<SearchInfo>>::iterator searchIterator;
+typedef std::map<symptomCategory, std::shared_ptr<SearchInfo>>::iterator searchIterator;
 typedef std::map<grabberCategory, std::shared_ptr<AggregationInfo>>::iterator grabIterator;
 
-static void putValueNode(std::unique_ptr<SearchInfoNode> &infoStruct, JsonObject const &configObj);
+static void putValueNode(std::shared_ptr<SearchInfoNode> &infoStruct, JsonObject const &configObj);
 
 /*-----------------------------------------------------------------*/
 /*----------------------IDESCRIPTOR FILLER-------------------------*/
@@ -244,27 +244,6 @@ DescriptionTable& DescriptionTable::getInstance()
 	return descriptionObject;
 }
 
-void DescriptionTable::tuneFromConfig(Configuration const &config, configType typeConfig)
-{
-	JsonObject configObj;
-
-	if(typeConfig == DescriptionTable::CORRELATION_CONFIG)
-	{
-		configObj = config.getConfiguration(SEARCH_CONFIGS);
-		constructSearchInfoStructures(configObj);
-	}
-	else if(typeConfig == DescriptionTable::AGGREGATION_CONFIG)
-	{
-		configObj = config.getConfiguration(AGGR_CONFIGS);
-		constructAggregationInfoStructures(configObj);
-	}
-	else
-	{
-		throw DescriptionException("Invalid config type recieved in tuneFromConfig method",
-			DescriptionException::INVALID_CONFIG_TYPE);
-	}
-}
-
 SearchInfo const& DescriptionTable::getSearchStructure(symptomCategory sympType)
 {
 	searchIterator structureIt = _descriptorSearching.find(sympType);
@@ -292,6 +271,53 @@ std::shared_ptr<AggregationInfo const> DescriptionTable::getAggrStructure(grabbe
 	return structureIt->second;
 }
 
+void DescriptionTable::tuneFromConfig(Configuration const &config, configType typeConfig)
+{
+	JsonObject configObj;
+
+	if(typeConfig == DescriptionTable::CORRELATION_CONFIG)
+	{
+		configObj = config.getConfiguration(SEARCH_CONFIGS);
+		constructSearchInfoStructures(configObj);
+	}
+	else if(typeConfig == DescriptionTable::AGGREGATION_CONFIG)
+	{
+		configObj = config.getConfiguration(AGGR_CONFIGS);
+		constructAggregationInfoStructures(configObj);
+	}
+	else
+	{
+		throw DescriptionException("Invalid config type recieved in tuneFromConfig method",
+			DescriptionException::INVALID_CONFIG_TYPE);
+	}
+}
+
+size_t DescriptionTable::getAmountConfigs(configType configurationType) const
+{
+	switch(configurationType)
+	{
+	case DescriptionTable::AGGREGATION_CONFIG:
+		return _aggregationDescriptors.size();
+		break;
+	case DescriptionTable::CORRELATION_CONFIG:
+		return _descriptorSearching.size();
+		break;
+	default:
+		// THROW
+		break;
+	}
+}
+
+std::map<symptomCategory, std::shared_ptr<SearchInfo>> const DescriptionTable::getAllSearchDescriptors()
+{
+	return _descriptorSearching;
+}
+
+std::map<grabberCategory, std::shared_ptr<AggregationInfo>> const DescriptionTable::getAllAggrDescriptors()
+{
+	return _aggregationDescriptors;
+}
+
 /*-------------------------------------------------------------------*/
 /*-----------------------------PRIVATE-------------------------------*/
 /*-------------------------------------------------------------------*/
@@ -309,7 +335,7 @@ void DescriptionTable::constructSearchInfoStructures(JsonObject const &searchJso
 		try
 		{
 			JsonObject configObj(*searchConfigs[i].get());
-			std::unique_ptr<SearchInfo> oneSearchConfig = std::make_unique<SearchInfo>();
+			std::shared_ptr<SearchInfo> oneSearchConfig = std::make_unique<SearchInfo>();
 
 			std::shared_ptr<JsonContainer> jsonLogFilenamePtr = guaranteeGetPtrByName(configObj, JSON_FILENAME);
 			oneSearchConfig->jsonFilename = jsonLogFilenamePtr->keyValue.second;
@@ -325,7 +351,7 @@ void DescriptionTable::constructSearchInfoStructures(JsonObject const &searchJso
 			std::string symptomCategoryStr = symptomCategoryNodePtr->keyValue.second;
 			symptomCategory sympCategory = SymptomCategoryResolver::stringToSymptomCategory(symptomCategoryStr);
 
-			_descriptorSearching.insert(std::pair<symptomCategory, std::unique_ptr<SearchInfo>>(
+			_descriptorSearching.insert(std::pair<symptomCategory, std::shared_ptr<SearchInfo>>(
 				sympCategory, std::move(oneSearchConfig)));
 		}
 		catch(DescriptionException const &ex)
@@ -375,8 +401,8 @@ void DescriptionTable::constructAggregationInfoStructures(JsonObject const &aggr
 	}
 }
 
-std::unique_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject const &searchConfigObj, 
-	std::unique_ptr<SearchInfoNode> infoStruct)
+std::shared_ptr<SearchInfoNode> DescriptionTable::addSearchingInfo(JsonObject const &searchConfigObj, 
+	std::shared_ptr<SearchInfoNode> infoStruct)
 {
 	try
 	{
@@ -450,7 +476,7 @@ std::shared_ptr<AggregationInfoNode> description_space::create_aggr_info_node(be
 /*--------------------------------------------------------------------------------------*/
 /*---------------------------------STATIC FUNCTIONS-------------------------------------*/
 /*--------------------------------------------------------------------------------------*/
-void putValueNode(std::unique_ptr<SearchInfoNode> &infoStruct, JsonObject const &configObj)
+void putValueNode(std::shared_ptr<SearchInfoNode> &infoStruct, JsonObject const &configObj)
 {
 	std::shared_ptr<JsonContainer> nodePtr = configObj.findNearElementByName(VALUE_NODE);
 

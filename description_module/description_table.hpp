@@ -57,7 +57,7 @@ namespace description_space
 	class DescriptionTable
 	{
 	private:
-		std::map<symptomCategory, std::unique_ptr<SearchInfo>> _descriptorSearching;
+		std::map<symptomCategory, std::shared_ptr<SearchInfo>> _descriptorSearching;
 		std::map<grabberCategory, std::shared_ptr<AggregationInfo>> _aggregationDescriptors;
 	private:
 		DescriptionTable();	
@@ -65,8 +65,8 @@ namespace description_space
 		DescriptionTable(DescriptionTable &&other) = delete;
 		DescriptionTable const& operator=(DescriptionTable const &other) = delete;
 		DescriptionTable const& operator=(DescriptionTable &&other) = delete;
-		std::unique_ptr<SearchInfoNode> addSearchingInfo(JsonObject const &searchConfigObj, 
-			std::unique_ptr<SearchInfoNode> infoStruct);
+		std::shared_ptr<SearchInfoNode> addSearchingInfo(JsonObject const &searchConfigObj, 
+			std::shared_ptr<SearchInfoNode> infoStruct);
 		void constructSearchInfoStructures(JsonObject const &searchJsonObj);
 		void constructAggregationInfoStructures(JsonObject const &aggregationJsonObj);
 	public:
@@ -76,6 +76,9 @@ namespace description_space
 		SearchInfo const& getSearchStructure(symptomCategory sympType);
 		std::shared_ptr<AggregationInfo const> getAggrStructure(grabberCategory grabType);
 		void tuneFromConfig(Configuration const &config, configType typeConfig);
+		size_t getAmountConfigs(configType configurationType) const;
+		std::map<symptomCategory, std::shared_ptr<SearchInfo>> const getAllSearchDescriptors();
+		std::map<grabberCategory, std::shared_ptr<AggregationInfo>> const getAllAggrDescriptors();
 	};
 
 	std::shared_ptr<DescriptorFillerImpl> create_descriptor_filler(behaviourType behaviourAggr);
