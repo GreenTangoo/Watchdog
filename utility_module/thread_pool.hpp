@@ -3,10 +3,17 @@
 
 #include <future>
 #include <list>
+#include <thread>
 #include <mutex>
+#include <atomic>
+#include <memory>
 #include <functional>
+#include <algorithm>
 
 #include "semaphore.hpp"
+#include "../exception_module/exceptions.hpp"
+
+using namespace siem_ex_space;
 
 namespace utility_space
 {
@@ -15,7 +22,6 @@ namespace utility_space
     class ThreadPool
     {
     public:
-        explicit ThreadPool();
         explicit ThreadPool(size_t poolSize);
         ThreadPool(ThreadPool const &other) = delete;
         ThreadPool(ThreadPool &&other) = delete;
@@ -23,18 +29,23 @@ namespace utility_space
         ThreadPool const& operator=(ThreadPool const &other) = delete;
         ThreadPool const& operator=(ThreadPool &&other) = delete;
         void addFunction(std::function<R(Args...)> func);
-        void tryAddFunction(std::function<R(Args...)> func);
-        std::future<R> getAnyCalculatedResult();
-        std::future<R> getFirstTastResult();
-        std::future<R> getLastTaskResult();
+        bool tryAddFunction(std::function<R(Args...)> func);
+        R getAnyCalculatedResult();
+        R getFirstTaskResult();
+        R getLastTaskResult();
         void flushAllCalculated();
         void flushAll();
+    private:
+        void checkTasks();
+        void putFunction(std::function<R(Args...)> func);
     public:
         enum taskStatus { NOT_STARTED = 0, STARTED, FINISHED };
     private:
         typedef std::pair<taskStatus, std::future<R>> Task;
-        size_t _poolSize;
         Semaphore _sem;
+        std::atomic<bool> _isStopCallback;
+        std::shared_ptr<std::thread> _callbackThPtr;
+        std::mutex _callbackMut;
         std::list<Task> _pool;
     };
 

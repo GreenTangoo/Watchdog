@@ -12,22 +12,27 @@ using namespace main_siem_space;
 using namespace description_space;
 using namespace utility_space;
 
-class AggregationInitializer
+namespace aggregation_space
 {
-public:
-    explicit AggregationInitializer(SettingsSIEM const &settings);
-    AggregationInitializer(AggregationInitializer const &other) = delete;
-    AggregationInitializer(AggregationInitializer &&other);
-    ~AggregationInitializer();
-    AggregationInitializer const& operator=(AggregationInitializer const &other) = delete;
-    AggregationInitializer const& operator=(AggregationInitializer &&other);
-    void startCycle();
-private:
-    void initGrabbers();
-private:
-    size_t _amountThreads;
-    std::string _aggrConfigPath;
-    std::vector<SymptomGrabber> _grabbers;
-};
+
+    class AggregationInitializer
+    {
+    public:
+        explicit AggregationInitializer(SettingsSIEM const &settings);
+        AggregationInitializer(AggregationInitializer const &other) = delete;
+        AggregationInitializer(AggregationInitializer &&other);
+        ~AggregationInitializer();
+        AggregationInitializer const& operator=(AggregationInitializer const &other) = delete;
+        AggregationInitializer const& operator=(AggregationInitializer &&other);
+        void startCycle();
+    private:
+        void initGrabbers();
+    private:
+        size_t _amountThreads;
+        std::string _aggrConfigPath;
+        std::vector<SymptomGrabber> _grabbers;
+    };
+
+}
 
 #endif // AGGREGATION_MODULE_INITIALIZER_HPP

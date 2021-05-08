@@ -27,13 +27,13 @@ static std::map<correlationModule, std::string> correlationKindStrMap =
 SettingsSIEM::SettingsSIEM(JsonObject const &configObj) : 
     _startupSettings(configObj)
 {
-
+    tuneFromConfig();
 }
 
 SettingsSIEM::SettingsSIEM(Configuration const &config) :
     _startupSettings(config)
 {
-
+    tuneFromConfig();
 }
 
 SettingsSIEM::SettingsSIEM(SettingsSIEM const &other) : 

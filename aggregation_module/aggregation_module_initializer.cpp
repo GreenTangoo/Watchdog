@@ -1,16 +1,20 @@
 #include "aggregation_module_initializer.hpp"
 
+using namespace aggregation_space;
+
 AggregationInitializer::AggregationInitializer(SettingsSIEM const &settings) :
     _amountThreads(settings.getAmountAggregationThreads()), _aggrConfigPath(settings.getAggregationConfigPath())
 {
-
+    initGrabbers();
 }
 
 
 AggregationInitializer::AggregationInitializer(AggregationInitializer &&other) : 
-    _amountThreads(other._amountThreads), _aggrConfigPath(std::move(other._aggrConfigPath))
+    _amountThreads(other._amountThreads), _aggrConfigPath(std::move(other._aggrConfigPath)),
+    _grabbers()
 {
     other._amountThreads = 0;
+    std::move(other._grabbers.begin(), other._grabbers.end(), std::back_inserter(_grabbers));
 }
 
 AggregationInitializer::~AggregationInitializer()
@@ -25,6 +29,9 @@ AggregationInitializer const& AggregationInitializer::operator=(AggregationIniti
         _amountThreads = other._amountThreads;
         other._amountThreads = 0;
         _aggrConfigPath = std::move(other._aggrConfigPath);
+
+        _grabbers.clear();
+        std::move(other._grabbers.begin(), other._grabbers.end(), std::back_inserter(_grabbers));
     }
 
     return *this;
@@ -39,6 +46,8 @@ void AggregationInitializer::startCycle()
         std::function<void(void)> runAggregationFunc = std::bind(&SymptomGrabber::tryAggregationInfo, &grabber);
         tasks.addFunction(runAggregationFunc);
     }
+
+    tasks.flushAll();
 }
 
 void AggregationInitializer::initGrabbers()

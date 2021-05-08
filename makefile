@@ -18,10 +18,11 @@ AGGREGATION_SOURCE := $(wildcard aggregation_module/*.cpp)
 AGGREGATION_OBJ = $(addprefix $(ODIR)/, $(AGGREGATION_SOURCE:.cpp=.o))
 
 all: creation $(UTILITY_OBJ) $(DESCRIPTION_OBJ) $(CORRELATION_OBJ) $(AGGREGATION_OBJ)
-	$(CC) $(CDFLAGS) main.cpp -o $(ODIR)/main.o
 	$(CC) $(CDFLAGS) siem_startup.cpp -o $(ODIR)/siem_startup.o
+	$(CC) $(CDFLAGS) main.cpp -o $(ODIR)/main.o
 	$(CC) -g $(LIBS) $(UTILITY_OBJ) $(DESCRIPTION_OBJ) \
 		$(CORRELATION_OBJ) $(AGGREGATION_OBJ) \
+		$(ODIR)/siem_startup.o \
 		$(ODIR)/main.o -o $(ODIR)/main
 
 $(ODIR)/%.o: %.cpp
