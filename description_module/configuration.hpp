@@ -21,6 +21,7 @@ namespace description_space
 	enum relationshipCondition { NO_RELATIONSHIP = 0, AND, OR, INNER };
     enum compareCondition { NO_CONDITION = 0, EQ, NE, LT, LE, GT, GE }; 
 	enum aggregationConditionMember {NO_MEMBER = 0, KEY_MEMBER, VALUE_MEMBER };
+	enum aggregationRecordBindType {NO_BIND = 0, SAME_RECORD, GENERAL_RECORD };
 
 
 	struct SearchInfoNode
@@ -42,6 +43,7 @@ namespace description_space
 		relationshipCondition aggrConditonType;
 		int idAggregationNode;
 		aggregationConditionMember infoNodeMember;
+		aggregationRecordBindType recordBind;
 
 		AggregationCondition();
 		AggregationCondition(AggregationCondition const &other);
@@ -124,6 +126,9 @@ namespace description_space
 
 	aggregationConditionMember stringToAggrMember(std::string memberStr);
 	std::string aggrMemberToString(aggregationConditionMember memberCondition);
+
+	aggregationRecordBindType stringToRecordBind(std::string recordBindStr);
+	std::string recordBindToString(aggregationRecordBindType recordBindType);
 }
 
 #endif // CONFIGURATION_HPP

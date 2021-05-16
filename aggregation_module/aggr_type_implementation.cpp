@@ -103,9 +103,9 @@ bool AggregatorTypeImpl::isValidCondition(AggregationCondition const &condition)
 {
     int idNode = condition.idAggregationNode;
 
-    std::pair<std::string, std::string> result = _manager.getResultById(idNode); 
+    std::pair<std::string, std::string> keyValueMembers = _manager.getResultById(idNode); 
 
-    std::string conditionMember = condition.infoNodeMember == KEY_MEMBER ? result.first : result.second;
+    std::string conditionMember = condition.infoNodeMember == KEY_MEMBER ? keyValueMembers.first : keyValueMembers.second;
 
     return static_cast<bool>(conditionMember.size());
 }
@@ -133,7 +133,14 @@ void AggregatorTypeCounter::tryAggregation(std::string const &logStr)
     std::string valueRegResult = findByRegex(logStr, _valueRegexInfo.first, _valueRegexInfo.second);
     if(valueRegResult.length())
     {
-        _grabResult.second++;
+        std::vector<AggregationCondition> const &conditions = _infoNode->additionalConditions;
+
+        bool passResult = this->isPassConditions(conditions);
+
+        if(passResult)
+        {
+            _grabResult.second++;
+        }
     }
 }
 

@@ -182,6 +182,7 @@ AggregationCondition DescriptorFillerImpl::parseConditionStr(std::string const &
 	conditionInfo.aggrConditonType = stringToRelationship(conditionDetails[0]);
 	conditionInfo.idAggregationNode = std::atoi(nodeDetails[0].c_str());
 	conditionInfo.infoNodeMember = stringToAggrMember(nodeDetails[1]);
+	conditionInfo.recordBind = stringToRecordBind(nodeDetails[2]);
 
 	return conditionInfo;
 }

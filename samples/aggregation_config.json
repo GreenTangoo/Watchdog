@@ -22,7 +22,7 @@
                 "value-name":"(Failed)",
                 "value-group":"1",
                 "parent-node":"root/[1]",
-                "condition":"and=[1,key]"
+                "condition":"and=[1,key,same]"
             }
         }
 	}

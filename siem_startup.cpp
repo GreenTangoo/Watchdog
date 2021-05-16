@@ -6,6 +6,8 @@ using namespace main_siem_space;
 #define AMOUNT_AGGR_THREADS "amount_aggr_threads"
 #define AMOUNT_CORR_THREADS "amount_corr_threads"
 #define CORRELATION_MODULE "correlation_module"
+#define AGGREGATION_PATH "aggregation_config"
+#define CORRELATION_PATH "correlation_config"
 
 #define STATISTIC_STR "statistic"
 #define AI_STR "ai"
@@ -84,6 +86,12 @@ void SettingsSIEM::tuneFromConfig()
     std::shared_ptr<JsonContainer> amountCorrThreadsPtr = guaranteeGetPtrByName(configObject, AMOUNT_CORR_THREADS);
     std::string amountCorrThreadsStr = amountCorrThreadsPtr->keyValue.second;
     _amountCorrThreads = static_cast<size_t>(std::atoi(amountCorrThreadsStr.c_str()));
+
+    std::shared_ptr<JsonContainer> aggregationConfigPathPtr = guaranteeGetPtrByName(configObject, AGGREGATION_PATH);
+    _aggregationConfigPath = aggregationConfigPathPtr->keyValue.second;
+
+    std::shared_ptr<JsonContainer> correlationConfigPathPtr = guaranteeGetPtrByName(configObject, CORRELATION_PATH);
+    _correlationConfigPath = correlationConfigPathPtr->keyValue.second;
 
     std::shared_ptr<JsonContainer> correlationKindPtr = guaranteeGetPtrByName(configObject, CORRELATION_MODULE);
 

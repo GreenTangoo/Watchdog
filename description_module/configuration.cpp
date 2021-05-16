@@ -19,6 +19,9 @@ using namespace description_space;
 #define KEY_MEMBER_CONDITION "key"
 #define VALUE_MEMBER_CONDITION "value"
 
+#define SAME_RECORD_BIND "same"
+#define GENERAL_RECORD_BIND "general"
+
 
 static std::map<compareCondition, std::string> const compareStringMap = 
                                                 {
@@ -47,6 +50,12 @@ static std::map<aggregationConditionMember, std::string> const aggrCondMemberStr
                                                 {
                                                     {KEY_MEMBER, KEY_MEMBER_CONDITION},
                                                     {VALUE_MEMBER, VALUE_MEMBER_CONDITION}
+                                                };
+
+static std::map<aggregationRecordBindType, std::string> const aggrRecordBindStringMap = 
+                                                {
+                                                    {SAME_RECORD, SAME_RECORD_BIND},
+                                                    {GENERAL_RECORD, GENERAL_RECORD_BIND}
                                                 };
 
 static bool isRelationShipNode(std::string const &keyStr);
@@ -336,6 +345,34 @@ std::string description_space::aggrMemberToString(aggregationConditionMember mem
 {
     auto it = aggrCondMemberStringMap.find(memberCondition);
     if(it != aggrCondMemberStringMap.end())
+    {
+        return it->second;
+    }
+
+    return std::string("");
+}
+
+aggregationRecordBindType description_space::stringToRecordBind(std::string recordBindStr)
+{
+    aggregationRecordBindType storeAggrMemberCond = NO_BIND;
+    
+    for(std::map<aggregationRecordBindType, std::string>::const_iterator it = aggrRecordBindStringMap.begin();
+        it != aggrRecordBindStringMap.end(); it++)
+    {
+        if(it->second == recordBindStr)
+        {
+            storeAggrMemberCond = it->first;
+            break;
+        }
+    }
+
+    return storeAggrMemberCond;
+}
+
+std::string description_space::recordBindToString(aggregationRecordBindType recordBindType)
+{
+    auto it = aggrRecordBindStringMap.find(recordBindType);
+    if(it != aggrRecordBindStringMap.end())
     {
         return it->second;
     }
