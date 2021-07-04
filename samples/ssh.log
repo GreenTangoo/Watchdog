@@ -1,2 +1,5 @@
 Jun 28 10:25:54 ekv sshd[2348]: Failed password for dworf from 10.0.2.2 port 50817 ssh2
 Jun 28 10:25:58 ekv sshd[2348]: Failed password for dworf from 10.0.2.2 port 50817 ssh2
+Jul 29 10:25:46 ekv sshd[2348]: Failed password for frodo from 10.0.2.1 port 50812 ssh2
+Jul 29 10:22:51 ekv sshd[2348]: Failed password for frodo from 10.0.2.1 port 50812 ssh2
+Jul 29 10:22:56 ekv sshd[2348]: Failed password for frodo from 10.0.2.1 port 50812 ssh2
