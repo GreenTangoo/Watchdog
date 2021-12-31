@@ -229,27 +229,27 @@ bool FileManipulator::isValidFlags(openOption flags)
 /*------------------FILESYSTEM EXCEPTIONS------------------------*/
 /*---------------------------------------------------------------*/
 FileManipulator::FilesystemSiemException::FilesystemSiemException(std::string const &exMsg, int errCode, int errnoCode) :
-	SIEMExecption(exMsg, errCode), _errno(errnoCode)
+    SIEMException(exMsg, errCode), _errno(errnoCode)
 {
 
 }
 
 FileManipulator::FilesystemSiemException::FilesystemSiemException(std::string &&exMsg, int errCode, int errnoCode) :
-	SIEMExecption(std::move(exMsg), errCode), _errno(errnoCode)
+    SIEMException(std::move(exMsg), errCode), _errno(errnoCode)
 {
 
 }
 
 FileManipulator::FilesystemSiemException::FilesystemSiemException(std::string const &exMsg, int errCode, 
 	openOption flags, int errnoCode) : 
-	SIEMExecption(exMsg, errCode), _errno(errnoCode), _flags(flags)
+    SIEMException(exMsg, errCode), _errno(errnoCode), _flags(flags)
 {
 
 }
 
 FileManipulator::FilesystemSiemException::FilesystemSiemException(std::string &&exMsg, int errCode, 
 	openOption flags, int errnoCode) : 
-	SIEMExecption(std::move(exMsg), errCode), _errno(errnoCode), _flags(flags)
+    SIEMException(std::move(exMsg), errCode), _errno(errnoCode), _flags(flags)
 {
 
 }

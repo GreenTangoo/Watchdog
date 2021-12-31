@@ -26,11 +26,11 @@ namespace aggregation_space
         AggregationInitializer const& operator=(AggregationInitializer &&other);
         void startCycle();
     private:
-        void initGrabbers();
+        void initCustomGrabbers(SettingsSIEM const &settings);
+        void initDefaultGrabbers(SettingsSIEM const &settings);
     private:
         size_t _amountThreads;
-        std::string _aggrConfigPath;
-        std::vector<SymptomGrabber> _grabbers;
+        //std::vector<SymptomGrabber> _grabbers;
     };
 
 }

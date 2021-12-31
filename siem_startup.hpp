@@ -25,20 +25,24 @@ namespace main_siem_space
         ~SettingsSIEM() = default;
         SettingsSIEM const& operator=(SettingsSIEM const &other);
         SettingsSIEM const& operator=(SettingsSIEM &&other);
-        size_t getAmountAggregationThreads() const { return _amountAggrThreads; };
-        size_t getAmountCorrelationThreads() const { return _amountCorrThreads; };
-        std::string getAggregationConfigPath() const { return _aggregationConfigPath; };
-        std::string getCorrelationConfigPath() const { return _correlationConfigPath; }; 
-        std::vector<correlationModule> getCorrelationModuleType() const { return _kindCorrelation; };
+        size_t getAmountAggregationThreads() const { return _amountAggrThreads; }
+        size_t getAmountCorrelationThreads() const { return _amountCorrThreads; }
+        std::string getAggregationConfigPath() const { return _aggregationCustomConfigPath; }
+        std::string getCorrelationConfigPath() const { return _correlationCustomConfigPath; }
+        std::vector<correlationModule> getCorrelationModuleType() const { return _kindCorrelation; }
+        bool getIsUseCustomAggr() const { return m_isUseCustomAggregation; }
+        bool getIsUseCustomCorr() const { return m_isUseCustomCorrelation; }
     private:
         void tuneFromConfig();
     private:
         Configuration _startupSettings;
         size_t _amountAggrThreads;
         size_t _amountCorrThreads;
-        std::string _aggregationConfigPath;
-        std::string _correlationConfigPath;
+        std::string _aggregationCustomConfigPath;
+        std::string _correlationCustomConfigPath;
         std::vector<correlationModule> _kindCorrelation;
+        bool m_isUseCustomAggregation;
+        bool m_isUseCustomCorrelation;
     };
 
     correlationModule stringToCorrelationModule(std::string correlationModuleStr);

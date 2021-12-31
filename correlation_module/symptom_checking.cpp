@@ -1,4 +1,4 @@
-#include "symptom_implementation.hpp"
+#include "symptom_checking.hpp"
 
 using namespace correlation_space;
 
@@ -8,32 +8,52 @@ static std::map<symptomCategory, std::string> categoryStringSearchMap =
     };
 
 /*-----------------------------------------------------------------------------*/
-/*-----------------------------SYMPTOM_CHECKER---------------------------------*/
+/*--------------------------SYMPTOM_CHECK_WRAPPER------------------------------*/
 /*-----------------------------------------------------------------------------*/
-SymptomChecker::SymptomChecker(SearchInfo const &infoSearch, symptomCategory sympType) : 
-    info(infoSearch)
+SymptomCheckWrapper::SymptomCheckWrapper() : sympType(SYMPTOM_CATEGORY_NONE)
 {
 
 }
 
-SymptomChecker::SymptomChecker(SymptomChecker const &other) : info(other.info)
+SymptomCheckWrapper::SymptomCheckWrapper(symptomCategory sympType) : sympType(sympType)
 {
 
 }
 
-SymptomChecker::SymptomChecker(SymptomChecker &&other) : info(std::move(other.info))
+SymptomCheckWrapper::SymptomCheckWrapper(SymptomCheckWrapper const &other) :
+    sympType(other.sympType), parser(other.parser)
 {
 
 }
 
-SymptomChecker::~SymptomChecker()
+SymptomCheckWrapper::SymptomCheckWrapper(SymptomCheckWrapper &&other) :
+    sympType(std::move(other.sympType)), parser(std::move(other.parser))
 {
 
 }
 
-bool SymptomChecker::tryFoundSymptom()
+SymptomCheckWrapper const& SymptomCheckWrapper::operator=(SymptomCheckWrapper const &other)
 {
+    if(this != &other)
+    {
+        sympType = other.sympType;
+        parser = other.parser;
+    }
 
+    return *this;
+}
+
+SymptomCheckWrapper const& SymptomCheckWrapper::operator=(SymptomCheckWrapper &&other)
+{
+    if(this != &other)
+    {
+        sympType = other.sympType;
+        other.sympType = SYMPTOM_CATEGORY_NONE;
+
+        parser = std::move(other.parser);
+    }
+
+    return *this;
 }
 
 /*-----------------------------------------------------------------------------*/

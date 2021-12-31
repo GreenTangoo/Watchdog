@@ -3,18 +3,18 @@
 using namespace aggregation_space;
 
 AggregationInitializer::AggregationInitializer(SettingsSIEM const &settings) :
-    _amountThreads(settings.getAmountAggregationThreads()), _aggrConfigPath(settings.getAggregationConfigPath())
+    _amountThreads(settings.getAmountAggregationThreads())
 {
-    initGrabbers();
+    initDefaultGrabbers(settings);
 }
 
 
 AggregationInitializer::AggregationInitializer(AggregationInitializer &&other) : 
-    _amountThreads(other._amountThreads), _aggrConfigPath(std::move(other._aggrConfigPath)),
-    _grabbers()
+    _amountThreads(other._amountThreads)//,
+    //_grabbers()
 {
     other._amountThreads = 0;
-    std::move(other._grabbers.begin(), other._grabbers.end(), std::back_inserter(_grabbers));
+    // std::move(other._grabbers.begin(), other._grabbers.end(), std::back_inserter(_grabbers));
 }
 
 AggregationInitializer::~AggregationInitializer()
@@ -28,10 +28,9 @@ AggregationInitializer const& AggregationInitializer::operator=(AggregationIniti
     {
         _amountThreads = other._amountThreads;
         other._amountThreads = 0;
-        _aggrConfigPath = std::move(other._aggrConfigPath);
 
-        _grabbers.clear();
-        std::move(other._grabbers.begin(), other._grabbers.end(), std::back_inserter(_grabbers));
+        // _grabbers.clear();
+        // std::move(other._grabbers.begin(), other._grabbers.end(), std::back_inserter(_grabbers));
     }
 
     return *this;
@@ -41,24 +40,36 @@ void AggregationInitializer::startCycle()
 {
     ThreadPool<void> tasks(_amountThreads);
 
-    for(SymptomGrabber &grabber : _grabbers)
-    {
-        std::function<void(void)> runAggregationFunc = std::bind(&SymptomGrabber::tryAggregationInfo, &grabber);
-        tasks.addFunction(runAggregationFunc);
-    }
+    // for(SymptomGrabber &grabber : _grabbers)
+    // {
+    //     std::function<void(void)> runAggregationFunc = std::bind(&SymptomGrabber::tryAggregationInfo, &grabber);
+    //     tasks.addFunction(runAggregationFunc);
+    // }
 
     tasks.flushAll();
 }
 
-void AggregationInitializer::initGrabbers()
+void AggregationInitializer::initDefaultGrabbers(SettingsSIEM const &settings)
 {
-	JsonObject aggrConfigJs = getJsonData(_aggrConfigPath);
+    // TODO: Init default grabbers.
+
+    bool isUseCustomAggregation = settings.getIsUseCustomAggr();
+
+    if(isUseCustomAggregation)
+    {
+        initCustomGrabbers(settings);
+    }
+}
+
+void AggregationInitializer::initCustomGrabbers(SettingsSIEM const &settings)
+{
+    JsonObject aggrConfigJs = getJsonData(settings.getAggregationConfigPath());
 	Configuration aggrConfig(aggrConfigJs);
 	DescriptionTable &confTable = DescriptionTable::getInstance();
 
 	confTable.tuneFromConfig(aggrConfig, DescriptionTable::AGGREGATION_CONFIG);
 
-    _grabbers.reserve(confTable.getAmountConfigs(DescriptionTable::AGGREGATION_CONFIG));
+    //_grabbers.reserve(confTable.getAmountConfigs(DescriptionTable::AGGREGATION_CONFIG));
 
     std::map<grabberCategory, std::shared_ptr<AggregationInfo>> const aggregationsMap = 
         confTable.getAllAggrDescriptors();
@@ -66,7 +77,7 @@ void AggregationInitializer::initGrabbers()
     for(std::map<grabberCategory, std::shared_ptr<AggregationInfo>>::const_iterator it = aggregationsMap.begin();
         it != aggregationsMap.end(); it++)
     {
-        SymptomGrabber grabber(it->second, it->first);
-        _grabbers.push_back(grabber);
+        //SymptomGrabber grabber(it->second, it->first);
+        //_grabbers.push_back(grabber);
     }
 }

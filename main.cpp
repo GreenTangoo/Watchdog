@@ -6,6 +6,7 @@
 #include "siem_startup.hpp"
 #include "utility_module/json.hpp"
 #include "aggregation_module/aggregation_module_initializer.hpp"
+#include <Python.h>
 
 using namespace utility_space;
 using namespace main_siem_space;
@@ -13,7 +14,7 @@ using namespace aggregation_space;
 
 #define MAIN_OPTIONS_PATH "configs/options.json"
 
-std::atomic<bool> isStopWork(false);
+static std::atomic<bool> isStopWork(false);
 
 void interrupt_handler(int sig)
 {
@@ -37,19 +38,19 @@ void interrupt_handler(int sig)
 	}
 }
 
-int main()
+int main(int argc, char** argv)
 {
-	signal(SIGINT, interrupt_handler);
+    signal(SIGINT, interrupt_handler);
 
-	JsonObject startupSettingsJson = getJsonData(MAIN_OPTIONS_PATH);
-	SettingsSIEM settings(startupSettingsJson);
+    JsonObject startupSettingsJson = getJsonData(MAIN_OPTIONS_PATH);
+    SettingsSIEM settings(startupSettingsJson);
 
-	AggregationInitializer aggrInit(settings);
+    AggregationInitializer aggrInit(settings);
 
-	while(!isStopWork.load())
-	{
-		aggrInit.startCycle();
-	}
+    while(!isStopWork.load())
+    {
+        aggrInit.startCycle();
+    }
 
 	return 0;
 }

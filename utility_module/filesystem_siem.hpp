@@ -63,7 +63,7 @@ namespace utility_space
 		void closeManipulator();
 		~FileManipulator();
 	public:
-		class FilesystemSiemException : public SIEMExecption
+        class FilesystemSiemException : public SIEMException
 		{
 		private:
 			int _errno;

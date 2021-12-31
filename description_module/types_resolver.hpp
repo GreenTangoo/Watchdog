@@ -28,7 +28,7 @@ namespace description_space
         static std::string grabberCategoryToString(grabberCategory grabCatebory);   
     };
 
-    class TypesException : public SIEMExecption
+    class TypesException : public SIEMException
     {
     private:
         int _typeErrCode;

@@ -299,10 +299,8 @@ size_t DescriptionTable::getAmountConfigs(configType configurationType) const
 	{
 	case DescriptionTable::AGGREGATION_CONFIG:
 		return _aggregationDescriptors.size();
-		break;
 	case DescriptionTable::CORRELATION_CONFIG:
 		return _descriptorSearching.size();
-		break;
 	default:
 		// THROW
 		break;

@@ -49,6 +49,17 @@ DateTime const& DateTime::operator=(DateTime const &other)
 	return *this;
 }
 
+DateTime const& DateTime::operator=(DateTime &&other)
+{
+    if(this != &other)
+    {
+        DateTime::operator=(other); // Copy
+        other.clear();
+    }
+
+    return *this;
+}
+
 bool DateTime::operator==(DateTime const &other)
 {
 	return compare(*this, other) == EQUAL ? true : false;
@@ -260,7 +271,18 @@ void DateTime::sub(DateTime const &other)
 void DateTime::sub(std::string const &timeString, std::string const &formatString)
 {
 	DateTime newDateTime(timeString, formatString);
-	this->sub(newDateTime);
+    this->sub(newDateTime);
+}
+
+void DateTime::clear()
+{
+    this->years = 0;
+    this->months = 0;
+    this->days = 0;
+    this->hours = 0;
+    this->minutes = 0;
+    this->seconds = 0;
+    this->milliseconds = 0;
 }
 
 int DateTime::getYears() const

@@ -19,7 +19,7 @@ using namespace siem_ex_space;
 namespace description_space
 {
 	enum relationshipCondition { NO_RELATIONSHIP = 0, AND, OR, INNER };
-    enum compareCondition { NO_CONDITION = 0, EQ, NE, LT, LE, GT, GE }; 
+        enum compareCondition { NO_CONDITION = 0, EQ, NE, LT, LE, GT, GE };
 	enum aggregationConditionMember {NO_MEMBER = 0, KEY_MEMBER, VALUE_MEMBER };
 	enum aggregationRecordBindType {NO_BIND = 0, SAME_RECORD, GENERAL_RECORD };
 

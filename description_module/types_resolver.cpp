@@ -74,13 +74,13 @@ std::string GrabberCategoryResolver::grabberCategoryToString(grabberCategory gra
 /*----------------------TYPES EXCEPTION----------------------------*/
 /*-----------------------------------------------------------------*/
 TypesException::TypesException(std::string const &exMsg, int errCode) :
-    SIEMExecption(exMsg, errCode)
+    SIEMException(exMsg, errCode)
 {
 
 }
 
 TypesException::TypesException(std::string &&exMsg, int errCode) : 
-    SIEMExecption(std::move(exMsg), errCode)
+    SIEMException(std::move(exMsg), errCode)
 {
 
 }

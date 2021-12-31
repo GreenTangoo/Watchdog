@@ -878,7 +878,7 @@ JsonObject utility_space::getJsonData(std::string jsonFilename)
 
     if(fin.is_open() == false)
     {
-        throw SIEMExecption("Cannot open file: " + jsonFilename, SIEMExecption::BAD_FILE);
+        throw SIEMException("Cannot open file: " + jsonFilename, SIEMException::BAD_FILE);
     }
 
     JsonObject readJsonObj;

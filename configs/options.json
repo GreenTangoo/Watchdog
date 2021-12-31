@@ -2,8 +2,10 @@
     "startup":{
         "amount_aggr_threads" : "4",
         "amount_corr_threads" : "4",
-        "aggregation_config" : "configs/aggregation_config.json",
-        "correlation_config" : "configs/symptoms_config.json",
+        "use_custom_aggregation" : "false",
+        "use_custom_correlation" : "false",
+        "aggregation_custom_config" : "configs/aggregation_config.json",
+        "correlation_custom_config" : "configs/symptoms_config.json",
         "correlation_module" : "statistic"
     }
 }

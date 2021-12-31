@@ -6,20 +6,20 @@
 
 namespace siem_ex_space
 {
-	class SIEMExecption : public std::exception
+    class SIEMException : public std::exception
 	{
 	protected:
 		std::string _msg;
 		int _errorCode;
 	public:
 		enum MainSIEMErrorCode { BAD_FILE = 0 };
-		SIEMExecption(std::string const &exMsg, int errCode) : 
+        SIEMException(std::string const &exMsg, int errCode) :
 			_msg(exMsg), _errorCode(errCode) {}
 
-		SIEMExecption(std::string &&exMsg, int errCode) : 
+        SIEMException(std::string &&exMsg, int errCode) :
 			_msg(std::move(exMsg)), _errorCode(errCode) {}
 
-		~SIEMExecption() {}
+        ~SIEMException() = default;
 		const char *what() const noexcept
 		{
 			return _msg.c_str();
@@ -30,7 +30,7 @@ namespace siem_ex_space
 		}
 	};
 
-	class DateTimeException : public SIEMExecption
+    class DateTimeException : public SIEMException
 	{
 	public:
 		enum DateTimeErrorCode { BAD_MONTH = 1,  BAD_DAY, BAD_HOUR, BAD_MINUTE,
@@ -38,68 +38,80 @@ namespace siem_ex_space
 								 BAD_FORMAT_SYMBOL, BAD_FORMAT_STRING, INCOMPITABLE_STRINGS,
 								 BAD_TIME_STRING, BAD_MATH_OPERATION, BAD_DATETIME_FORMAT };
 		DateTimeException(std::string const &exMsg, int errCode) :
-			SIEMExecption(exMsg, errCode) {}
+            SIEMException(exMsg, errCode) {}
 
 		DateTimeException(std::string &&exMsg, int errCode) : 
-			SIEMExecption(std::move(exMsg), errCode) {}
+            SIEMException(std::move(exMsg), errCode) {}
 
-		~DateTimeException() {}
+        ~DateTimeException() = default;
 	};
 
-	class JsonException : public SIEMExecption
+    class JsonException : public SIEMException
 	{
 	public:
 		enum JsonErrorCode { BAD_PATH = 1, BAD_NAME, BAD_NODE, EMPTY_CONTAINER };
 		JsonException(std::string const &exMsg, int errCode) : 
-			SIEMExecption(exMsg, errCode) {}
+            SIEMException(exMsg, errCode) {}
 
 		JsonException(std::string &&exMsg, int errCode) : 
-			SIEMExecption(std::move(exMsg), errCode) {}
+            SIEMException(std::move(exMsg), errCode) {}
 
-		~JsonException() {}
+        ~JsonException() = default;
 	};
 
-	class ConfigurationException : public SIEMExecption
+    class ConfigurationException : public SIEMException
 	{
 	public:
 		enum ConfigErrorCode { BAD_SEARCH_STRUCTURE = 1, BAD_AGGR_STRUCTURE, 
 							   BAD_SUBNODE_LEVEL };
 		ConfigurationException(std::string const &exMsg, int errCode) :
-			SIEMExecption(exMsg, errCode) {}
+            SIEMException(exMsg, errCode) {}
 
 		ConfigurationException(std::string &&exMsg, int errCode) : 
-			SIEMExecption(std::move(exMsg), errCode) {}
+            SIEMException(std::move(exMsg), errCode) {}
 
-		~ConfigurationException() {}
+        ~ConfigurationException() = default;
 	};
 
-	class DescriptionException : public SIEMExecption
+    class DescriptionException : public SIEMException
 	{
 	public:
 		enum DescriptionErrorCode { INVALID_SEARCH_CONFIG = 1, INVALID_AGGREGATION_CONFIG,
 									INVALID_VALUE_STRING, NOT_FOUND_JSONLOGFILE, 
 									NOT_FOUND_NODE, INVALID_CONFIG_TYPE, INVALID_PARAMETER };
 		DescriptionException(std::string const &exMsg, int errCode) : 
-			SIEMExecption(exMsg, errCode) {}
+            SIEMException(exMsg, errCode) {}
 
 		DescriptionException(std::string &&exMsg, int errCode) : 
-			SIEMExecption(std::move(exMsg), errCode) {}
+            SIEMException(std::move(exMsg), errCode) {}
 
-		~DescriptionException() {}
+        ~DescriptionException() = default;
 	};
 
-	class CorrelationException : public SIEMExecption
+    class CorrelationException : public SIEMException
 	{
 	public:
-		enum CorrelationErrorCode { INCORRECT_SEARCH_CATEGORY = 1, INCORRECT_SEARCH_STRING,
-									 };
+        enum CorrelationErrorCode { INCORRECT_SEARCH_CATEGORY = 1, INCORRECT_SEARCH_STRING };
 		CorrelationException(std::string const &exMsg, int errCode) :
-			SIEMExecption(exMsg, errCode) {}
+            SIEMException(exMsg, errCode) {}
 
 		CorrelationException(std::string &&exMsg, int errCode) :
-			SIEMExecption(std::move(exMsg), errCode) {}
+            SIEMException(std::move(exMsg), errCode) {}
 
-		~CorrelationException() {}
+        ~CorrelationException() = default;
 	};
+
+    class ThreadPoolException : public SIEMException
+    {
+    public:
+        enum ThreadPoolErrorCode { EMPTY_TASK_POOL = 0 };
+        ThreadPoolException(std::string const &exMsg, int errCode) :
+            SIEMException(exMsg, errCode) {}
+
+        ThreadPoolException(std::string &&exMsg, int errCode) :
+            SIEMException(std::move(exMsg), errCode) {}
+
+        ~ThreadPoolException() = default;
+    };
 }
 #endif // EXCEPTIONS_HPP

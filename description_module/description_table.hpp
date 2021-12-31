@@ -3,12 +3,12 @@
 
 #include <map>
 
-#include "../correlation_module/symptom_implementation.hpp"
-#include "../aggregation_module/symptom_grabber.hpp"
+#include "configuration.hpp"
+
+#include "../correlation_module/symptom_checking.hpp"
 #include "../exception_module/exceptions.hpp"
 
 using namespace correlation_space;
-using namespace aggregation_space;
 using namespace siem_ex_space;
 
 namespace description_space

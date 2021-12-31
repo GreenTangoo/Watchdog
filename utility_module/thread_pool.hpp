@@ -18,7 +18,7 @@ using namespace siem_ex_space;
 namespace utility_space
 {
 
-    template <typename R, typename ...Args> 
+    template <typename R>
     class ThreadPool
     {
     public:
@@ -28,8 +28,8 @@ namespace utility_space
         ~ThreadPool();
         ThreadPool const& operator=(ThreadPool const &other) = delete;
         ThreadPool const& operator=(ThreadPool &&other) = delete;
-        void addFunction(std::function<R(Args...)> func);
-        bool tryAddFunction(std::function<R(Args...)> func);
+        void addFunction(std::function<R(void)> func);
+        bool tryAddFunction(std::function<R(void)> func);
         R getAnyCalculatedResult();
         R getFirstTaskResult();
         R getLastTaskResult();
@@ -37,7 +37,7 @@ namespace utility_space
         void flushAll();
     private:
         void checkTasks();
-        void putFunction(std::function<R(Args...)> func);
+        void putFunction(std::function<R(void)> func);
     public:
         enum taskStatus { NOT_STARTED = 0, STARTED, FINISHED };
     private:

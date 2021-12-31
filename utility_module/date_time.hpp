@@ -41,7 +41,7 @@ namespace utility_space
 		DateTime(DateTime &&other) = delete;
 		~DateTime();
 		DateTime const& operator=(DateTime const &other);
-		DateTime const& operator=(DateTime &&other) = delete;
+                DateTime const& operator=(DateTime &&other);
 		bool operator==(DateTime const &other);
 		bool operator<(DateTime const &other);
 		bool operator>(DateTime const &other);
@@ -54,6 +54,7 @@ namespace utility_space
 		void add(std::string const &timeString, std::string const &formatString);
 		void sub(DateTime const &other);
 		void sub(std::string const &timeString, std::string const &formatString);
+                void clear();
 		int getYears() const;
 		int getMonths() const;
 		int getDays() const;
