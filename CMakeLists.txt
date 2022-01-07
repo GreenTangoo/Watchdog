@@ -24,6 +24,8 @@ set(CORRELATION_MODULE
     correlation_module/correlation/correlation.cpp
     correlation_module/correlation/machine_learning/correlation_ml.hpp
     correlation_module/correlation/machine_learning/correlation_ml.cpp
+    correlation_module/correlation/python_invoke.hpp
+    correlation_module/correlation/python_invoke.cpp
 )
 
 set(DESCRIPTION_MODULE

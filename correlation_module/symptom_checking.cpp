@@ -4,13 +4,13 @@ using namespace correlation_space;
 
 static std::map<symptomCategory, std::string> categoryStringSearchMap = 
     {
-        {PORT_SCANNING, "port_scanning"}, {LFI, "lfi"}
+        {scPortScanning, "port_scanning"}, {scLFI, "lfi"}
     };
 
 /*-----------------------------------------------------------------------------*/
 /*--------------------------SYMPTOM_CHECK_WRAPPER------------------------------*/
 /*-----------------------------------------------------------------------------*/
-SymptomCheckWrapper::SymptomCheckWrapper() : sympType(SYMPTOM_CATEGORY_NONE)
+SymptomCheckWrapper::SymptomCheckWrapper() : sympType(scNone)
 {
 
 }
@@ -48,7 +48,7 @@ SymptomCheckWrapper const& SymptomCheckWrapper::operator=(SymptomCheckWrapper &&
     if(this != &other)
     {
         sympType = other.sympType;
-        other.sympType = SYMPTOM_CATEGORY_NONE;
+        other.sympType = scNone;
 
         parser = std::move(other.parser);
     }

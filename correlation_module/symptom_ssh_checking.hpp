@@ -5,22 +5,22 @@
 
 namespace correlation_space
 {
-    class SymptomSshCheck : public SymptomCheckWrapper
+    class SymptomSSHCheck : public SymptomCheckWrapper
     {
     public:
-        SymptomSshCheck();
-        SymptomSshCheck(symptomCategory sympType);
-        SymptomSshCheck(SymptomSshCheck const &other);
-        SymptomSshCheck(SymptomSshCheck &&other);
-        SymptomSshCheck const& operator=(SymptomSshCheck const &other);
-        SymptomSshCheck const& operator=(SymptomSshCheck &&other);
-        ~SymptomSshCheck() override;
-        symptomFoundResult tryFoundSymptom() override;
+        SymptomSSHCheck();
+        SymptomSSHCheck(symptomCategory sympType);
+        SymptomSSHCheck(SymptomSSHCheck const &other);
+        SymptomSSHCheck(SymptomSSHCheck &&other);
+        SymptomSSHCheck const& operator=(SymptomSSHCheck const &other);
+        SymptomSSHCheck const& operator=(SymptomSSHCheck &&other);
+        ~SymptomSSHCheck() override;
+        virtual symptomFoundResult tryFoundSymptom() = 0;
     protected:
-        SymptomInfo sympFoundResult;
+        SymptomInfo m_FoundResult;
     };
 
-    typedef std::shared_ptr<SymptomSshCheck> SymptomSshCheckPtr;
+    typedef std::shared_ptr<SymptomSSHCheck> SymptomSSHCheckPtr;
 }
 
 #endif // SYMPTOM_SSH_CHECKING_HPP

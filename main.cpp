@@ -6,7 +6,6 @@
 #include "siem_startup.hpp"
 #include "utility_module/json.hpp"
 #include "aggregation_module/aggregation_module_initializer.hpp"
-#include <Python.h>
 
 using namespace utility_space;
 using namespace main_siem_space;

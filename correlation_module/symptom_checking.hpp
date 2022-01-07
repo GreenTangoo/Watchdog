@@ -12,9 +12,9 @@ using namespace siem_ex_space;
 
 namespace correlation_space
 {
-    enum symptomCategory { SYMPTOM_CATEGORY_NONE = 0, PORT_SCANNING, LFI };
+    enum symptomCategory { scNone = 0, scPortScanning, scLFI, scBruteSSH, scAuthSSH };
 
-    enum detailCategory { DETAIL_CATEGORY_NONE = 0, IP_ADDR, MAC_ADDR };
+    enum detailCategory { dtNone = 0, dtAddrIP, dtAddrMAC, dtUsername, dtAmountTryes, dtStatus};
 
     struct SymptomInfo
     {

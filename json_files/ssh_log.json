@@ -1,0 +1,21 @@
+{
+    "symptoms" : [
+        {
+          "type" : "brute_ssh",
+          "datetime" : "2021:06:28:10:25:54",
+          "username" : "frodo",
+          "status" : "failed",
+          "amount_tryes" : "10",
+          "addr_ip" : "10.0.2.2",
+          "port" : "50812"
+        },
+        {
+          "type" : "auth_ssh",
+          "datetime" : "2021:06:28:10:29:32",
+          "username" : "frodo",
+          "status" : "accepted",
+          "addr_ip" : "10.0.2.2",
+          "port" : "50812"
+        }
+    ]
+}
