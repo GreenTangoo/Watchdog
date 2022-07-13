@@ -1,12 +1,14 @@
-import numpu as np
-from sklearn import preprocessing
+import numpy as np
 
-class MinMaxNormalize:
-    def __init__(self):
-        pass
+def normalize(matrix):
+    matrix = matrix.astype('float128')
+    transposeMatrix = np.array(matrix).transpose()
 
-    def normalizeVec(self, vec):
-        pass
+    for i in range(0, transposeMatrix.shape[0]):
+        maxElemValue = max(transposeMatrix[i])
 
-    def normalizeMatrix(self, matrix):
-        pass
+        for j in range(0, transposeMatrix.shape[1]):
+            if maxElemValue != 0:
+                transposeMatrix[i][j] = transposeMatrix[i][j] / maxElemValue
+
+    return transposeMatrix.transpose()

@@ -18,82 +18,6 @@ using namespace siem_ex_space;
 
 namespace description_space
 {
-	enum relationshipCondition { NO_RELATIONSHIP = 0, AND, OR, INNER };
-        enum compareCondition { NO_CONDITION = 0, EQ, NE, LT, LE, GT, GE };
-	enum aggregationConditionMember {NO_MEMBER = 0, KEY_MEMBER, VALUE_MEMBER };
-	enum aggregationRecordBindType {NO_BIND = 0, SAME_RECORD, GENERAL_RECORD };
-
-
-	struct SearchInfoNode
-	{
-		relationshipCondition condition;
-		std::string keyNode;
-		std::pair<std::string, compareCondition> searchDetail;
-		std::shared_ptr<SearchInfoNode> additionalSearchNode;
-	};
-
-	struct SearchInfo
-	{
-		std::string jsonFilename;
-		std::shared_ptr<SearchInfoNode> rootSearchConfigNode;
-	};
-
-	struct AggregationCondition
-	{
-		relationshipCondition aggrConditonType;
-		int idAggregationNode;
-		aggregationConditionMember infoNodeMember;
-		aggregationRecordBindType recordBind;
-
-		AggregationCondition();
-		AggregationCondition(AggregationCondition const &other);
-		AggregationCondition const& operator=(AggregationCondition const &other);
-	};
-
-	struct AggregationRegexInfo
-	{
-		int keyRegGroup;
-		int valueRegGroup;
-		RegexSiem keyFindRegex;
-		RegexSiem valueFindRegex;
-
-		AggregationRegexInfo();
-		AggregationRegexInfo(AggregationRegexInfo const &other);
-	};
-
-	struct AggregationInfoNode
-	{
-		int nodeId;
-		aggrType grabType;
-		AggregationRegexInfo regexInfo;
-		std::vector<AggregationCondition> additionalConditions;
-
-		AggregationInfoNode();
-		AggregationInfoNode(AggregationInfoNode const &other);
-		virtual ~AggregationInfoNode();
-	};
-
-	struct AggregationJsonInfoNode : public AggregationInfoNode
-	{
-		typeNodeJSON typeNode;
-		std::string parentNodePath;
-
-		AggregationJsonInfoNode();
-		AggregationJsonInfoNode(AggregationJsonInfoNode const &other);
-		virtual ~AggregationJsonInfoNode();
-	};
-
-	struct AggregationInfo
-	{
-		std::string logFilename;
-		std::string resultFilename;
-		behaviourType aggregationBehaviour;
-		std::vector<std::shared_ptr<AggregationInfoNode>> aggregationsInfoCfg;
-		
-		AggregationInfo();
-		virtual ~AggregationInfo();
-	};
-
 	class Configuration
 	{
 	private:
@@ -106,29 +30,6 @@ namespace description_space
 		Configuration const& operator=(Configuration &&other);
 		JsonObject getConfiguration(std::string const &nameNode) const;
 	};
-
-	compareCondition tryFoundCompareCondition(std::string const &valueStr);
-
-	std::shared_ptr<JsonContainer> tryFoundNextRelationship(std::shared_ptr<JsonContainer> const ptr, 
-		int subNodeLevel);
-
-	std::shared_ptr<JsonContainer> tryFoundNextRelationship(JsonObject const &obj,
-		int subNodeLevel);
-
-	relationshipCondition stringToRelationship(std::string relationshipStr);
-	std::string relationshipToString(relationshipCondition relationship);
-
-	compareCondition stringToCompareCondition(std::string conditionStr);
-	std::string compareConditionToString(compareCondition condition);
-
-	aggrType stringToAggregationType(std::string aggrTypeStr);
-	std::string aggregationTypeToString(aggrType grabType);
-
-	aggregationConditionMember stringToAggrMember(std::string memberStr);
-	std::string aggrMemberToString(aggregationConditionMember memberCondition);
-
-	aggregationRecordBindType stringToRecordBind(std::string recordBindStr);
-	std::string recordBindToString(aggregationRecordBindType recordBindType);
 }
 
 #endif // CONFIGURATION_HPP

@@ -4,9 +4,9 @@
 
 У каждого симптома есть обязательные для корреляции параметры:
 1) Время
-2) Тип симптома
-3) ip-адрес
-4) mac-адрес
+2) Подтип симптома согласно классификации ATT&CK
+3) Тип симптома
+4) ip-адрес
 5) порт
 6) имя пользователя
 7) действие в системе(команда)
@@ -18,7 +18,7 @@
 import json
 import hashlib
 
-from defines import SymptomTypeMap, CommandTypeMap
+from defines import SymptomTypeMap, MitreSubtypeMap, CommandTypeMap
 
 class WeightsCreator:
     def __init__(self, filesPath=None):
@@ -27,6 +27,9 @@ class WeightsCreator:
 
     def setFilesPath(self, filesPath):
         self.filesPath = filesPath
+
+    def getWeightsFromContainer(self, jsonContainer):
+        return self.__generateWeights(jsonContainer)
 
     def getWeights(self):
         symptomWeightsLst = []
@@ -49,23 +52,27 @@ class WeightsCreator:
             return self.__generateWeights(jsonDescriptor)
 
     def __generateWeights(self, jsonDescriptor):
+        weightsLst = []
         for oneSymptomInfo in jsonDescriptor['symptoms']:
-            return self.__generateWeightsFromSymptomInfo(oneSymptomInfo)
+            weights = self.__generateWeightsFromSymptomInfo(oneSymptomInfo)
+            weightsLst.append(weights)
 
-    def __generateWeightsFromSymptomInfo(symptomInfo):
+        return weightsLst
+
+    def __generateWeightsFromSymptomInfo(self, symptomInfo):
         weights = []
 
-        weights.append(self.__generateWeightFromTime(symptomInfo))
+        #weights.append(self.__generateWeightFromTime(symptomInfo))
+        weights.append(self.__generateWeightFromATTCKmatrixSubtype(symptomInfo))
         weights.append(self.__generateWeightFromType(symptomInfo))
         weights.append(self.__generateWeightFromIP(symptomInfo))
-        weights.append(self.__generateWeightFromMAC(symptomInfo))
         weights.append(self.__generateWeightFromPort(symptomInfo))
         weights.append(self.__generateWeightFromUsername(symptomInfo))
         weights.append(self.__generateWeightFromAction(symptomInfo))
 
         return weights
 
-    def __generateWeightFromTime(symptomInfo):
+    def __generateWeightFromTime(self, symptomInfo):
         weight = 0
 
         if 'datetime' in symptomInfo:
@@ -74,7 +81,15 @@ class WeightsCreator:
 
         return weight
 
-    def __generateWeightFromType(symptomInfo):
+    def __generateWeightFromATTCKmatrixSubtype(self, symptomInfo):
+        weight = 0
+
+        if 'mitre_subtype' in symptomInfo:
+            weight = MitreSubtypeMap[symptomInfo['mitre_subtype']]
+
+        return weight
+
+    def __generateWeightFromType(self, symptomInfo):
         weight = 0
 
         if 'type' in symptomInfo:
@@ -82,7 +97,7 @@ class WeightsCreator:
 
         return weight
 
-    def __generateWeightFromIP(symptomInfo):
+    def __generateWeightFromIP(self, symptomInfo):
         weight = 0
 
         if 'addr_ip' in symptomInfo:
@@ -92,17 +107,7 @@ class WeightsCreator:
 
         return weight
 
-    def __generateWeightFromMAC(symptomInfo):
-        weight = 0
-
-        if 'addr_mac' in symptomInfo:
-            hexDigits = symptomInfo['addr_mac'].split(':')
-            hexStr = ''.join(hexDigits)
-            weight = int(hexStr, 16)
-
-        return weight
-
-    def __generateWeightFromPort(symptomInfo):
+    def __generateWeightFromPort(self, symptomInfo):
         weight = 0
 
         if 'port' in symptomInfo:
@@ -110,7 +115,7 @@ class WeightsCreator:
 
         return weight
 
-    def __generateWeightFromUsername(symptomInfo):
+    def __generateWeightFromUsername(self, symptomInfo):
         weight = 0
 
         if 'username' in symptomInfo:
@@ -120,7 +125,7 @@ class WeightsCreator:
 
         return weight
 
-    def __generateWeightFromAction(symptomInfo):
+    def __generateWeightFromAction(self, symptomInfo):
         weight = 0
 
         if 'command' in symptomInfo:

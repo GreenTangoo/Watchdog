@@ -1,6 +1,8 @@
 {
     "symptoms" : [
         {
+          "mitre_type" : "credential_access",
+          "mitre_subtype" : "brute_force",
           "type" : "brute_ssh",
           "datetime" : "2021:06:28:10:25:54",
           "username" : "frodo",
@@ -10,6 +12,8 @@
           "port" : "50812"
         },
         {
+          "mitre_type" : "initial_access",
+          "mitre_subtype" : "valid_accounts",
           "type" : "auth_ssh",
           "datetime" : "2021:06:28:10:29:32",
           "username" : "frodo",

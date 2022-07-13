@@ -14,7 +14,7 @@ namespace correlation_space
     class CorrelationMachineLearning : public ICorrelation
     {
     public:
-        enum MachineLearningType {noneMl = 0, kNeighboorMl, logisticRegressionMl, decisionTreeMl, randomForestMl};
+        enum MachineLearningType {noneMl = 0, kNeighboorMl, logisticRegressionMl, decisionTreeMl, randomForestMl, neuralNetMl};
 
         CorrelationMachineLearning() = default;
         CorrelationMachineLearning(size_t amountArgs, std::wstring scriptName);
@@ -34,8 +34,9 @@ namespace correlation_space
         size_t GetAmountArgs() const;
         void SetAmountArgs(size_t amountArgs);
     protected:
-        virtual std::vector<std::wstring> GetScriptParams() = 0;
+        virtual std::vector<std::wstring> PrepareScriptParams() = 0;
         void SetInvokerParameters(std::vector<std::wstring> params);
+        std::wstring MlType2Wstring(MachineLearningType mlType);
     private:
         size_t m_AmountArgs = 0;
         std::wstring m_ScriptName = L"";
@@ -54,12 +55,9 @@ namespace correlation_space
         CorrelationKNeighboor const& operator=(CorrelationKNeighboor const &other);
         CorrelationKNeighboor const& operator=(CorrelationKNeighboor &&other) = delete;
 
-        void SetAmountNeighboors(size_t amountNeighboors);
         virtual void startCorrelation() override;
     protected:
-        virtual std::vector<std::wstring> GetScriptParams() override;
-    private:
-        size_t m_AmountNeighboors = 3;
+        virtual std::vector<std::wstring> PrepareScriptParams() override;
     };
 }
 

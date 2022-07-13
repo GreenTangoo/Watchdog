@@ -1,6 +1,13 @@
 {
-    "192.168.1.1":{
-        "amount_requests":"1337",
-        "protocol":"tcp"
-    }
+    "symptoms" : [
+      {
+        "mitre_type" : "reconnaissance",
+        "mitre_subtype" : "active_scanning",
+        "type" : "port_scanning_iptables",
+        "datetime" : "2021:06:28:10:22:31",
+        "addr_ip" : "10.0.2.2",
+        "protocol" : "tcp",
+        "amount_requests" : "1337"
+      }
+    ]
 }

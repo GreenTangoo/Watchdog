@@ -4,16 +4,38 @@
 #include <map>
 #include <vector>
 
+#include "grabbers.hpp"
+
 #include "../siem_startup.hpp"
 #include "../utility_module/thread_pool.hpp"
-#include "../description_module/description_table.hpp"
 
 using namespace main_siem_space;
-using namespace description_space;
 using namespace utility_space;
 
 namespace aggregation_space
 {
+
+    class GrabbersListCreator
+    {
+    public:
+        GrabbersListCreator() = default;
+        GrabbersListCreator(GrabbersListCreator const &other);
+        GrabbersListCreator(GrabbersListCreator &&other);
+        ~GrabbersListCreator();
+        std::vector<AggrGrabber> GetAggrsArr();
+    };
+
+    class GrabberFactory
+    {
+    public:
+        GrabberFactory(GrabberFactory const &other) = delete;
+        GrabberFactory(GrabberFactory &&other) = delete;
+        GrabberFactory const& operator=(GrabberFactory const &other) = delete;
+        GrabberFactory const& operator=(GrabberFactory &&other) = delete;
+        static GrabberFactory& GetInstance();
+    private:
+        GrabberFactory();
+    };
 
     class AggregationInitializer
     {
@@ -26,11 +48,10 @@ namespace aggregation_space
         AggregationInitializer const& operator=(AggregationInitializer &&other);
         void startCycle();
     private:
-        void initCustomGrabbers(SettingsSIEM const &settings);
         void initDefaultGrabbers(SettingsSIEM const &settings);
     private:
         size_t _amountThreads;
-        //std::vector<SymptomGrabber> _grabbers;
+        std::vector<IGrabberPtr> _grabbers;
     };
 
 }

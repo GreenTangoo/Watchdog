@@ -9,6 +9,10 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(AGGREGATION_MODULE
     aggregation_module/aggregation_module_initializer.hpp
     aggregation_module/aggregation_module_initializer.cpp
+    aggregation_module/grabber_base.hpp
+    aggregation_module/grabber_base.cpp
+    aggregation_module/grabbers.hpp
+    aggregation_module/grabbers.cpp
 )
 
 set(CORRELATION_MODULE
@@ -31,8 +35,6 @@ set(CORRELATION_MODULE
 set(DESCRIPTION_MODULE
     description_module/configuration.hpp
     description_module/configuration.cpp
-    description_module/description_table.hpp
-    description_module/description_table.cpp
     description_module/types_resolver.hpp
     description_module/types_resolver.cpp
 )

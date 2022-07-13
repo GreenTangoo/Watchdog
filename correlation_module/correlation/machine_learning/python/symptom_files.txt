@@ -1,1 +1,2 @@
-../../../json_files/ssh_log.json
+../../../../json_files/ssh_log.json
+../../../../json_files/iptables_log.json

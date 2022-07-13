@@ -1,6 +1,17 @@
 #include "correlation_ml.hpp"
 
+#include <map>
+
 using namespace correlation_space;
+
+static std::map<CorrelationMachineLearning::MachineLearningType, std::wstring> mlTypeStringMap = {
+    {CorrelationMachineLearning::noneMl, L""},
+    {CorrelationMachineLearning::kNeighboorMl, L"kNeighbors"},
+    {CorrelationMachineLearning::logisticRegressionMl, L"LogisticRegression"},
+    {CorrelationMachineLearning::decisionTreeMl, L"DecisionTree"},
+    {CorrelationMachineLearning::randomForestMl, L"RandomForest"},
+    {CorrelationMachineLearning::neuralNetMl, L"NeuralNet"}
+};
 
 /*---------------------------------------------------------------*/
 /*---------------CORRELATION_MACHINE_LEARNING--------------------*/
@@ -62,6 +73,11 @@ void CorrelationMachineLearning::SetInvokerParameters(std::vector<std::wstring> 
     m_Invoker.SetArgs(params);
 }
 
+std::wstring CorrelationMachineLearning::MlType2Wstring(MachineLearningType mlType)
+{
+    return mlTypeStringMap[mlType];
+}
+
 /*---------------------------------------------------------------*/
 /*---------------CORRELATION_K_NEIGHBOORS------------------------*/
 /*---------------------------------------------------------------*/
@@ -72,7 +88,7 @@ CorrelationKNeighboor::CorrelationKNeighboor(size_t amountArgs, std::wstring scr
 }
 
 CorrelationKNeighboor::CorrelationKNeighboor(CorrelationKNeighboor const &other) :
-    CorrelationMachineLearning(other), m_AmountNeighboors(other.m_AmountNeighboors)
+    CorrelationMachineLearning(other)
 {
 
 }
@@ -82,30 +98,25 @@ CorrelationKNeighboor const& CorrelationKNeighboor::operator=(CorrelationKNeighb
     if(this != &other)
     {
         CorrelationMachineLearning::operator=(other);
-        m_AmountNeighboors = other.m_AmountNeighboors;
     }
 
     return *this;
-}
-
-void CorrelationKNeighboor::SetAmountNeighboors(size_t amountNeighboors)
-{
-    m_AmountNeighboors = amountNeighboors;
 }
 
 void CorrelationKNeighboor::startCorrelation()
 {
     auto &invoker = GetInvoker();
 
-    std::vector<std::wstring> paramsVec = GetScriptParams();
+    std::vector<std::wstring> paramsVec = PrepareScriptParams();
     SetInvokerParameters(paramsVec);
 
     invoker.RunScript();
 }
-std::vector<std::wstring> CorrelationKNeighboor::GetScriptParams()
+std::vector<std::wstring> CorrelationKNeighboor::PrepareScriptParams()
 {
     std::vector<std::wstring> args;
     args.push_back(GetScriptName());
+    args.push_back(MlType2Wstring(kNeighboorMl));
 
     return args;
 }
