@@ -6,7 +6,7 @@
 
 #include "../correlation.hpp"
 #include "../python_invoke.hpp"
-#include "../utility_module/json.hpp"
+#include "../utility_module/json_proc.hpp"
 
 
 namespace correlation_space

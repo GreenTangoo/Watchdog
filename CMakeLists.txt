@@ -20,8 +20,6 @@ set(CORRELATION_MODULE
     correlation_module/correlation_module_initializer.cpp
     correlation_module/symptom_checking.hpp
     correlation_module/symptom_checking.cpp
-    correlation_module/symptom_custom_checking.hpp
-    correlation_module/symptom_custom_checking.cpp
     correlation_module/symptom_ssh_checking.hpp
     correlation_module/symptom_ssh_checking.cpp
     correlation_module/correlation/correlation.hpp
@@ -58,14 +56,14 @@ set(UTILITY_MODULE
     utility_module/encryption.cpp
     utility_module/filesystem_siem.hpp
     utility_module/filesystem_siem.cpp
-    utility_module/json.hpp
-    utility_module/json.cpp
     utility_module/regex_siem.hpp
     utility_module/regex_siem.cpp
     utility_module/semaphore.hpp
     utility_module/semaphore.cpp
     utility_module/string_manager.hpp
     utility_module/string_manager.cpp
+    utility_module/json_proc.hpp
+    utility_module/json_proc.cpp
 )
 
 set(UTILITY_MODULE_HEADERS

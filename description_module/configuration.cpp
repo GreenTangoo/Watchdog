@@ -2,7 +2,7 @@
 
 using namespace description_space;
 
-Configuration::Configuration(JsonObject configJson) : 
+Configuration::Configuration(IJsonContainerPtr configJson) :
 	_configurationFileParser(configJson)
 {
 
@@ -38,20 +38,20 @@ Configuration const& Configuration::operator=(Configuration &&other)
 	return *this;
 }
 
-JsonObject Configuration::getConfiguration(std::string const &nameNode) const 
+IJsonContainerPtr Configuration::getConfiguration(std::string const &nameNode) const
 {
-	JsonObject configNodeObj;
-	std::shared_ptr<JsonContainer> foundedContainer = _configurationFileParser.findElementByName(nameNode);
+    IJsonContainerPtr configNodeObj;
+//	std::shared_ptr<JsonContainer> foundedContainer = _configurationFileParser.findElementByName(nameNode);
 	
-	if(foundedContainer == nullptr)
-	{
-		throw JsonException("Cannot find configuration node by name: " + nameNode, 
-			JsonException::BAD_NAME);
-	}
-	else
-	{
-		configNodeObj.setContainer(*foundedContainer.get());
-	}
+//	if(foundedContainer == nullptr)
+//	{
+//		throw JsonException("Cannot find configuration node by name: " + nameNode,
+//			JsonException::BAD_NAME);
+//	}
+//	else
+//	{
+//		configNodeObj.setContainer(*foundedContainer.get());
+//	}
 
 	return configNodeObj;
 }

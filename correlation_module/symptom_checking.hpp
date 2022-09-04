@@ -3,8 +3,8 @@
 
 #include <map>
 
-#include "../utility_module/json.hpp"
 #include "../utility_module/date_time.hpp"
+#include "../utility_module/json_proc.hpp"
 #include "../exception_module/exceptions.hpp"
 
 using namespace utility_space;
@@ -52,7 +52,7 @@ namespace correlation_space
         virtual symptomFoundResult tryFoundSymptom() = 0;
     protected:
         symptomCategory sympType;
-        JsonObject parser;
+        IJsonContainerPtr parser;
     };
 
     typedef std::shared_ptr<SymptomCheckWrapper> SymptomCheckWrapperPtr;

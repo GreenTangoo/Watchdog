@@ -42,10 +42,10 @@ namespace aggregation_space
     public:
         explicit AggregationInitializer(SettingsSIEM const &settings);
         AggregationInitializer(AggregationInitializer const &other) = delete;
-        AggregationInitializer(AggregationInitializer &&other);
+        AggregationInitializer(AggregationInitializer &&other) = delete;
         ~AggregationInitializer();
         AggregationInitializer const& operator=(AggregationInitializer const &other) = delete;
-        AggregationInitializer const& operator=(AggregationInitializer &&other);
+        AggregationInitializer const& operator=(AggregationInitializer &&other) = delete;
         void startCycle();
     private:
         void initDefaultGrabbers(SettingsSIEM const &settings);

@@ -5,7 +5,7 @@ using namespace siem_ex_space;
 
 #define AMOUNT_TO_DELETE 2
 
-static std::map<ino_t, std::shared_ptr<FileObject>> fileObjectsMap;
+static std::map<ino_t, std::shared_ptr<FileManipulator::FileObjectDescriptor>> fileObjectsMap;
 static std::mutex mapFileObjectsMut;
 
 /*---------------------------------------------------------------*/
@@ -13,101 +13,121 @@ static std::mutex mapFileObjectsMut;
 /*---------------------------------------------------------------*/
 FileObject::FileObject(std::string const &filePath, std::ios_base::openmode mode)
 {
-	_fileStream.open(filePath, mode);
+    m_FileStream.open(filePath, mode);
 }
 
 FileObject::~FileObject()
 {
-	_fileStream.close();
+    m_FileStream.close();
 }
 
-operationState FileObject::write(char const *buf, size_t amountBytes)
+operationState FileObject::Write(char const *buf, size_t amountBytes)
 {
-	std::lock_guard<std::mutex> streamOperationGuard(_fileStreamMut);
-	_fileStream.write(buf, amountBytes);
+    m_FileStream.write(buf, amountBytes);
 	
-	return _fileStream.rdstate();
+    return m_FileStream.rdstate();
 }
 
-operationState FileObject::writeLine(std::string const &line)
+operationState FileObject::WriteSymbol(char const ch)
 {
-	std::lock_guard<std::mutex> streamOperationGuard(_fileStreamMut);
-	_fileStream.write(line.c_str(), line.size());
+    m_FileStream.put(ch);
 
-	return _fileStream.rdstate();
+    return m_FileStream.rdstate();
 }
 
-operationState FileObject::read(char *buf, size_t amountBytes)
+operationState FileObject::WriteLine(std::string const &line)
 {
-	std::lock_guard<std::mutex> streamOperationGuard(_fileStreamMut);
-	_fileStream.readsome(buf, amountBytes);
+    m_FileStream.write(line.c_str(), line.size());
 
-	return _fileStream.rdstate();
+    return m_FileStream.rdstate();
 }
 
-operationState FileObject::readLine(std::string &line)
+operationState FileObject::PutbackSymbol(char const ch)
 {
-	std::lock_guard<std::mutex> streamOperationGuard(_fileStreamMut);
-	std::getline(_fileStream, line);
+    m_FileStream.putback(ch);
 
-	std::ios_base::iostate state = _fileStream.rdstate();
-	return state;
+    return m_FileStream.rdstate();
 }
 
-void FileObject::synchronizationStream()
+operationState FileObject::Read(char *buf, size_t amountBytes, size_t &readedBytes)
 {
-	std::lock_guard<std::mutex> streamOperationGuard(_fileStreamMut);
-	_fileStream.sync();
+    readedBytes = m_FileStream.readsome(buf, amountBytes);
+
+    return m_FileStream.rdstate();
 }
 
-std::fstream& FileObject::getStream()
+operationState FileObject::ReadSymbol(char &ch)
 {
-	return _fileStream;
+    ch = static_cast<int>(m_FileStream.get());
+
+    return m_FileStream.rdstate();
+}
+
+operationState FileObject::ReadLine(std::string &line)
+{
+    std::getline(m_FileStream, line);
+
+    return m_FileStream.rdstate();
+}
+
+void FileObject::SynchronizationStream()
+{
+    m_FileStream.sync();
+}
+
+std::fstream& FileObject::GetStream()
+{
+    return m_FileStream;
 }
 
 /*---------------------------------------------------------------*/
 /*----------------------FILE MANIPULATOR-------------------------*/
 /*---------------------------------------------------------------*/
-FileManipulator::FileManipulator() : _isClosed(true)
+FileManipulator::FileManipulator() : m_IsClosed(true)
 {
 
 }
 
 FileManipulator::FileManipulator(std::string const &filePath, openOption flags) :
-	_isClosed(true)
+    m_IsClosed(true)
 {
-	if(!(this->isValidFlags(flags)))
+    if(!(IsValidFlags(flags)))
 	{
 		throw FilesystemSiemException("Incorrect flags.", 
 			FilesystemSiemException::BAD_FLAGS,
 			flags);
 	}
 
-	this->openManipulator(filePath, flags);
+    OpenManipulatorInner(filePath, flags);
 }
 
 FileManipulator::FileManipulator(FileManipulator const &other)
 {
 	std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
-	_fileSignature = other._fileSignature;
-	_filePtr = other._filePtr;
-	_isClosed = other._isClosed;
+    m_FileSignature = other.m_FileSignature;
+    m_pFileDescriptor = other.m_pFileDescriptor;
+    m_IsClosed = other.m_IsClosed;
 }
 
 FileManipulator::FileManipulator(FileManipulator &&other)
 {
 	std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
-	_fileSignature = other._fileSignature;
-	_filePtr = other._filePtr;
-	other._filePtr.reset();
-	_isClosed = other._isClosed;
+    m_FileSignature = other.m_FileSignature;
+    m_pFileDescriptor = other.m_pFileDescriptor;
+    other.m_pFileDescriptor.reset();
+    m_IsClosed = other.m_IsClosed;
+}
+
+FileManipulator::~FileManipulator()
+{
+    CloseManipulator();
 }
 
 FileManipulator const& FileManipulator::operator=(FileManipulator const &other)
 {
 	std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
-	_fileSignature = other._fileSignature;
-	_filePtr = other._filePtr;
+    m_FileSignature = other.m_FileSignature;
+    m_pFileDescriptor = other.m_pFileDescriptor;
 
 	return *this;
 }
@@ -115,98 +135,65 @@ FileManipulator const& FileManipulator::operator=(FileManipulator const &other)
 FileManipulator const& FileManipulator::operator=(FileManipulator &&other)
 {
 	std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
-	_fileSignature = other._fileSignature;
-	_filePtr = other._filePtr;
-	other._filePtr.reset();
+    m_FileSignature = other.m_FileSignature;
+    m_pFileDescriptor = other.m_pFileDescriptor;
+    other.m_pFileDescriptor.reset();
 
 	return *this;
 }
 
 std::shared_ptr<FileObject> FileManipulator::operator->()
 {
-	return _filePtr;
+    return m_pFileDescriptor->m_pFileObject;
 }
 
-void FileManipulator::openManipulator(std::string const &filePath, openOption flags)
+void FileManipulator::OpenManipulator(std::string const &filePath, openOption flags)
 {
-	if(!_isClosed)
+    if(!m_IsClosed)
 	{
 		return;
 	}
 
-	int fileDescriptor = 0;
+    if(!(IsValidFlags(flags)))
+    {
+        throw FilesystemSiemException("Incorrect flags.",
+            FilesystemSiemException::BAD_FLAGS,
+            flags);
+    }
 
-	if(flags & CREATE)
-		fileDescriptor = open(filePath.c_str(), flags, S_IWUSR | S_IRUSR);
-	else
-		fileDescriptor = open(filePath.c_str(), flags);
-
-	if(fileDescriptor == -1)
-	{
-		throw FilesystemSiemException("Bad descriptor of file.", 
-			FilesystemSiemException::INVALID_PATH, errno);
-	}
-
-	struct stat fileStat = { 0 };
-	if(fstat(fileDescriptor, &fileStat) == -1)
-	{
-		close(fileDescriptor);
-		throw FilesystemSiemException("Cannot get stat information.",
-			FilesystemSiemException::BAD_SIGNATURE, errno);
-	}
-
-	_fileSignature = fileStat.st_ino;
-	close(fileDescriptor);
-
-	std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
-
-	std::map<ino_t, std::shared_ptr<FileObject>>::iterator it = 
-		fileObjectsMap.find(_fileSignature);
-
-	if(it != fileObjectsMap.end())
-	{
-		_filePtr = it->second;
-	}
-	else
-	{
-		fileObjectsMap.insert(std::pair<ino_t, std::shared_ptr<FileObject>>(
-			_fileSignature, std::make_shared<FileObject>(filePath)));
-		
-		_filePtr = fileObjectsMap[_fileSignature];
-	}
-
-	_isClosed = false;
+    OpenManipulatorInner(filePath, flags);
 }
 
-void FileManipulator::closeManipulator()
+void FileManipulator::CloseManipulator()
 {
-	if(_isClosed)
+    if(m_IsClosed)
 	{
 		return;
 	}
 
 	std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
 
-	long amountRefs = _filePtr.use_count();
-	_filePtr.reset();
+    if(m_pFileDescriptor->m_IsOpenForRead)
+    {
+        m_pFileDescriptor->m_DescriptorLock.unlock_shared();
+    }
+    else
+    {
+        m_pFileDescriptor->m_DescriptorLock.unlock();
+    }
 
-	if(amountRefs == AMOUNT_TO_DELETE)
-	{
-		fileObjectsMap.erase(_fileSignature);
-	}
-
-	_isClosed = true;
+    m_IsClosed = true;
 }
 
-FileManipulator::~FileManipulator()
+bool FileManipulator::IsExistsFile(std::string const &filename) const
 {
-	this->closeManipulator();
+    return std::filesystem::exists(filename);
 }
 
 /*----------------------------------------------------------------*/
 /*-----------------FILE MANIPULATOR(PRIVATE)----------------------*/
 /*----------------------------------------------------------------*/
-bool FileManipulator::isValidFlags(openOption flags)
+bool FileManipulator::IsValidFlags(openOption flags)
 {
 	bool validFlags = false;
 
@@ -225,31 +212,98 @@ bool FileManipulator::isValidFlags(openOption flags)
 	return validFlags;
 }
 
+bool FileManipulator::IsOpenForRead(openOption flags)
+{
+    return flags & READONLY;
+}
+
+ino_t FileManipulator::GetFileSignature(std::string const &filePath, openOption flags)
+{
+    int fileDescriptor = 0;
+
+    fileDescriptor = open(filePath.c_str(), flags, S_IRWXU);
+
+    if(fileDescriptor == -1)
+    {
+        throw FilesystemSiemException("Bad descriptor of file.",
+            FilesystemSiemException::INVALID_PATH, errno);
+    }
+
+    struct stat fileStat = { 0 };
+    if(fstat(fileDescriptor, &fileStat) == -1)
+    {
+        close(fileDescriptor);
+        throw FilesystemSiemException("Cannot get stat information.",
+            FilesystemSiemException::BAD_SIGNATURE, errno);
+    }
+
+    ino_t signature = fileStat.st_ino;
+    close(fileDescriptor);
+
+    return signature;
+}
+
+void FileManipulator::OpenManipulatorInner(std::string const &filePath, openOption flags)
+{
+    m_FileSignature = GetFileSignature(filePath, flags);
+    bool isOpenForRead = IsOpenForRead(flags);
+
+    std::lock_guard<std::mutex> fileSignaturesMapGuard(mapFileObjectsMut);
+
+    std::map<ino_t, std::shared_ptr<FileObjectDescriptor>>::iterator it =
+        fileObjectsMap.find(m_FileSignature);
+
+    if(it != fileObjectsMap.end())
+    {
+        m_pFileDescriptor = it->second;
+    }
+    else
+    {
+        m_pFileDescriptor = std::make_shared<FileObjectDescriptor>();
+        fileObjectsMap.insert(std::pair<ino_t, std::shared_ptr<FileObjectDescriptor>>(
+            m_FileSignature, m_pFileDescriptor));
+    }
+
+    m_pFileDescriptor->m_pFileObject = std::make_shared<FileObject>(filePath);
+    if(isOpenForRead)
+    {
+        m_pFileDescriptor->m_DescriptorLock.lock_shared();
+        m_pFileDescriptor->m_IsOpenForRead = true;
+    }
+    else
+    {
+        m_pFileDescriptor->m_DescriptorLock.lock();
+        m_pFileDescriptor->m_IsOpenForRead = false;
+    }
+
+    m_IsClosed = false;
+}
+
 /*---------------------------------------------------------------*/
 /*------------------FILESYSTEM EXCEPTIONS------------------------*/
 /*---------------------------------------------------------------*/
 FileManipulator::FilesystemSiemException::FilesystemSiemException(std::string const &exMsg, int errCode, int errnoCode) :
-    SIEMException(exMsg, errCode), _errno(errnoCode)
+    SIEMException(exMsg, errCode), m_Errno(errnoCode)
 {
 
 }
 
 FileManipulator::FilesystemSiemException::FilesystemSiemException(std::string &&exMsg, int errCode, int errnoCode) :
-    SIEMException(std::move(exMsg), errCode), _errno(errnoCode)
+    SIEMException(std::move(exMsg), errCode), m_Errno(errnoCode)
 {
 
 }
 
 FileManipulator::FilesystemSiemException::FilesystemSiemException(std::string const &exMsg, int errCode, 
 	openOption flags, int errnoCode) : 
-    SIEMException(exMsg, errCode), _errno(errnoCode), _flags(flags)
+    SIEMException(exMsg, errCode), m_Errno(errnoCode), m_Flags(flags)
 {
 
 }
 
 FileManipulator::FilesystemSiemException::FilesystemSiemException(std::string &&exMsg, int errCode, 
 	openOption flags, int errnoCode) : 
-    SIEMException(std::move(exMsg), errCode), _errno(errnoCode), _flags(flags)
+    SIEMException(std::move(exMsg), errCode), m_Errno(errnoCode), m_Flags(flags)
 {
 
 }
@@ -259,28 +313,28 @@ FileManipulator::FilesystemSiemException::~FilesystemSiemException()
 
 }
 
-int FileManipulator::FilesystemSiemException::getErrno()
+int FileManipulator::FilesystemSiemException::GetErrno()
 {
-	return _errno;
+    return m_Errno;
 }
 
-std::vector<FileManipulator::manipulateOption> FileManipulator::FilesystemSiemException::separateFlags()
+std::vector<FileManipulator::manipulateOption> FileManipulator::FilesystemSiemException::SeparateFlags()
 {
 	std::vector<FileManipulator::manipulateOption> flagsVec;
 
-	if(_flags & READONLY)
+    if(m_Flags & READONLY)
 		flagsVec.push_back(READONLY);
-	if(_flags & WRITEONLY)
+    if(m_Flags & WRITEONLY)
 		flagsVec.push_back(WRITEONLY);
-	if(_flags & READ_WRITE)
+    if(m_Flags & READ_WRITE)
 		flagsVec.push_back(READ_WRITE);
-	if(_flags & CREATE)
+    if(m_Flags & CREATE)
 		flagsVec.push_back(CREATE);
-	if(_flags & APPEND)
+    if(m_Flags & APPEND)
 		flagsVec.push_back(APPEND);
-	if(_flags & LARGE_FILE)
+    if(m_Flags & LARGE_FILE)
 		flagsVec.push_back(LARGE_FILE);
-	if(_flags & TRUNCATE)
+    if(m_Flags & TRUNCATE)
 		flagsVec.push_back(TRUNCATE);
 
 	return flagsVec;

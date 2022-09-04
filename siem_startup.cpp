@@ -28,7 +28,7 @@ static std::map<correlationModule, std::string> correlationKindStrMap =
 /*---------------------------------------------------------------*/
 /*----------------------SETTINGS SIEM----------------------------*/
 /*---------------------------------------------------------------*/
-SettingsSIEM::SettingsSIEM(JsonObject const &configObj) : 
+SettingsSIEM::SettingsSIEM(const IJsonContainerPtr &configObj) :
     _startupSettings(configObj)
 {
     tuneFromConfig();
@@ -51,7 +51,7 @@ SettingsSIEM::SettingsSIEM(SettingsSIEM const &other) :
 }
 
 SettingsSIEM::SettingsSIEM(SettingsSIEM &&other) :
-    _startupSettings(std::move(_startupSettings)), _amountAggrThreads(other._amountAggrThreads),
+    _startupSettings(std::move(other._startupSettings)), _amountAggrThreads(other._amountAggrThreads),
     _amountCorrThreads(other._amountCorrThreads), _aggregationCustomConfigPath(std::move(other._aggregationCustomConfigPath)),
     _correlationCustomConfigPath(std::move(other._correlationCustomConfigPath)), _kindCorrelation(other._kindCorrelation),
     m_isUseCustomAggregation(other.m_isUseCustomAggregation), m_isUseCustomCorrelation(other.m_isUseCustomCorrelation)
@@ -84,58 +84,58 @@ SettingsSIEM const& SettingsSIEM::operator=(SettingsSIEM &&other)
 
 void SettingsSIEM::tuneFromConfig()
 {
-    JsonObject configObject = _startupSettings.getConfiguration(STARTUP);
+//    IJsonContainerPtr configObject = _startupSettings.getConfiguration(STARTUP);
 
-    std::shared_ptr<JsonContainer> amountAggrThreadsPtr = guaranteeGetPtrByName(configObject, AMOUNT_AGGR_THREADS);
-    std::string amountAggrThreadsStr = amountAggrThreadsPtr->keyValue.second;
-    _amountAggrThreads = static_cast<size_t>(std::atoi(amountAggrThreadsStr.c_str()));
+//    std::shared_ptr<JsonContainer> amountAggrThreadsPtr = guaranteeGetPtrByName(configObject, AMOUNT_AGGR_THREADS);
+//    std::string amountAggrThreadsStr = amountAggrThreadsPtr->keyValue.second;
+//    _amountAggrThreads = static_cast<size_t>(std::atoi(amountAggrThreadsStr.c_str()));
 
-    std::shared_ptr<JsonContainer> amountCorrThreadsPtr = guaranteeGetPtrByName(configObject, AMOUNT_CORR_THREADS);
-    std::string amountCorrThreadsStr = amountCorrThreadsPtr->keyValue.second;
-    _amountCorrThreads = static_cast<size_t>(std::atoi(amountCorrThreadsStr.c_str()));
+//    std::shared_ptr<JsonContainer> amountCorrThreadsPtr = guaranteeGetPtrByName(configObject, AMOUNT_CORR_THREADS);
+//    std::string amountCorrThreadsStr = amountCorrThreadsPtr->keyValue.second;
+//    _amountCorrThreads = static_cast<size_t>(std::atoi(amountCorrThreadsStr.c_str()));
 
-    std::shared_ptr<JsonContainer> isUseCustomAggrPtr = guaranteeGetPtrByName(configObject, USING_CUSTOM_AGGREGATION);
-    std::string isUseCustomAggrStr = isUseCustomAggrPtr->keyValue.second;
+//    std::shared_ptr<JsonContainer> isUseCustomAggrPtr = guaranteeGetPtrByName(configObject, USING_CUSTOM_AGGREGATION);
+//    std::string isUseCustomAggrStr = isUseCustomAggrPtr->keyValue.second;
 
-    if(isUseCustomAggrStr != "true")
-    {
-        m_isUseCustomAggregation = false;
-    }
-    else
-    {
-        m_isUseCustomAggregation = true;
+//    if(isUseCustomAggrStr != "true")
+//    {
+//        m_isUseCustomAggregation = false;
+//    }
+//    else
+//    {
+//        m_isUseCustomAggregation = true;
 
-        std::shared_ptr<JsonContainer> aggregationConfigPathPtr = guaranteeGetPtrByName(configObject, AGGREGATION_PATH);
-        _aggregationCustomConfigPath = aggregationConfigPathPtr->keyValue.second;
-    }
-
-
-    std::shared_ptr<JsonContainer> isUseCustomCorrPtr = guaranteeGetPtrByName(configObject, USING_CUSTOM_CORRELATION);
-    std::string isUseCustomCorrStr = isUseCustomCorrPtr->keyValue.second;
-
-    if(isUseCustomCorrStr != "true")
-    {
-        m_isUseCustomCorrelation = false;
-    }
-    else
-    {
-        m_isUseCustomCorrelation = true;
-
-        std::shared_ptr<JsonContainer> correlationConfigPathPtr = guaranteeGetPtrByName(configObject, CORRELATION_PATH);
-        _correlationCustomConfigPath = correlationConfigPathPtr->keyValue.second;
-    }
+//        std::shared_ptr<JsonContainer> aggregationConfigPathPtr = guaranteeGetPtrByName(configObject, AGGREGATION_PATH);
+//        _aggregationCustomConfigPath = aggregationConfigPathPtr->keyValue.second;
+//    }
 
 
-    std::shared_ptr<JsonContainer> correlationKindPtr = guaranteeGetPtrByName(configObject, CORRELATION_MODULE);
+//    std::shared_ptr<JsonContainer> isUseCustomCorrPtr = guaranteeGetPtrByName(configObject, USING_CUSTOM_CORRELATION);
+//    std::string isUseCustomCorrStr = isUseCustomCorrPtr->keyValue.second;
 
-    std::vector<std::string> correlationModuleStrs = 
-        StringManager::parseByDelimiter(correlationKindPtr->keyValue.second, "|");
+//    if(isUseCustomCorrStr != "true")
+//    {
+//        m_isUseCustomCorrelation = false;
+//    }
+//    else
+//    {
+//        m_isUseCustomCorrelation = true;
 
-    std::transform(correlationModuleStrs.begin(), correlationModuleStrs.end(), std::back_inserter(_kindCorrelation),
-        [](std::string const &correlationType) -> correlationModule
-    {
-        return main_siem_space::stringToCorrelationModule(correlationType);
-    });
+//        std::shared_ptr<JsonContainer> correlationConfigPathPtr = guaranteeGetPtrByName(configObject, CORRELATION_PATH);
+//        _correlationCustomConfigPath = correlationConfigPathPtr->keyValue.second;
+//    }
+
+
+//    std::shared_ptr<JsonContainer> correlationKindPtr = guaranteeGetPtrByName(configObject, CORRELATION_MODULE);
+
+//    std::vector<std::string> correlationModuleStrs =
+//        StringManager::parseByDelimiter(correlationKindPtr->keyValue.second, "|");
+
+//    std::transform(correlationModuleStrs.begin(), correlationModuleStrs.end(), std::back_inserter(_kindCorrelation),
+//        [](std::string const &correlationType) -> correlationModule
+//    {
+//        return main_siem_space::stringToCorrelationModule(correlationType);
+//    });
 }
 
 /*---------------------------------------------------------------*/

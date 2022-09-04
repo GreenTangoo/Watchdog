@@ -8,7 +8,7 @@
 #include <cstdlib>
 
 #include "types_resolver.hpp"
-#include "../utility_module/json.hpp"
+#include "../utility_module/json_proc.hpp"
 #include "../utility_module/regex_siem.hpp"
 
 using namespace utility_space;
@@ -21,14 +21,14 @@ namespace description_space
 	class Configuration
 	{
 	private:
-		JsonObject _configurationFileParser;
+        IJsonContainerPtr _configurationFileParser;
 	public:
-		Configuration(JsonObject configJson);
+        Configuration(IJsonContainerPtr configJson);
 		Configuration(Configuration const &other);
 		Configuration(Configuration &&other);
 		Configuration const& operator=(Configuration const &other);
 		Configuration const& operator=(Configuration &&other);
-		JsonObject getConfiguration(std::string const &nameNode) const;
+        IJsonContainerPtr getConfiguration(std::string const &nameNode) const;
 	};
 }
 

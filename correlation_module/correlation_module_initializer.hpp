@@ -6,7 +6,6 @@
 
 #include "../siem_startup.hpp"
 #include "../utility_module/thread_pool.hpp"
-#include "../description_module/description_table.hpp"
 
 using namespace main_siem_space;
 using namespace description_space;

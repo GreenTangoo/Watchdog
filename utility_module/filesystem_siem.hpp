@@ -12,6 +12,7 @@
 #include <mutex>
 #include <vector>
 #include <shared_mutex>
+#include <filesystem>
 
 #include "../exception_module/exceptions.hpp"
 
@@ -32,17 +33,17 @@ namespace utility_space
 		FileObject const& operator=(FileObject const &other) = delete;
 		FileObject const& operator=(FileObject &&other) = delete;
 		~FileObject();
-		operationState write(char const *buf, size_t amountBytes);
-		operationState write(void const *buf, size_t blockSize, size_t amountBlocks);
-		operationState writeLine(std::string const &line);
-		operationState read(char *buf, size_t amountBytes);
-		operationState read(void *buf, size_t blockSize, size_t amountBlocks);
-		operationState readLine(std::string &line);
-		void synchronizationStream();
-		std::fstream& getStream();
+        operationState Write(char const *buf, size_t amountBytes);
+        operationState WriteSymbol(char const ch);
+        operationState WriteLine(std::string const &line);
+        operationState PutbackSymbol(char const ch);
+        operationState Read(char *buf, size_t amountBytes, size_t &readedBytes);
+        operationState ReadSymbol(char &ch);
+        operationState ReadLine(std::string &line);
+        void SynchronizationStream();
+        std::fstream& GetStream();
 	private:
-		std::fstream _fileStream;
-		std::mutex _fileStreamMut;
+        std::fstream m_FileStream;
 	};
 
 	class FileManipulator
@@ -56,18 +57,26 @@ namespace utility_space
 		explicit FileManipulator(std::string const &filePath, openOption flags = READONLY);
 		FileManipulator(FileManipulator const &other);
 		FileManipulator(FileManipulator &&other);
+        ~FileManipulator();
 		FileManipulator const& operator=(FileManipulator const &other);
 		FileManipulator const& operator=(FileManipulator &&other);
 		std::shared_ptr<FileObject> operator->();
-		void openManipulator(std::string const &filePath, openOption flags);
-		void closeManipulator();
-		~FileManipulator();
+        void OpenManipulator(std::string const &filePath, openOption flags);
+        void CloseManipulator();
+        bool IsExistsFile(std::string const &filename) const;
 	public:
+        struct FileObjectDescriptor
+        {
+            bool m_IsOpenForRead{ false };
+            std::shared_mutex m_DescriptorLock;
+            std::shared_ptr<FileObject> m_pFileObject;
+        };
+
         class FilesystemSiemException : public SIEMException
 		{
 		private:
-			int _errno;
-			openOption _flags;
+            int m_Errno;
+            openOption m_Flags;
 		public:
 			enum FilesystemErrorCode { INVALID_PATH = 1, PERMISSION_DENIED,
 										INTERNAL_ERROR, CANNOT_OPEN_FILE, BAD_SIGNATURE,
@@ -77,15 +86,18 @@ namespace utility_space
 			FilesystemSiemException(std::string const &exMsg, int errCode, openOption flags, int errnoCode = 0);
 			FilesystemSiemException(std::string &&exMsg, int errCode, openOption flags, int errnoCode = 0);
 			~FilesystemSiemException();
-			int getErrno();
-			std::vector<manipulateOption> separateFlags();
+            inline int GetErrno();
+            std::vector<manipulateOption> SeparateFlags();
 		};
 	private:
-		bool isValidFlags(openOption flags);
+        bool IsValidFlags(openOption flags);
+        bool IsOpenForRead(openOption flags);
+        ino_t GetFileSignature(std::string const &filePath, openOption flags);
+        void OpenManipulatorInner(std::string const &filePath, openOption flags);
 	private:
-		bool _isClosed;
-		ino_t _fileSignature;
-		std::shared_ptr<FileObject> _filePtr;
+        bool m_IsClosed;
+        ino_t m_FileSignature;
+        std::shared_ptr<FileObjectDescriptor> m_pFileDescriptor;
 	};
 }
 

@@ -5,7 +5,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "utility_module/json.hpp"
+#include "utility_module/json_proc.hpp"
 #include "description_module/configuration.hpp"
 
 using namespace description_space;
@@ -18,7 +18,7 @@ namespace main_siem_space
     class SettingsSIEM
     {
     public:
-        explicit SettingsSIEM(JsonObject const &configObj);
+        explicit SettingsSIEM(IJsonContainerPtr const &configObj);
         explicit SettingsSIEM(Configuration const &config);
         SettingsSIEM(SettingsSIEM const &other);
         SettingsSIEM(SettingsSIEM &&other);

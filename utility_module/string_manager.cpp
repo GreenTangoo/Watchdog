@@ -87,19 +87,19 @@ std::vector<std::string> StringManager::parseByDelimiter(std::string const &sour
     return returnVec;
 }
 
-std::string StringManager::deleteSymbol(std::string const &sourceStr, symbolType symbol)
+std::string StringManager::deleteSymbol(std::string const &sourceStr, SymbolType symbol)
 {
 	std::string cropedString = sourceStr;
-	cropedString.erase(std::remove(cropedString.begin(), cropedString.end(), symbol), 
+    cropedString.erase(std::remove(cropedString.begin(), cropedString.end(), static_cast<char>(symbol)),
 		cropedString.end());
 	return cropedString;
 }
 
-std::string StringManager::deleteSymbols(std::string const &sourceStr, std::vector<symbolType> const &symbolsVec)
+std::string StringManager::deleteSymbols(std::string const &sourceStr, std::vector<SymbolType> const &symbolsVec)
 {
 	std::string cropedString = sourceStr;
 	for(size_t i(0); i < symbolsVec.size(); i++)
-		cropedString.erase(std::remove(cropedString.begin(), cropedString.end(), symbolsVec[i]), 
+        cropedString.erase(std::remove(cropedString.begin(), cropedString.end(), static_cast<char>(symbolsVec[i])),
 			cropedString.end());
 
 	return cropedString;
@@ -115,13 +115,13 @@ std::string StringManager::deleteSymbols(std::string const &sourceStr, std::stri
 	return cropedString;
 }
 
-std::string StringManager::cropFromEnd(std::string const &sourceStr, symbolType delimiterSymbol)
+std::string StringManager::cropFromEnd(std::string const &sourceStr, SymbolType delimiterSymbol)
 {
 	std::string cropedString = sourceStr;
 	char ch = 0;
 
 	while((cropedString.size() > 0) && 
-				((ch = cropedString.back()) != delimiterSymbol))
+                ((ch = cropedString.back()) != static_cast<char>(delimiterSymbol)))
 	{
 		cropedString.pop_back();
 	}
@@ -137,14 +137,14 @@ std::string StringManager::cropFromEnd(std::string const &sourceStr, symbolType 
 	}
 }
 
-std::string StringManager::cropFromBegin(std::string const &sourceStr, symbolType delimiterSymbol)
+std::string StringManager::cropFromBegin(std::string const &sourceStr, SymbolType delimiterSymbol)
 {
 	std::string cropedString = sourceStr;
 	size_t cropIndex = 0;
 	size_t stringSize = cropedString.size();
 
 	while((cropIndex < stringSize) && 
-				(cropedString[cropIndex] != delimiterSymbol))
+                (cropedString[cropIndex] != static_cast<char>(delimiterSymbol)))
 	{
 		cropIndex++;
 	}
@@ -153,9 +153,9 @@ std::string StringManager::cropFromBegin(std::string const &sourceStr, symbolTyp
 		sourceStr;
 }
 
-std::string StringManager::getBeforeSymbol(std::string const &sourceStr, symbolType delimiterSymbol)
+std::string StringManager::getBeforeSymbol(std::string const &sourceStr, SymbolType delimiterSymbol)
 {
-	size_t symbolPos = sourceStr.find(delimiterSymbol);
+    size_t symbolPos = sourceStr.find(static_cast<char>(delimiterSymbol));
 	if(symbolPos == std::string::npos)
 	{
 		return std::string("");
@@ -164,9 +164,9 @@ std::string StringManager::getBeforeSymbol(std::string const &sourceStr, symbolT
 	return sourceStr.substr(0, symbolPos);
 }
 
-std::string StringManager::getAfterSymbol(std::string const &sourceStr, symbolType delimiterSymbol)
+std::string StringManager::getAfterSymbol(std::string const &sourceStr, SymbolType delimiterSymbol)
 {
-	size_t symbolPos = sourceStr.find(delimiterSymbol);
+    size_t symbolPos = sourceStr.find(static_cast<char>(delimiterSymbol));
 	if(symbolPos == std::string::npos)
 	{
 		return std::string("");
@@ -175,12 +175,12 @@ std::string StringManager::getAfterSymbol(std::string const &sourceStr, symbolTy
 	return sourceStr.substr(symbolPos + 1, sourceStr.size() - symbolPos - 1);
 }
 
-std::string StringManager::constructPath(symbolType delimPath, std::vector<std::string> const &args)
+std::string StringManager::constructPath(SymbolType delimPath, std::vector<std::string> const &args)
 {
 	std::string pathStr = args[0];
 	for(size_t i(0); i < args.size() - 1; i++)
 	{
-		pathStr += delimPath;
+        pathStr += static_cast<char>(delimPath);
 		pathStr += args[i + 1];
 	}
 

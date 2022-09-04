@@ -4,7 +4,7 @@
 #include <csignal>
 
 #include "siem_startup.hpp"
-#include "utility_module/json.hpp"
+#include "utility_module/json_proc.hpp"
 #include "aggregation_module/aggregation_module_initializer.hpp"
 
 using namespace utility_space;
@@ -37,19 +37,57 @@ void interrupt_handler(int sig)
 	}
 }
 
-int main(int argc, char** argv)
+IJsonContainerPtr createJson()
 {
-    signal(SIGINT, interrupt_handler);
-
-    JsonObject startupSettingsJson = getJsonData(MAIN_OPTIONS_PATH);
-    SettingsSIEM settings(startupSettingsJson);
-
-    AggregationInitializer aggrInit(settings);
-
-    while(!isStopWork.load())
+    std::map<std::string, IJsonContainerPtr> mainContainer;
+    for(int i(0); i < 5; i++)
     {
-        aggrInit.startCycle();
+        const std::string value = std::string("val-") + std::to_string(i);
+        IJsonContainerPtr temp = utility_space::CreateContainer(value);
+
+        mainContainer.insert({std::to_string(i), temp});
     }
 
-	return 0;
+    std::map<std::string, IJsonContainerPtr> externContainer;
+    externContainer.insert({"main", utility_space::CreateContainer(mainContainer)});
+
+    return CreateContainer(externContainer);
+}
+
+int main(int argc, char** argv)
+{
+//    signal(SIGINT, interrupt_handler);
+
+//    JsonObject startupSettingsJson = getJsonData(MAIN_OPTIONS_PATH);
+//    SettingsSIEM settings(startupSettingsJson);
+
+//    AggregationInitializer aggrInit(settings);
+
+//    while(!isStopWork.load())
+//    {
+//        aggrInit.startCycle();
+//    }
+
+    JsonFileSerializer *serializer = new JsonFileSerializer(createJson());
+
+    serializer->SetFile("test.json");
+    serializer->Write();
+
+    delete serializer;
+
+    JsonFileDeserializer *deserializer = new JsonFileDeserializer;
+
+    deserializer->SetFile("test.json");
+    IJsonContainerPtr allJson = deserializer->Read();
+
+    delete deserializer;
+
+    serializer = new JsonFileSerializer(allJson);
+
+    serializer->SetFile("test1.json");
+    serializer->Write();
+
+    delete serializer;
+
+    return 0;
 }

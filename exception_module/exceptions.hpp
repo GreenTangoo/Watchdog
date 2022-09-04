@@ -100,18 +100,5 @@ namespace siem_ex_space
 
         ~CorrelationException() = default;
 	};
-
-    class ThreadPoolException : public SIEMException
-    {
-    public:
-        enum ThreadPoolErrorCode { EMPTY_TASK_POOL = 0 };
-        ThreadPoolException(std::string const &exMsg, int errCode) :
-            SIEMException(exMsg, errCode) {}
-
-        ThreadPoolException(std::string &&exMsg, int errCode) :
-            SIEMException(std::move(exMsg), errCode) {}
-
-        ~ThreadPoolException() = default;
-    };
 }
 #endif // EXCEPTIONS_HPP
