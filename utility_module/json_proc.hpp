@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <sstream>
 
 #include "filesystem_siem.hpp"
 #include "string_manager.hpp"
@@ -94,6 +95,8 @@ namespace utility_space
         JsonString const& operator=(JsonString &&other);
         virtual IJsonContainerPtr operator[](std::string const &key) override;
         explicit operator std::string() const;
+        int AsInteger() const;
+        bool AsBoolean() const;
     private:
         std::string m_Value;
     };

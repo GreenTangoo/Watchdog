@@ -280,6 +280,19 @@ JsonString::operator std::string() const
     return m_Value;
 }
 
+int JsonString::AsInteger() const
+{
+    return std::atoi(m_Value.c_str());
+}
+
+bool JsonString::AsBoolean() const
+{
+    bool res = false;
+    std::istringstream(m_Value) >> std::boolalpha >> res;
+
+    return res;
+}
+
 
 // //////////////////////////////////////////////////////////////////////
 // Public functions

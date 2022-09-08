@@ -2,74 +2,47 @@
 
 using namespace main_siem_space;
 
-#define STARTUP "startup"
-#define AMOUNT_AGGR_THREADS "amount_aggr_threads"
-#define AMOUNT_CORR_THREADS "amount_corr_threads"
-#define CORRELATION_MODULE "correlation_module"
-#define AGGREGATION_PATH "aggregation_custom_config"
-#define CORRELATION_PATH "correlation_custom_config"
-
-#define STATISTIC_STR "statistic"
-#define AI_STR "ai"
-#define MACHINE_STR "machine"
-
-#define USING_CUSTOM_AGGREGATION "use_custom_aggregation"
-#define USING_CUSTOM_CORRELATION "use_custom_correlation"
-
-
-static std::map<correlationModule, std::string> correlationKindStrMap = 
-    {
-        {STATISTIC, STATISTIC_STR},
-        {AI, AI_STR},
-        {MACHINE, MACHINE_STR}
-    };
-
 
 /*---------------------------------------------------------------*/
 /*----------------------SETTINGS SIEM----------------------------*/
 /*---------------------------------------------------------------*/
 SettingsSIEM::SettingsSIEM(const IJsonContainerPtr &configObj) :
-    _startupSettings(configObj)
+    m_pConfigJson(configObj)
 {
-    tuneFromConfig();
-}
-
-SettingsSIEM::SettingsSIEM(Configuration const &config) :
-    _startupSettings(config)
-{
-    tuneFromConfig();
+    TuneFromConfig();
 }
 
 SettingsSIEM::SettingsSIEM(SettingsSIEM const &other) : 
-    _startupSettings(other._startupSettings), _amountAggrThreads(other._amountAggrThreads), 
-    _amountCorrThreads(other._amountCorrThreads), _aggregationCustomConfigPath(other._aggregationCustomConfigPath),
-    _correlationCustomConfigPath(other._correlationCustomConfigPath), _kindCorrelation(other._kindCorrelation),
-    m_isUseCustomAggregation(other.m_isUseCustomAggregation), m_isUseCustomCorrelation(other.m_isUseCustomCorrelation)
+    m_pConfigJson(other.m_pConfigJson), m_AmountAggrThreads(other.m_AmountAggrThreads),
+    m_AmountCorrThreads(other.m_AmountCorrThreads), m_AggregationCustomConfigPath(other.m_AggregationCustomConfigPath),
+    m_CorrelationCustomConfigPath(other.m_CorrelationCustomConfigPath), m_KindCorrelation(other.m_KindCorrelation),
+    m_IsUseCustomAggregation(other.m_IsUseCustomAggregation), m_IsUseCustomCorrelation(other.m_IsUseCustomCorrelation)
 
 {
 
 }
 
 SettingsSIEM::SettingsSIEM(SettingsSIEM &&other) :
-    _startupSettings(std::move(other._startupSettings)), _amountAggrThreads(other._amountAggrThreads),
-    _amountCorrThreads(other._amountCorrThreads), _aggregationCustomConfigPath(std::move(other._aggregationCustomConfigPath)),
-    _correlationCustomConfigPath(std::move(other._correlationCustomConfigPath)), _kindCorrelation(other._kindCorrelation),
-    m_isUseCustomAggregation(other.m_isUseCustomAggregation), m_isUseCustomCorrelation(other.m_isUseCustomCorrelation)
+    m_pConfigJson(std::move(other.m_pConfigJson)), m_AmountAggrThreads(other.m_AmountAggrThreads),
+    m_AmountCorrThreads(other.m_AmountCorrThreads), m_AggregationCustomConfigPath(std::move(other.m_AggregationCustomConfigPath)),
+    m_CorrelationCustomConfigPath(std::move(other.m_CorrelationCustomConfigPath)), m_KindCorrelation(other.m_KindCorrelation),
+    m_IsUseCustomAggregation(other.m_IsUseCustomAggregation), m_IsUseCustomCorrelation(other.m_IsUseCustomCorrelation)
 {
-    other._amountAggrThreads = 0;
-    other._amountCorrThreads = 0;
-    other._kindCorrelation.clear();
 }
 
 SettingsSIEM const& SettingsSIEM::operator=(SettingsSIEM const &other)
 {
     if(this != &other)
     {
-        _startupSettings = other._startupSettings;
-        _amountAggrThreads = other._amountAggrThreads;
-        _amountCorrThreads = other._amountCorrThreads;
-        _kindCorrelation = other._kindCorrelation;
-    }
+        m_pConfigJson = other.m_pConfigJson;
+        m_AmountAggrThreads = other.m_AmountAggrThreads;
+        m_AmountCorrThreads = other.m_AmountCorrThreads;
+        m_AggregationCustomConfigPath = other.m_AggregationCustomConfigPath;
+        m_CorrelationCustomConfigPath = other.m_CorrelationCustomConfigPath;
+        m_KindCorrelation = other.m_KindCorrelation;
+        m_IsUseCustomAggregation = other.m_IsUseCustomAggregation;
+        m_IsUseCustomCorrelation = other.m_IsUseCustomCorrelation;
+    };
 
     return *this;
 }
@@ -77,89 +50,139 @@ SettingsSIEM const& SettingsSIEM::operator=(SettingsSIEM const &other)
 SettingsSIEM const& SettingsSIEM::operator=(SettingsSIEM &&other)
 {
     if(this != &other)
-        std::swap(*this, other);
+    {
+        m_pConfigJson = std::move(other.m_pConfigJson);
+        m_AmountAggrThreads = std::move(other.m_AmountAggrThreads);
+        m_AmountCorrThreads = std::move(other.m_AmountCorrThreads);
+        m_AggregationCustomConfigPath = std::move(other.m_AggregationCustomConfigPath);
+        m_CorrelationCustomConfigPath = std::move(other.m_CorrelationCustomConfigPath);
+        m_KindCorrelation = std::move(other.m_KindCorrelation);
+        m_IsUseCustomAggregation = std::move(other.m_IsUseCustomAggregation);
+        m_IsUseCustomCorrelation = std::move(other.m_IsUseCustomCorrelation);
+    }
 
     return *this;
 }
 
-void SettingsSIEM::tuneFromConfig()
+void SettingsSIEM::ReadAggregationThreadsCount()
 {
-//    IJsonContainerPtr configObject = _startupSettings.getConfiguration(STARTUP);
+    JsonStringPtr amountAggrThreadsContainer =
+            std::dynamic_pointer_cast<JsonString>(m_pConfigJson->FindByName(AmountAggregationThreadsKey));
 
-//    std::shared_ptr<JsonContainer> amountAggrThreadsPtr = guaranteeGetPtrByName(configObject, AMOUNT_AGGR_THREADS);
-//    std::string amountAggrThreadsStr = amountAggrThreadsPtr->keyValue.second;
-//    _amountAggrThreads = static_cast<size_t>(std::atoi(amountAggrThreadsStr.c_str()));
-
-//    std::shared_ptr<JsonContainer> amountCorrThreadsPtr = guaranteeGetPtrByName(configObject, AMOUNT_CORR_THREADS);
-//    std::string amountCorrThreadsStr = amountCorrThreadsPtr->keyValue.second;
-//    _amountCorrThreads = static_cast<size_t>(std::atoi(amountCorrThreadsStr.c_str()));
-
-//    std::shared_ptr<JsonContainer> isUseCustomAggrPtr = guaranteeGetPtrByName(configObject, USING_CUSTOM_AGGREGATION);
-//    std::string isUseCustomAggrStr = isUseCustomAggrPtr->keyValue.second;
-
-//    if(isUseCustomAggrStr != "true")
-//    {
-//        m_isUseCustomAggregation = false;
-//    }
-//    else
-//    {
-//        m_isUseCustomAggregation = true;
-
-//        std::shared_ptr<JsonContainer> aggregationConfigPathPtr = guaranteeGetPtrByName(configObject, AGGREGATION_PATH);
-//        _aggregationCustomConfigPath = aggregationConfigPathPtr->keyValue.second;
-//    }
-
-
-//    std::shared_ptr<JsonContainer> isUseCustomCorrPtr = guaranteeGetPtrByName(configObject, USING_CUSTOM_CORRELATION);
-//    std::string isUseCustomCorrStr = isUseCustomCorrPtr->keyValue.second;
-
-//    if(isUseCustomCorrStr != "true")
-//    {
-//        m_isUseCustomCorrelation = false;
-//    }
-//    else
-//    {
-//        m_isUseCustomCorrelation = true;
-
-//        std::shared_ptr<JsonContainer> correlationConfigPathPtr = guaranteeGetPtrByName(configObject, CORRELATION_PATH);
-//        _correlationCustomConfigPath = correlationConfigPathPtr->keyValue.second;
-//    }
-
-
-//    std::shared_ptr<JsonContainer> correlationKindPtr = guaranteeGetPtrByName(configObject, CORRELATION_MODULE);
-
-//    std::vector<std::string> correlationModuleStrs =
-//        StringManager::parseByDelimiter(correlationKindPtr->keyValue.second, "|");
-
-//    std::transform(correlationModuleStrs.begin(), correlationModuleStrs.end(), std::back_inserter(_kindCorrelation),
-//        [](std::string const &correlationType) -> correlationModule
-//    {
-//        return main_siem_space::stringToCorrelationModule(correlationType);
-//    });
+    if(amountAggrThreadsContainer)
+    {
+        m_AmountAggrThreads = amountAggrThreadsContainer->AsInteger();
+    }
+    else
+    {
+        m_AmountAggrThreads = 1;
+    }
 }
 
-/*---------------------------------------------------------------*/
-/*---------------------PUBLIC FUNCTIONS--------------------------*/
-/*---------------------------------------------------------------*/
-correlationModule main_siem_space::stringToCorrelationModule(std::string correlationModuleStr)
+void SettingsSIEM::ReadCorrelationThreadsCount()
 {
-    for(std::map<correlationModule, std::string>::const_iterator it = correlationKindStrMap.begin();
-        it != correlationKindStrMap.end(); it++)
-    {
-        if(it->second == correlationModuleStr)
-            return it->first;
-    }
+    JsonStringPtr amountCorrThreadsContainer =
+            std::dynamic_pointer_cast<JsonString>(m_pConfigJson->FindByName(AmountCorrelationThreadsKey));
 
-    return correlationModule::NONE_CORRELATION;
+    if(amountCorrThreadsContainer)
+    {
+        m_AmountCorrThreads = amountCorrThreadsContainer->AsInteger();
+    }
+    else
+    {
+        m_AmountCorrThreads = 1;
+    }
 }
 
-std::string main_siem_space::correlationModuleToString(correlationModule correlationKind)
+void SettingsSIEM::ReadIsUseCustomAggregation()
 {
-    auto it = correlationKindStrMap.find(correlationKind);
-    if(it != correlationKindStrMap.end())
+    JsonStringPtr isUseCustomAggrContainer =
+            std::dynamic_pointer_cast<JsonString>(m_pConfigJson->FindByName(UseCustomAggregationKey));
+
+    if(isUseCustomAggrContainer)
     {
-        return it->second;
+        m_IsUseCustomAggregation = isUseCustomAggrContainer->AsBoolean();
+    }
+    else
+    {
+        m_IsUseCustomAggregation = false;
+    }
+}
+
+void SettingsSIEM::ReadIsUseCustomCorrelation()
+{
+    JsonStringPtr isUseCustomCorrContainer =
+            std::dynamic_pointer_cast<JsonString>(m_pConfigJson->FindByName(UseCustomCorrelationKey));
+
+    if(isUseCustomCorrContainer)
+    {
+        m_IsUseCustomCorrelation = isUseCustomCorrContainer->AsBoolean();
+    }
+    else
+    {
+        m_IsUseCustomCorrelation = false;
+    }
+}
+
+void SettingsSIEM::ReadCustomAggrConfigPath()
+{
+    JsonStringPtr aggrConfigPathContainer =
+            std::dynamic_pointer_cast<JsonString>(m_pConfigJson->FindByName(CustomAggregationConfPathKey));
+
+    if(aggrConfigPathContainer)
+    {
+        m_AggregationCustomConfigPath = static_cast<std::string>(*aggrConfigPathContainer);
+    }
+    else
+    {
+        throw SettingsException("Not set custom aggregation config file path",
+                                static_cast<int>(SettingsException::SettingsErrorCode::NOT_SET_CUSTOM_AGGR_CONFIG_PATH));
+    }
+}
+
+void SettingsSIEM::ReadCustomCorrConfigPath()
+{
+    JsonStringPtr corrConfigPathContainer =
+            std::dynamic_pointer_cast<JsonString>(m_pConfigJson->FindByName(CustomCorrelationConfPathKey));
+
+    if(corrConfigPathContainer)
+    {
+        m_CorrelationCustomConfigPath = static_cast<std::string>(*corrConfigPathContainer);
+    }
+    else
+    {
+        throw SettingsException("Not set custom correlation config file path",
+                                static_cast<int>(SettingsException::SettingsErrorCode::NOT_SET_CUSTOM_CORR_CONFIG_PATH));
+    }
+}
+
+void SettingsSIEM::TuneFromConfig()
+{
+    ReadAggregationThreadsCount();
+    ReadCorrelationThreadsCount();
+
+    ReadIsUseCustomAggregation();
+    ReadIsUseCustomCorrelation();
+
+    if(m_IsUseCustomAggregation)
+    {
+        ReadCustomAggrConfigPath();
     }
 
-    return std::string("");
+    if(m_IsUseCustomCorrelation)
+    {
+        ReadCustomCorrConfigPath();
+    }
+}
+
+SettingsSIEM::SettingsException::SettingsException(std::string const &exMsg, int errCode) :
+    SIEMException(exMsg, errCode)
+{
+
+}
+
+SettingsSIEM::SettingsException::SettingsException(std::string &&exMsg, int errCode) :
+    SIEMException(std::move(exMsg), errCode)
+{
+
 }
