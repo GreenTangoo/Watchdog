@@ -23,16 +23,16 @@ namespace utility_space
 	typedef std::ios_base::iostate operationState;
 	typedef unsigned int openOption;
 
-	class FileObject
-	{
-	public:
-		explicit FileObject(std::string const &filePath, std::ios_base::openmode mode = 
-			std::ios_base::in | std::ios_base::out);
-		FileObject(FileObject const &other) = delete;
-		FileObject(FileObject &&other) = delete;
-		FileObject const& operator=(FileObject const &other) = delete;
-		FileObject const& operator=(FileObject &&other) = delete;
-		~FileObject();
+    class FileObject
+    {
+    public:
+        explicit FileObject(std::string const &filePath, std::ios_base::openmode mode =
+                std::ios_base::in | std::ios_base::out);
+        FileObject(FileObject const &other) = delete;
+        FileObject(FileObject &&other) = delete;
+        FileObject const& operator=(FileObject const &other) = delete;
+        FileObject const& operator=(FileObject &&other) = delete;
+        ~FileObject();
         operationState Write(char const *buf, size_t amountBytes);
         operationState WriteSymbol(char const ch);
         operationState WriteLine(std::string const &line);
@@ -42,29 +42,30 @@ namespace utility_space
         operationState ReadLine(std::string &line);
         void SynchronizationStream();
         std::fstream& GetStream();
-	private:
+    private:
         std::fstream m_FileStream;
-	};
+    };
 
-	class FileManipulator
-	{
-	public:
-		enum manipulateOption { READONLY = O_RDONLY, WRITEONLY = O_WRONLY, 
-			READ_WRITE = O_RDWR, CREATE = O_CREAT, APPEND = O_APPEND,
-			LARGE_FILE = O_LARGEFILE, TRUNCATE = O_TRUNC };
+    class FileManipulator
+    {
+    public:
+        enum manipulateOption { READONLY = O_RDONLY, WRITEONLY = O_WRONLY,
+                READ_WRITE = O_RDWR, CREATE = O_CREAT, APPEND = O_APPEND,
+                LARGE_FILE = O_LARGEFILE, TRUNCATE = O_TRUNC };
 
-		explicit FileManipulator();
-		explicit FileManipulator(std::string const &filePath, openOption flags = READONLY);
-		FileManipulator(FileManipulator const &other);
-		FileManipulator(FileManipulator &&other);
+        explicit FileManipulator();
+        explicit FileManipulator(std::string const &filePath, openOption flags = READONLY);
+        FileManipulator(FileManipulator const &other);
+        FileManipulator(FileManipulator &&other);
         ~FileManipulator();
-		FileManipulator const& operator=(FileManipulator const &other);
-		FileManipulator const& operator=(FileManipulator &&other);
-		std::shared_ptr<FileObject> operator->();
+        FileManipulator const& operator=(FileManipulator const &other);
+        FileManipulator const& operator=(FileManipulator &&other);
+        std::shared_ptr<FileObject> operator->();
         void OpenManipulator(std::string const &filePath, openOption flags);
         void CloseManipulator();
         bool IsExistsFile(std::string const &filename) const;
-	public:
+        inline bool IsOpen() const;
+    public:
         struct FileObjectDescriptor
         {
             bool m_IsOpenForRead{ false };
@@ -73,32 +74,32 @@ namespace utility_space
         };
 
         class FilesystemSiemException : public SIEMException
-		{
-		private:
+        {
+        private:
             int m_Errno;
             openOption m_Flags;
-		public:
-			enum FilesystemErrorCode { INVALID_PATH = 1, PERMISSION_DENIED,
-										INTERNAL_ERROR, CANNOT_OPEN_FILE, BAD_SIGNATURE,
-										BAD_FLAGS };
-			FilesystemSiemException(std::string const &exMsg, int errCode, int errnoCode = 0);
-			FilesystemSiemException(std::string &&exMsg, int errCode, int errnoCode = 0);
-			FilesystemSiemException(std::string const &exMsg, int errCode, openOption flags, int errnoCode = 0);
-			FilesystemSiemException(std::string &&exMsg, int errCode, openOption flags, int errnoCode = 0);
-			~FilesystemSiemException();
-            inline int GetErrno();
+        public:
+            enum FilesystemErrorCode { INVALID_PATH = 1, PERMISSION_DENIED,
+                                                                    INTERNAL_ERROR, CANNOT_OPEN_FILE, BAD_SIGNATURE,
+                                                                    BAD_FLAGS };
+            FilesystemSiemException(std::string const &exMsg, int errCode, int errnoCode = 0);
+            FilesystemSiemException(std::string &&exMsg, int errCode, int errnoCode = 0);
+            FilesystemSiemException(std::string const &exMsg, int errCode, openOption flags, int errnoCode = 0);
+            FilesystemSiemException(std::string &&exMsg, int errCode, openOption flags, int errnoCode = 0);
+            ~FilesystemSiemException();
+            inline int GetErrno() const { return m_Errno; }
             std::vector<manipulateOption> SeparateFlags();
-		};
-	private:
+        };
+    private:
         bool IsValidFlags(openOption flags);
         bool IsOpenForRead(openOption flags);
         ino_t GetFileSignature(std::string const &filePath, openOption flags);
         void OpenManipulatorInner(std::string const &filePath, openOption flags);
-	private:
+    private:
         bool m_IsClosed;
         ino_t m_FileSignature;
         std::shared_ptr<FileObjectDescriptor> m_pFileDescriptor;
-	};
+    };
 }
 
 #endif // FILESYSTEM_SIEM_HPP

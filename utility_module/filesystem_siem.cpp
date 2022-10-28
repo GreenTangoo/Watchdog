@@ -66,6 +66,7 @@ operationState FileObject::ReadSymbol(char &ch)
 operationState FileObject::ReadLine(std::string &line)
 {
     std::getline(m_FileStream, line);
+    operationState readState = m_FileStream.rdstate();
 
     return m_FileStream.rdstate();
 }
@@ -190,6 +191,11 @@ bool FileManipulator::IsExistsFile(std::string const &filename) const
     return std::filesystem::exists(filename);
 }
 
+inline bool FileManipulator::IsOpen() const
+{
+    return !m_IsClosed;
+}
+
 /*----------------------------------------------------------------*/
 /*-----------------FILE MANIPULATOR(PRIVATE)----------------------*/
 /*----------------------------------------------------------------*/
@@ -311,11 +317,6 @@ FileManipulator::FilesystemSiemException::FilesystemSiemException(std::string &&
 FileManipulator::FilesystemSiemException::~FilesystemSiemException()
 {
 
-}
-
-int FileManipulator::FilesystemSiemException::GetErrno()
-{
-    return m_Errno;
 }
 
 std::vector<FileManipulator::manipulateOption> FileManipulator::FilesystemSiemException::SeparateFlags()

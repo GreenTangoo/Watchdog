@@ -62,22 +62,29 @@ std::string RegexSiem::getExpressison()
 /*---------------------------------------------------------------*/
 /*------------------PUBLIC FUNCTIONS-----------------------------*/
 /*---------------------------------------------------------------*/
-std::string utility_space::findByRegex(std::string const &line, std::regex const reg, int regGroup)
+std::string utility_space::FindByRegex(std::string const &line, std::regex const reg, int regGroup)
 {
     std::smatch matchArr;
     std::string matchStr;
 
     std::regex_search(line, matchArr, reg);
 
-    if(static_cast<int>(matchArr.size()) > (regGroup - 1))
+    if(static_cast<int>(matchArr.size()) > regGroup)
     {
-        matchStr = matchArr[regGroup - 1].str();
+        matchStr = matchArr[regGroup].str();
     }
 
     return matchStr;
 }
 
-std::string utility_space::replaceByRegexVec(std::string const &srcStr, std::vector<std::pair<std::regex, std::string>> regDstPair)
+std::string utility_space::FindByRegex(std::string const &line, std::string const &expr, int regGroup)
+{
+    RegexSiem regExpr(expr);
+
+    return FindByRegex(line, regExpr, regGroup);
+}
+
+std::string utility_space::ReplaceByRegexVec(std::string const &srcStr, std::vector<std::pair<std::regex, std::string>> regDstPair)
 {
     std::string replacedStr = srcStr;
 
@@ -89,7 +96,7 @@ std::string utility_space::replaceByRegexVec(std::string const &srcStr, std::vec
     return replacedStr;
 }
 
-std::string utility_space::replaceByRegexVec(std::string const &srcStr, std::vector<std::pair<RegexSiem, std::string>> regDstPair)
+std::string utility_space::ReplaceByRegexVec(std::string const &srcStr, std::vector<std::pair<RegexSiem, std::string>> regDstPair)
 {
     std::string replacedStr = srcStr;
 

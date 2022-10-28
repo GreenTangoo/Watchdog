@@ -11,10 +11,11 @@ namespace utility_space
 {
 	class DateTime
 	{
-	private:
-		enum monthType { JAN = 1, FEB = 2,  MARCH = 3, APRIL = 4,
+    public:
+        enum class monthType { JAN = 1, FEB = 2,  MARCH = 3, APRIL = 4,
 						 MAY = 5, JUN = 6,  JUL = 7,   AUG = 8,
 						 SEP = 9, OCT = 10, NOV = 11,  DEC = 12};
+    private:
 		int years;
 		int months;
 		int days;
@@ -25,13 +26,12 @@ namespace utility_space
 	private:
 		enum compareType { EQUAL = 0, FIRST_BIGGER = 1, SECOND_BIGGER = -1 };
 		enum formatSymbolType { Y = 'Y', M = 'M', D = 'D', h = 'h', m = 'm', s = 's', l = 'l'};
-		std::map<monthType, int> monthDaysAmountMap;
 	private:
 		void initializeDaysMap();
 		bool isValidDateTime();
 		bool isSpecialYear(int year);
 		compareType compare(DateTime const &first, DateTime const &second);
-		std::string getSubTime(char subTimeSymbol);
+                std::string getSubTime(char subTimeSymbol) const;
 		void putSubTime(std::string timeStr, formatSymbolType symbolTimeType);
 		bool isNumberString(std::string str);
 	public:
@@ -48,7 +48,7 @@ namespace utility_space
 		bool operator<=(DateTime const &other);
 		bool operator>=(DateTime const &other);
 		bool operator!=(DateTime const &other);
-		std::string getFormatTime(std::string const &formatString);
+                std::string getFormatTime(std::string const &formatString) const;
 		void putFormatTime(std::string const &stringTime, std::string const &formatString);
 		void add(DateTime const &other);
 		void add(std::string const &timeString, std::string const &formatString);

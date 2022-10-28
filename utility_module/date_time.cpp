@@ -5,6 +5,11 @@
 using namespace utility_space;
 using namespace siem_ex_space;
 
+namespace
+{
+    std::map<DateTime::monthType, int> monthDaysAmountMap;
+}
+
 /*------------------------------------------------------------------------------*/
 /*--------------------------------PUBLIC----------------------------------------*/
 /*------------------------------------------------------------------------------*/
@@ -89,10 +94,10 @@ bool DateTime::operator<=(DateTime const &other)
 bool DateTime::operator>=(DateTime const &other)
 {
 	int result = compare(*this, other);
-	return (result = EQUAL) || (result == FIRST_BIGGER);
+    return (result == EQUAL) || (result == FIRST_BIGGER);
 }
 
-std::string DateTime::getFormatTime(std::string const &formatString)
+std::string DateTime::getFormatTime(std::string const &formatString) const
 {
 	std::string resultTimeString;
 
@@ -418,18 +423,18 @@ bool DateTime::isValidDateTime()
 
 void DateTime::initializeDaysMap()
 {
-	monthDaysAmountMap[JAN] = 31;
-	monthDaysAmountMap[FEB] = (isSpecialYear(this->years) == true ? 29 : 28);
-	monthDaysAmountMap[MARCH] = 31;
-	monthDaysAmountMap[APRIL] = 30;
-	monthDaysAmountMap[MAY] = 31;
-	monthDaysAmountMap[JUN] = 30;
-	monthDaysAmountMap[JUL] = 31;
-	monthDaysAmountMap[AUG] = 31;
-	monthDaysAmountMap[SEP] = 30;
-	monthDaysAmountMap[OCT] = 31;
-	monthDaysAmountMap[NOV] = 30;
-	monthDaysAmountMap[DEC] = 31;
+    monthDaysAmountMap[monthType::JAN] = 31;
+    monthDaysAmountMap[monthType::FEB] = (isSpecialYear(this->years) == true ? 29 : 28);
+    monthDaysAmountMap[monthType::MARCH] = 31;
+    monthDaysAmountMap[monthType::APRIL] = 30;
+    monthDaysAmountMap[monthType::MAY] = 31;
+    monthDaysAmountMap[monthType::JUN] = 30;
+    monthDaysAmountMap[monthType::JUL] = 31;
+    monthDaysAmountMap[monthType::AUG] = 31;
+    monthDaysAmountMap[monthType::SEP] = 30;
+    monthDaysAmountMap[monthType::OCT] = 31;
+    monthDaysAmountMap[monthType::NOV] = 30;
+    monthDaysAmountMap[monthType::DEC] = 31;
 }
 
 bool DateTime::isSpecialYear(int year)
@@ -439,7 +444,7 @@ bool DateTime::isSpecialYear(int year)
 	return true;
 }
 
-std::string DateTime::getSubTime(char formatSymbol)
+std::string DateTime::getSubTime(char formatSymbol) const
 {
 	switch(formatSymbol)
 	{
@@ -465,7 +470,7 @@ std::string DateTime::getSubTime(char formatSymbol)
 		return std::to_string(this->milliseconds);
 		break;
 	default:
-		throw DateTimeException("Bad symol in format string: " + formatSymbol, 
+        throw DateTimeException("Bad symol in format string: " + std::to_string(formatSymbol),
 			DateTimeException::BAD_FORMAT_SYMBOL);
 	}
 }
@@ -502,7 +507,7 @@ void DateTime::putSubTime(std::string timeStr, formatSymbolType symbolTimeType)
 		this->milliseconds = numReprStr;
 		break;
 	default:
-		throw DateTimeException("Bad symol in format string: " + symbolTimeType, 
+        throw DateTimeException("Bad symol in format string: " + std::to_string(symbolTimeType),
 			DateTimeException::BAD_FORMAT_SYMBOL);
 	}
 }

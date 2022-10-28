@@ -1,11 +1,30 @@
 {
-    "startup":{
-        "amount_aggr_threads" : "4",
-        "amount_corr_threads" : "4",
-        "use_custom_aggregation" : "false",
-        "use_custom_correlation" : "false",
-        "aggregation_custom_config" : "configs/aggregation_config.json",
-        "correlation_custom_config" : "configs/symptoms_config.json",
-        "correlation_module" : "statistic"
+  "startup" : {
+      "amount_aggr_threads" : "1",
+      "amount_corr_threads" : "1",
+      "use_custom_aggregation" : "false",
+      "use_custom_correlation" : "false",
+      "aggregation_custom_config" : "configs/aggregation_config.json",
+      "correlation_custom_config" : "configs/symptoms_config.json",
+      "correlation_module" : "statistic",
+      "log_details" : "2",
+      "seriazlie" : "0"
+  },
+  "aggregations_settings" : {
+  	"iptables" : {
+  		"src_file" : "iptables.log",
+  		"dst_file" : "iptables.json",
+  		"details_level" : "0"
+  	},
+    "sshd" : {
+      "src_file" : "ssh.log",
+      "dst_file" : "sshd.json",
+      "details_level" : "0"
+    },
+    "vsftpd" : {
+      "src_file" : "vsftpd.log",
+      "dst_file" : "vsftpd.json",
+      "details_level" : "0"
     }
+  }
 }

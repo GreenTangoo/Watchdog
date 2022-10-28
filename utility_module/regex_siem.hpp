@@ -23,9 +23,10 @@ namespace utility_space
         std::string expression;
     };
 
-    std::string findByRegex(std::string const &line, std::regex const reg, int regGroup);
-    std::string replaceByRegexVec(std::string const &srcStr, std::vector<std::pair<std::regex, std::string>> regDstPair);
-    std::string replaceByRegexVec(std::string const &srcStr, std::vector<std::pair<RegexSiem, std::string>> regDstPair);
+    std::string FindByRegex(std::string const &line, std::regex const reg, int regGroup);
+    std::string FindByRegex(std::string const &line, std::string const &expr, int regGroup);
+    std::string ReplaceByRegexVec(std::string const &srcStr, std::vector<std::pair<std::regex, std::string>> regDstPair);
+    std::string ReplaceByRegexVec(std::string const &srcStr, std::vector<std::pair<RegexSiem, std::string>> regDstPair);
 }
 
 #endif // REGEX_SIEM_HPP

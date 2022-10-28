@@ -8,7 +8,6 @@
 #include "../utility_module/thread_pool.hpp"
 
 using namespace main_siem_space;
-using namespace description_space;
 using namespace utility_space;
 
 namespace correlation_space

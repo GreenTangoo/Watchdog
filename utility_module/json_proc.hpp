@@ -1,7 +1,6 @@
 #ifndef JSON_PROC_HPP
 #define JSON_PROC_HPP
 
-#include <memory>
 #include <string>
 #include <vector>
 #include <map>
@@ -10,13 +9,14 @@
 
 #include "filesystem_siem.hpp"
 #include "string_manager.hpp"
+#include "data_storage.hpp"
 
 namespace utility_space
 {
     class IJsonContainer;
     typedef std::shared_ptr<IJsonContainer> IJsonContainerPtr;
 
-    class IJsonContainer
+    class IJsonContainer : public IDataStorage
     {
     public:
         enum class JsContainerType {
@@ -106,18 +106,8 @@ namespace utility_space
     IJsonContainerPtr CreateContainer(std::vector<IJsonContainerPtr> const &values);
     IJsonContainerPtr CreateContainer(std::map<std::string, IJsonContainerPtr> const &values);
 
-    class IJsonSerializer
-    {
-    public:
-        explicit IJsonSerializer(IJsonContainerPtr json);
-        explicit IJsonSerializer(IJsonSerializer const &other);
-        explicit IJsonSerializer(IJsonSerializer &&other);
-        virtual void Write() = 0;
-    protected:
-        IJsonContainerPtr m_pJson;
-    };
 
-    class JsonFileSerializer : public IJsonSerializer
+    class JsonFileSerializer : public ISerializer
     {
     public:
         explicit JsonFileSerializer(IJsonContainerPtr json);
@@ -144,16 +134,12 @@ namespace utility_space
             void RecursiveResolveWrite(IJsonContainerPtr pJson, FileManipulator &writer);
         };
     private:
+        IJsonContainerPtr m_pJson;
         std::string m_Filename;
     };
 
-    class IJsonDeserializer
-    {
-    public:
-        virtual IJsonContainerPtr Read() = 0;
-    };
 
-    class JsonFileDeserializer : public IJsonDeserializer
+    class JsonFileDeserializer : public IDeserializer
     {
     public:
         explicit JsonFileDeserializer();
@@ -164,7 +150,7 @@ namespace utility_space
         JsonFileDeserializer const& operator=(JsonFileDeserializer const &other);
         JsonFileDeserializer const& operator=(JsonFileDeserializer &&other);
         void SetFile(std::string const &filename);
-        virtual IJsonContainerPtr Read() override;
+        IJsonContainerPtr Read();
     public:
         class JsonFileDeserializerException : public SIEMException
         {
@@ -184,6 +170,7 @@ namespace utility_space
         };
     private:
         static std::string ReadUntilSymbol(FileManipulator &reader, char const symbol);
+        static operationState ReadSymbolWithSkipUseless(FileManipulator &reader, char &symbol);
         static void SkipStreamIncludeSymbol(FileManipulator &reader, char const symbol);
         static void SkipUselessSymbols(FileManipulator &reader);
         static std::string GetKey(FileManipulator &reader);

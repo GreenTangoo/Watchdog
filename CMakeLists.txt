@@ -11,8 +11,8 @@ set(AGGREGATION_MODULE
     aggregation_module/aggregation_module_initializer.cpp
     aggregation_module/grabber_base.hpp
     aggregation_module/grabber_base.cpp
-    aggregation_module/grabbers.hpp
-    aggregation_module/grabbers.cpp
+    aggregation_module/net_grabbers.hpp
+    aggregation_module/net_grabbers.cpp
 )
 
 set(CORRELATION_MODULE
@@ -28,13 +28,6 @@ set(CORRELATION_MODULE
     correlation_module/correlation/machine_learning/correlation_ml.cpp
     correlation_module/correlation/python_invoke.hpp
     correlation_module/correlation/python_invoke.cpp
-)
-
-set(DESCRIPTION_MODULE
-    description_module/configuration.hpp
-    description_module/configuration.cpp
-    description_module/types_resolver.hpp
-    description_module/types_resolver.cpp
 )
 
 set(EXCEPTION_MODULE_DIR
@@ -62,6 +55,7 @@ set(UTILITY_MODULE
     utility_module/semaphore.cpp
     utility_module/string_manager.hpp
     utility_module/string_manager.cpp
+    utility_module/data_storage.hpp
     utility_module/json_proc.hpp
     utility_module/json_proc.cpp
 )
@@ -74,6 +68,8 @@ set(UTILITY_MODULE_HEADERS
 set(SIEM_STARTUP_MODULE
     siem_startup.hpp
     siem_startup.cpp
+    siem_defines.hpp
+    siem_defines.cpp
 )
 
 include_directories(configs)
@@ -89,9 +85,6 @@ link_libraries(aggregation_module)
 
 add_library(correlation_module ${CORRELATION_MODULE})
 link_libraries(correlation_module)
-
-add_library(description_module ${DESCRIPTION_MODULE})
-link_libraries(description_module)
 
 add_library(utility_module ${UTILITY_MODULE})
 link_libraries(utility_module)

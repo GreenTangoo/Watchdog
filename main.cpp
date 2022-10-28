@@ -4,6 +4,7 @@
 #include <csignal>
 
 #include "siem_startup.hpp"
+#include "siem_defines.hpp"
 #include "utility_module/json_proc.hpp"
 #include "aggregation_module/aggregation_module_initializer.hpp"
 
@@ -11,7 +12,7 @@ using namespace utility_space;
 using namespace main_siem_space;
 using namespace aggregation_space;
 
-#define MAIN_OPTIONS_PATH "configs/options.json"
+
 
 void interrupt_handler(int sig)
 {
@@ -39,13 +40,14 @@ int main(int argc, char** argv)
 {
     signal(SIGINT, interrupt_handler);
 
-    JsonFileDeserializer reader(MAIN_OPTIONS_PATH);
+    JsonFileDeserializer reader(g_SIEMConfigPath);
 
     IJsonContainerPtr pConfig = reader.Read();
     SettingsSIEM startUpSettings(pConfig);
 
+    AggregationInitializer aggInit(startUpSettings);
 
-
+    aggInit.StartCycle();
 
     return 0;
 }

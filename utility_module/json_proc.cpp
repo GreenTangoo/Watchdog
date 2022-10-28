@@ -314,44 +314,23 @@ IJsonContainerPtr utility_space::CreateContainer(std::map<std::string, IJsonCont
 
 // //////////////////////////////////////////////////////////////////////
 // JsonFileSerializer
-IJsonSerializer::IJsonSerializer(IJsonContainerPtr json) :
-    m_pJson(json)
-{
-
-}
-
-IJsonSerializer::IJsonSerializer(IJsonSerializer const &other) :
-    m_pJson(other.m_pJson)
-{
-
-}
-
-IJsonSerializer::IJsonSerializer(IJsonSerializer &&other) :
-    m_pJson(std::move(other.m_pJson))
-{
-
-}
-
-
-// //////////////////////////////////////////////////////////////////////
-// JsonFileSerializer
 JsonFileSerializer::JsonFileSerializer(IJsonContainerPtr json) :
-    IJsonSerializer(json)
+    m_pJson(json)
 {
 }
 
 JsonFileSerializer::JsonFileSerializer(IJsonContainerPtr json, std::string const &filename) :
-    IJsonSerializer(json), m_Filename(filename)
+    m_pJson(json), m_Filename(filename)
 {
 }
 
 JsonFileSerializer::JsonFileSerializer(JsonFileSerializer const &other) :
-    IJsonSerializer(other), m_Filename(other.m_Filename)
+    m_pJson(other.m_pJson), m_Filename(other.m_Filename)
 {
 }
 
 JsonFileSerializer::JsonFileSerializer(JsonFileSerializer &&other) :
-    IJsonSerializer(std::move(other)), m_Filename(std::move(other.m_Filename))
+    m_pJson(std::move(other.m_pJson)), m_Filename(std::move(other.m_Filename))
 {
 }
 
@@ -588,6 +567,13 @@ std::string JsonFileDeserializer::ReadUntilSymbol(FileManipulator &reader, char 
     return readStr;
 }
 
+operationState JsonFileDeserializer::ReadSymbolWithSkipUseless(FileManipulator &reader, char &symbol)
+{
+    SkipUselessSymbols(reader);
+
+    return reader->ReadSymbol(symbol);
+}
+
 void JsonFileDeserializer::SkipStreamIncludeSymbol(FileManipulator &reader, char const symbol)
 {
     char ch = 0;
@@ -600,13 +586,14 @@ void JsonFileDeserializer::SkipStreamIncludeSymbol(FileManipulator &reader, char
 
 void JsonFileDeserializer::SkipUselessSymbols(FileManipulator &reader)
 {
-    // SKip ' ', '\n', '\r' symbols
+    // SKip ' ', '\n', '\r' '\t' symbols
     char ch = 0;
     while(reader->ReadSymbol(ch) != std::ios_base::iostate::_S_eofbit)
     {
         if((ch != ' ')  &&
            (ch != '\n') &&
-           (ch != '\r'))
+           (ch != '\r') &&
+           (ch != '\t'))
         {
             reader->PutbackSymbol(ch);
             break;
@@ -619,9 +606,8 @@ std::string JsonFileDeserializer::GetKey(FileManipulator &reader)
     char ch = 0;
     std::string key = JsonFileDeserializer::ReadUntilSymbol(reader, static_cast<char>(SymbolType::DQUOTE));
 
-    SkipUselessSymbols(reader);
+    ReadSymbolWithSkipUseless(reader, ch);
 
-    reader->ReadSymbol(ch);
     if(ch != static_cast<char>(SymbolType::DOUBLE_DOTS))
     {
         throw JsonFileDeserializerException("Error occured due json file reading",
@@ -637,9 +623,7 @@ IJsonContainerPtr JsonFileDeserializer::ReadObject(FileManipulator &reader)
     std::string key;
     char ch = 0;
 
-    SkipUselessSymbols(reader);
-
-    while(reader->ReadSymbol(ch) != std::ios_base::iostate::_S_eofbit)
+    while(ReadSymbolWithSkipUseless(reader, ch) != std::ios_base::iostate::_S_eofbit)
     {
         if(ch == static_cast<char>(SymbolType::R_BRACKET))
             break;
@@ -669,9 +653,7 @@ IJsonContainerPtr JsonFileDeserializer::ReadArray(FileManipulator &reader)
     std::vector<IJsonContainerPtr> values;
     char ch = 0;
 
-    SkipUselessSymbols(reader);
-
-    while(reader->ReadSymbol(ch) != std::ios_base::iostate::_S_eofbit)
+    while(ReadSymbolWithSkipUseless(reader, ch) != std::ios_base::iostate::_S_eofbit)
     {
         if(ch == static_cast<char>(SymbolType::R_SQ_BRACKET))
             break;
@@ -680,8 +662,6 @@ IJsonContainerPtr JsonFileDeserializer::ReadArray(FileManipulator &reader)
             continue;
 
         reader->PutbackSymbol(ch);
-
-        SkipUselessSymbols(reader);
 
         IJsonContainerPtr pContainer = JsonFileReaderResolver::GetInstance().RecursiveResolveRead(reader);
         values.push_back(pContainer);
@@ -709,7 +689,8 @@ JsonFileDeserializer::JsonFileReaderResolver& JsonFileDeserializer::JsonFileRead
 IJsonContainerPtr JsonFileDeserializer::JsonFileReaderResolver::RecursiveResolveRead(FileManipulator &reader)
 {
     char ch = 0;
-    operationState state = reader->ReadSymbol(ch);
+
+    operationState state = ReadSymbolWithSkipUseless(reader, ch);
 
     if(state == std::ios_base::iostate::_S_eofbit)
         return nullptr;
