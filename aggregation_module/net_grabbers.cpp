@@ -169,7 +169,7 @@ AggregationIpTables::IpTablesRecordInfo& AggregationIpTables::CreateRecordInfo(s
 
     if(srcIp.length() > 0)
     {
-        Ip4Addr srcAddr = StringIp2Bytes(srcIp);
+        const Ip4Addr srcAddr = StringIp2Bytes(srcIp);
 
         return CreateRecordInfoEx(srcAddr, m_Records);
     }
@@ -680,6 +680,514 @@ void AggregationSshd::SetTime(SshdRecordInfo &record, std::string const &logLine
 }
 
 
+// /////////////////////////////////////////////////////////////////////////////
+// AggregationApache
+// Class for apache symptoms aggregation.
+//
+// Depending on the level of detail of the collection of logs,
+// the following information is collected:
+// 1) LOW - source addr, request type, request status.
+// 2) MEDIUM - LOW + server path, protocol version.
+// 3) HIGH - MEDIUM + file size, datetime.
+//
+// Other information collect depends on settings.
+// ////////////////////////////////////////////////////////////////////////////
+static const std::string ApacheSourceAddrExp = "\\d+\\.\\d+\\.\\d+\\.\\d+";
+static const std::string ApacheReqTypeExp = "]\\s\\\"(\\w+)";
+static const std::string ApacheReqStatusExp = "\\\"\\s(\\d+)";
+static const std::string ApacheServPathExp = "\\\"\\w+\\s(\\S+)";
+static const std::string ApacheProtoVerExp = "\\s(\\S+)\\\"";
+static const std::string ApacheFileSizeExp = "\\\"\\s\\d+\\s(\\d+)";
+static const std::string ApacheTimeExp = "\\d+:\\d+:\\d+:\\d+";
+
+static std::map<std::string, unsigned short> ApacheReqTypeMap =
+{
+    { "GET", 1 },
+    { "POST", 2 }
+};
+
+static std::map<std::string, unsigned short> ApacheProtoVerMap =
+{
+    { "HTTP/1.0", 1 },
+    { "HTTP/1.0" , 2 }
+};
+
+AggregationApache::AggregationApache(AggregationApacheSettingsPtr const &settings) :
+    GrabberBase(settings)
+{
+
+}
+
+AggregationApache::AggregationApache(AggregationApache const &other) :
+    GrabberBase(other)
+{
+
+}
+
+AggregationApache::AggregationApache(AggregationApache &&other) :
+    GrabberBase(std::move(other))
+{
+
+}
+
+AggregationApache const& AggregationApache::operator=(AggregationApache const &other)
+{
+    if(this != &other)
+    {
+        GrabberBase::operator=(other);
+    }
+
+    return *this;
+}
+
+AggregationApache const& AggregationApache::operator=(AggregationApache &&other)
+{
+    if(this != &other)
+    {
+        GrabberBase::operator=(std::move(other));
+    }
+
+    return *this;
+}
+
+bool AggregationApache::StartAggregate()
+{
+    try
+    {
+        FileManipulator reader(GetSrcFile());
+
+        std::string logLine;
+        while(reader->GetStream().peek() != EOF)
+        {
+            reader->ReadLine(logLine);
+            ParseString(logLine);
+        }
+
+        return true;
+    }
+    catch(FileManipulator::FilesystemSiemException const &ex)
+    {
+        SiemLogger &logger = SiemLogger::GetInstance();
+
+        if(ex.GetErrno() == FileManipulator::FilesystemSiemException::INVALID_PATH)
+        {
+            logger.WriteLog("AggregationApache", "Cannot open log file: " + GetSrcFile(), 1);
+        }
+        else
+        {
+            logger.WriteLog("AggregationApache", "Unrecognized filesystem error", 1);
+        }
+    }
+
+    return false;
+}
+
+void AggregationApache::Accept(IAggrSerializerVisitorPtr const &pVisitor)
+{
+    pVisitor->Visit(this);
+}
+
+std::map<Ip4Addr, std::vector<AggregationApache::ApacheRecordInfo>> const& AggregationApache::GetData() const
+{
+    return m_Records;
+}
+
+void AggregationApache::ParseString(std::string const &logLine)
+{
+    try
+    {
+        ApacheRecordInfo& record = CreateRecordInfo(logLine);
+
+        SetRequestType(record, logLine);
+        SetRequestStatus(record, logLine);
+
+        DetailsLevel logLvl = GetAggregationDetailsLevel();
+
+        if((logLvl == DetailsLevel::MEDIUM) || (logLvl == DetailsLevel::HIGH))
+        {
+            SetServerPath(record, logLine);
+            SetProtocolVersion(record, logLine);
+
+            if(logLvl == DetailsLevel::HIGH)
+            {
+                SetFileSize(record, logLine);
+                SetDateTime(record, logLine);
+            }
+        }
+    }
+    catch(AggregationException const &ex)
+    {
+        SiemLogger &logger = SiemLogger::GetInstance();
+        logger.WriteLog("AggregationApache", "Cannot create record info structure", 1);
+    }
+}
+
+AggregationApache::ApacheRecordInfo& AggregationApache::CreateRecordInfo(std::string const &logLine)
+{
+    const std::string sourceAddr = FindByRegex(logLine, ApacheSourceAddrExp, 0);
+
+    if(sourceAddr.size() > 0)
+    {
+        const Ip4Addr srcAddrBytes = StringIp2Bytes(sourceAddr);
+
+        return CreateRecordInfoEx(srcAddrBytes, m_Records);
+    }
+    else
+    {
+        throw AggregationException("Cannot create apache record info: source address empty",
+                                   AggregationException::CANNOT_CREATE_RECORD);
+    }
+}
+
+void AggregationApache::SetRequestType(ApacheRecordInfo &record, std::string const &logLine)
+{
+    const std::string reqTypeStr = FindByRegex(logLine, ApacheReqTypeExp, 1);
+
+    if(reqTypeStr.size() > 0)
+    {
+        try
+        {
+            const unsigned short reqType = ApacheReqTypeMap[reqTypeStr];
+            record.m_ReqType = static_cast<RequestType>(reqType);
+        }
+        catch(std::out_of_range const&)
+        {
+            SiemLogger &logger = SiemLogger::GetInstance();
+            logger.WriteLog("AggregationApache", "Unrecgonized request type", 1);
+            logger.WriteLog("AggregationApache", "In source line: " + logLine, 2);
+        }
+    }
+    else
+    {
+        record.m_ReqType = RequestType::NONE;
+    }
+}
+
+void AggregationApache::SetRequestStatus(ApacheRecordInfo &record, std::string const &logLine)
+{
+    const std::string reqStatusStr = FindByRegex(logLine, ApacheReqStatusExp, 1);
+
+    if(reqStatusStr.size() > 0)
+    {
+        record.m_ReqStatus = static_cast<unsigned short>(std::atoi(reqStatusStr.c_str()));
+    }
+}
+
+void AggregationApache::SetProtocolVersion(ApacheRecordInfo &record, std::string const &logLine)
+{
+    const std::string protoVersionStr = FindByRegex(logLine, ApacheProtoVerExp, 1);
+
+    if(protoVersionStr.size() > 0)
+    {
+        try
+        {
+            const unsigned short protoVer = ApacheProtoVerMap[protoVersionStr];
+            record.m_ProtoVer = static_cast<ProtocolVersion>(protoVer);
+        }
+        catch (std::out_of_range const&)
+        {
+            SiemLogger &logger = SiemLogger::GetInstance();
+            logger.WriteLog("AggregationApache", "Unrecgonized protocol version", 1);
+            logger.WriteLog("AggregationApache", "In source line: " + logLine, 2);
+        }
+    }
+    else
+    {
+        record.m_ProtoVer = ProtocolVersion::NONE;
+    }
+}
+
+void AggregationApache::SetServerPath(ApacheRecordInfo &record, std::string const &logLine)
+{
+    const std::string serverPathStr = FindByRegex(logLine, ApacheServPathExp, 1);
+
+    if(serverPathStr.size() > 0)
+    {
+        record.m_ServerPath = serverPathStr;
+    }
+}
+
+void AggregationApache::SetFileSize(ApacheRecordInfo &record, std::string const &logLine)
+{
+    const std::string fileSizeStr = FindByRegex(logLine, ApacheFileSizeExp, 1);
+
+    if(fileSizeStr.size() > 0)
+    {
+        record.m_FileSize = static_cast<unsigned int>(std::atoi(fileSizeStr.c_str()));
+    }
+}
+
+void AggregationApache::SetDateTime(ApacheRecordInfo &record, std::string const &logLine)
+{
+    const std::string dateTimeStr = FindByRegex(logLine, ApacheTimeExp, 0);
+
+    if(dateTimeStr.size() > 0)
+    {
+        record.m_Time.putFormatTime(dateTimeStr, "%Y:%h:%m:%s");
+    }
+}
+
+
+// /////////////////////////////////////////////////////////////////////////////
+// AggregationPam
+// Class for pam symptoms aggregation.
+//
+// Depending on the level of detail of the collection of logs,
+// the following information is collected:
+// 1) LOW - source addr, request type, request status.
+// 2) MEDIUM - LOW + server path, protocol version.
+// 3) HIGH - MEDIUM + file size, datetime.
+//
+// Other information collect depends on settings.
+// ////////////////////////////////////////////////////////////////////////////
+static const std::string PamProcessName1Exp = "(\\w+):\\spam_unix";
+static const std::string PamProcessName2Exp = "(\\w+)[(\\[]";
+static const std::string PamSessionManipulationExp = "session\\s(?:opened|closed)";
+static const std::string PamAuthFailruleExp = "authentication\\sfailure";
+static const std::string PamInvalidLoginAttemptExp = "check\\spass";
+static const std::string PamUsernameExp = "user\\s(\\w+)";
+static const std::string PamPidExp = "\\[(\\d+)\\]";
+static const std::string PamSessionTypeExp = "session\\s(opened|closed)";
+static const std::string PamRemoteHostExp = "rhost=(\\d+\\.\\d+\\.\\d+\\.\\d+)";
+static const std::string PamRemoteUserExp = "ruser=(\\w+)";
+static const std::string PamTtyExp = "tty=(\\d+)";
+
+
+
+
+AggregationPam::AggregationPam(AggregationPamSettingsPtr const &settings) :
+    GrabberBase(settings)
+{
+
+}
+
+AggregationPam::AggregationPam(AggregationPam const &other) :
+    GrabberBase(other)
+{
+
+}
+
+AggregationPam::AggregationPam(AggregationPam &&other) :
+    GrabberBase(std::move(other))
+{
+
+}
+
+AggregationPam const& AggregationPam::operator=(AggregationPam const &other)
+{
+    if(this != &other)
+    {
+        GrabberBase::operator=(other);
+    }
+
+    return *this;
+}
+
+AggregationPam const& AggregationPam::operator=(AggregationPam &&other)
+{
+    if(this != &other)
+    {
+        GrabberBase::operator=(std::move(other));
+    }
+
+    return *this;
+}
+
+bool AggregationPam::StartAggregate()
+{
+    try
+    {
+        FileManipulator reader(GetSrcFile());
+
+        std::string logLine;
+        while(reader->GetStream().peek() != EOF)
+        {
+            reader->ReadLine(logLine);
+            ParseString(logLine);
+        }
+
+        return true;
+    }
+    catch(FileManipulator::FilesystemSiemException const &ex)
+    {
+        SiemLogger &logger = SiemLogger::GetInstance();
+
+        if(ex.GetErrno() == FileManipulator::FilesystemSiemException::INVALID_PATH)
+        {
+            logger.WriteLog("AggregationApache", "Cannot open log file: " + GetSrcFile(), 1);
+        }
+        else
+        {
+            logger.WriteLog("AggregationApache", "Unrecognized filesystem error", 1);
+        }
+    }
+
+    return false;
+}
+
+void AggregationPam::Accept(IAggrSerializerVisitorPtr const &pVisitor)
+{
+    pVisitor->Visit(this);
+}
+
+std::map<std::string, std::vector<AggregationPam::PamRecordInfo>> const& AggregationPam::GetData() const
+{
+    return m_Records;
+}
+
+void AggregationPam::ParseString(std::string const &logLine)
+{
+    try
+    {
+        PamRecordInfo& record = CreateRecordInfo(logLine);
+
+        SetRecordType(record, logLine);
+
+        if(std::shared_ptr<PamRecordBase> pRecordDetails =
+                CreateDetailsByRecordType(record.m_RecType))
+        {
+            SetUserName(*pRecordDetails, logLine);
+            SetPid(*pRecordDetails, logLine);
+
+            record.m_RecordDetails = pRecordDetails;
+        }
+        else
+        {
+            throw AggregationException("Cannot create pam record details by record type", 3);
+        }
+
+        DetailsLevel logLvl = GetAggregationDetailsLevel();
+
+        if((logLvl == DetailsLevel::MEDIUM) || (logLvl == DetailsLevel::HIGH))
+        {
+
+            if(logLvl == DetailsLevel::HIGH)
+            {
+            }
+        }
+    }
+    catch(AggregationException const &ex)
+    {
+        SiemLogger &logger = SiemLogger::GetInstance();
+        logger.WriteLog("AggregationPam", ex.what(), 1);
+    }
+}
+
+AggregationPam::PamRecordInfo& AggregationPam::CreateRecordInfo(std::string const &logLine)
+{
+    bool isFoundProcName = false;
+    std::string procName = FindByRegex(logLine, PamProcessName1Exp, 1);
+
+    if(procName.size() > 0)
+    {
+        isFoundProcName = true;
+    }
+    else
+    {
+        procName = FindByRegex(logLine, PamProcessName2Exp, 1);
+
+        if(procName.size() > 0)
+        {
+            isFoundProcName = true;
+        }
+    }
+
+    if(isFoundProcName)
+    {
+        return CreateRecordInfoEx(procName, m_Records);
+    }
+    else
+    {
+        throw AggregationException("Cannot create pam record info: process name empty",
+                                    AggregationException::CANNOT_CREATE_RECORD);
+    }
+}
+
+std::shared_ptr<AggregationPam::PamRecordBase> AggregationPam::CreateDetailsByRecordType(PamRecordType const detailsType)
+{
+    switch (detailsType)
+    {
+    case PamRecordType::SESSION_MANIPULATION:
+        return std::make_shared<SessionRecord>();
+    case PamRecordType::FAILED:
+        return std::make_shared<LoginFailed>();
+    case PamRecordType::INVALID_LOGIN_ATTEMPT:
+        return std::make_shared<PamRecordBase>();
+    default:
+        return nullptr;
+    }
+}
+
+void AggregationPam::SetRecordType(PamRecordInfo &record, std::string const &logLine)
+{    
+    for(;;)
+    {
+        std::string recordTypeStr = FindByRegex(logLine, PamSessionManipulationExp, 0);
+        if(recordTypeStr.size() > 0)
+        {
+            record.m_RecType = PamRecordType::SESSION_MANIPULATION;
+            break;
+        }
+
+        recordTypeStr = FindByRegex(logLine, PamAuthFailruleExp, 0);
+        if(recordTypeStr.size() > 0)
+        {
+            record.m_RecType = PamRecordType::SESSION_MANIPULATION;
+            break;
+        }
+
+        recordTypeStr = FindByRegex(logLine, PamInvalidLoginAttemptExp, 0);
+        if(recordTypeStr.size() > 0)
+        {
+            record.m_RecType = PamRecordType::SESSION_MANIPULATION;
+            break;
+        }
+
+        record.m_RecType = PamRecordType::NONE;
+    }
+}
+
+void AggregationPam::SetUserName(PamRecordBase &baseRecord, std::string const &logLine)
+{
+    const std::string username = FindByRegex(logLine, PamUsernameExp, 1);
+
+    if(username.size() > 0)
+    {
+        baseRecord.m_Username = username;
+    }
+}
+
+void AggregationPam::SetPid(PamRecordBase &baseRecord, std::string const &logLine)
+{
+    const std::string pidStr = FindByRegex(logLine, PamPidExp, 1);
+
+    if(pidStr.size() > 0)
+    {
+        baseRecord.m_Pid =
+                static_cast<unsigned int>(std::atoi(pidStr.c_str()));
+    }
+}
+
+void AggregationPam::SetSessionType(PamRecordBase &sessRecord, std::string const &logLine)
+{
+
+}
+
+void AggregationPam::SetRemoteHost(PamRecordBase &failRecord, std::string const &logLine)
+{
+
+}
+
+void AggregationPam::SetRemoteUser(PamRecordBase &failRecord, std::string const &logLine)
+{
+
+}
+
+void AggregationPam::SetTTY(PamRecordBase &failRecord, std::string const &logLine)
+{
+
+}
+
 
 // /////////////////////////////////////////////////////////////////////////////
 // AggrJsonSerializerVisitor
@@ -701,6 +1209,12 @@ static const std::string FilePathKey = "filepath";
 static const std::string ActionTypeKey = "action_type";
 static const std::string ActionStatusKey = "action_status";
 
+static const std::string RequestTypeKey = "request_type";
+static const std::string RequestStatusKey = "request_status";
+static const std::string ProtocolVersionKey = "protocol_version";
+static const std::string FileSizeKey = "filesize";
+
+
 void AggrJsonSerializerVisitor::Visit(AggregationIpTables const *pAggrIpTables) const
 {
     std::map<std::string, IJsonContainerPtr> serializeMap;
@@ -714,7 +1228,7 @@ void AggrJsonSerializerVisitor::Visit(AggregationIpTables const *pAggrIpTables) 
     IJsonContainerPtr pRecordsContainer = CreateContainer(serializeMap);
     std::map<std::string, IJsonContainerPtr> finalContainer =
     {
-        {"iptables", pRecordsContainer}
+        { "iptables", pRecordsContainer }
     };
 
     JsonFileSerializer serializer(CreateContainer(finalContainer), pAggrIpTables->GetDstFile());
@@ -734,7 +1248,7 @@ void AggrJsonSerializerVisitor::Visit(AggregationVsftpd const *pAggrVsftpd) cons
     IJsonContainerPtr pRecordsContainer = CreateContainer(serializeMap);
     std::map<std::string, IJsonContainerPtr> finalContainer =
     {
-        {"vsftpd", pRecordsContainer}
+        { "vsftpd", pRecordsContainer }
     };
 
     JsonFileSerializer serializer(CreateContainer(finalContainer), pAggrVsftpd->GetDstFile());
@@ -754,10 +1268,50 @@ void AggrJsonSerializerVisitor::Visit(AggregationSshd const *pAggrSshd) const
     IJsonContainerPtr pRecordsContainer = CreateContainer(serializeMap);
     std::map<std::string, IJsonContainerPtr> finalContainer =
     {
-        {"sshd", pRecordsContainer}
+        { "sshd", pRecordsContainer }
     };
 
     JsonFileSerializer serializer(CreateContainer(finalContainer), pAggrSshd->GetDstFile());
+    serializer.Write();
+}
+
+void AggrJsonSerializerVisitor::Visit(AggregationApache const *pAggrApache) const
+{
+    std::map<std::string, IJsonContainerPtr> serializeMap;
+
+    for(const auto& pair : pAggrApache->GetData())
+    {
+        const std::string key = Bytes2StringIp(pair.first);
+        FillSerializeStructure(key, pair.second, serializeMap);
+    }
+
+    IJsonContainerPtr pRecordsContainer = CreateContainer(serializeMap);
+    std::map<std::string, IJsonContainerPtr> finalContainer =
+    {
+        { "apache", pRecordsContainer }
+    };
+
+    JsonFileSerializer serializer(CreateContainer(finalContainer), pAggrApache->GetDstFile());
+    serializer.Write();
+}
+
+void AggrJsonSerializerVisitor::Visit(AggregationPam const *pAggrPam) const
+{
+    std::map<std::string, IJsonContainerPtr> serializeMap;
+
+    for(const auto& pair : pAggrPam->GetData())
+    {
+        const std::string key = pair.first;
+        FillSerializeStructure(key, pair.second, serializeMap);
+    }
+
+    IJsonContainerPtr pRecordsContainer = CreateContainer(serializeMap);
+    std::map<std::string, IJsonContainerPtr> finalContainer =
+    {
+        { "pam", pRecordsContainer }
+    };
+
+    JsonFileSerializer serializer(CreateContainer(finalContainer), pAggrPam->GetDstFile());
     serializer.Write();
 }
 
@@ -818,6 +1372,26 @@ IJsonContainerPtr AggrJsonSerializerVisitor::FromRecordInfo(AggregationSshd::Ssh
     };
 
     return CreateContainer(recordContainer);
+}
+
+IJsonContainerPtr AggrJsonSerializerVisitor::FromRecordInfo(AggregationApache::ApacheRecordInfo const &record) const
+{
+    std::map<std::string, IJsonContainerPtr> const recordContainer =
+    {
+        {RequestTypeKey, CreateContainer(std::to_string(static_cast<int>(record.m_ReqType)))},
+        {RequestStatusKey, CreateContainer(std::to_string(static_cast<int>(record.m_ReqStatus)))},
+        {ProtocolVersionKey, CreateContainer(std::to_string(static_cast<int>(record.m_ProtoVer)))},
+        {FilePathKey, CreateContainer(record.m_ServerPath)},
+        {FileSizeKey, CreateContainer(std::to_string(record.m_FileSize))},
+        {DateTimeKey, CreateContainer(record.m_Time.getFormatTime("%Y:%h:%m:%s"))}
+    };
+
+    return CreateContainer(recordContainer);
+}
+
+IJsonContainerPtr AggrJsonSerializerVisitor::FromRecordInfo(AggregationPam::PamRecordInfo const &record) const
+{
+
 }
 
 IAggrSerializerVisitorPtr aggregation_space::CreateVisitor(SerializeType const serializeKind)

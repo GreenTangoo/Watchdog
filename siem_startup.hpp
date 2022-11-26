@@ -18,8 +18,11 @@ namespace main_siem_space
     enum class AggrGrabber : unsigned short
     {
         aggrIPtables = 0, aggrVsftpd = 1,
-        aggrSshd = 2
+        aggrSshd = 2, aggrApache = 3,
+        aggrPam = 4
     };
+
+    std::string AggrGrabber2String(AggrGrabber const type);
 
     enum class SerializeType : unsigned short
     {
@@ -97,6 +100,36 @@ namespace main_siem_space
     typedef std::shared_ptr<AggregationSshdSettings> AggregationSshdSettingsPtr;
 
 
+    class AggregationApacheSettings : public SubAggregationsBaseSettings
+    {
+    public:
+        explicit AggregationApacheSettings() = default;
+        AggregationApacheSettings(AggregationApacheSettings const &other);
+        AggregationApacheSettings(AggregationApacheSettings &&other);
+        ~AggregationApacheSettings() = default;
+        AggregationApacheSettings const& operator=(AggregationApacheSettings const &other);
+        AggregationApacheSettings const operator=(AggregationApacheSettings &&other);
+        void ReadSettings(IJsonContainerPtr const &pConfig) override;
+        AggrGrabber GetAggrType() override;
+    };
+    typedef std::shared_ptr<AggregationApacheSettings> AggregationApacheSettingsPtr;
+
+
+    class AggregationPamSettings : public SubAggregationsBaseSettings
+    {
+    public:
+        explicit AggregationPamSettings() = default;
+        AggregationPamSettings(AggregationPamSettings const &other);
+        AggregationPamSettings(AggregationPamSettings &&other);
+        ~AggregationPamSettings() = default;
+        AggregationPamSettings const& operator=(AggregationPamSettings const &other);
+        AggregationPamSettings const& operator=(AggregationPamSettings &&other);
+        void ReadSettings(IJsonContainerPtr const &pConfig) override;
+        AggrGrabber GetAggrType() override;
+    };
+    typedef std::shared_ptr<AggregationPamSettings> AggregationPamSettingsPtr;
+
+
     class SubAggregationSettingsCreator
     {
     public:
@@ -115,7 +148,9 @@ namespace main_siem_space
         {
             { "iptables", AggrGrabber::aggrIPtables },
             { "vsftpd", AggrGrabber::aggrVsftpd },
-            { "sshd", AggrGrabber::aggrSshd }
+            { "sshd", AggrGrabber::aggrSshd },
+            { "apache", AggrGrabber::aggrApache },
+            { "pam", AggrGrabber::aggrPam }
         };
     };
 

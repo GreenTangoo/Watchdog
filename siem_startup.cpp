@@ -2,6 +2,25 @@
 
 using namespace main_siem_space;
 
+std::string main_siem_space::AggrGrabber2String(AggrGrabber const type)
+{
+    switch(type)
+    {
+    case AggrGrabber::aggrApache:
+        return "aggrApache";
+    case AggrGrabber::aggrIPtables:
+        return "aggrIPtables";
+    case AggrGrabber::aggrSshd:
+        return "aggrSshd";
+    case AggrGrabber::aggrVsftpd:
+        return "aggrVsftpd";
+    case AggrGrabber::aggrPam:
+        return "aggrPam";
+    }
+
+    return {};
+}
+
 // ////////////////////////////////////////////////////////////////
 // SubAggregationBase
 // Base class for apply settings for all agregations
@@ -223,6 +242,100 @@ AggrGrabber AggregationSshdSettings::GetAggrType()
 
 
 // ///////////////////////////////////////////////////////////////
+// AggregationApacheSettings
+// Class for setup Apache aggregation settings
+// ///////////////////////////////////////////////////////////////
+AggregationApacheSettings::AggregationApacheSettings(AggregationApacheSettings const &other) :
+    SubAggregationsBaseSettings(other)
+{
+
+}
+
+AggregationApacheSettings::AggregationApacheSettings(AggregationApacheSettings &&other) :
+    SubAggregationsBaseSettings(std::move(other))
+{
+
+}
+
+AggregationApacheSettings const& AggregationApacheSettings::operator=(AggregationApacheSettings const &other)
+{
+    if(this != &other)
+    {
+        SubAggregationsBaseSettings::operator=(other);
+    }
+
+    return *this;
+}
+
+AggregationApacheSettings const AggregationApacheSettings::operator=(AggregationApacheSettings &&other)
+{
+    if(this != &other)
+    {
+        SubAggregationsBaseSettings::operator=(std::move(other));
+    }
+
+    return *this;
+}
+
+void AggregationApacheSettings::ReadSettings(IJsonContainerPtr const &pConfig)
+{
+    SubAggregationsBaseSettings::ReadSettings(pConfig);
+}
+
+AggrGrabber AggregationApacheSettings::GetAggrType()
+{
+    return AggrGrabber::aggrApache;
+}
+
+
+// ///////////////////////////////////////////////////////////////
+// AggregationPamSettings
+// Class for setup Pam aggregation settings
+// ///////////////////////////////////////////////////////////////
+AggregationPamSettings::AggregationPamSettings(AggregationPamSettings const &other) :
+    SubAggregationsBaseSettings(other)
+{
+
+}
+
+AggregationPamSettings::AggregationPamSettings(AggregationPamSettings &&other) :
+    SubAggregationsBaseSettings(std::move(other))
+{
+
+}
+
+AggregationPamSettings const& AggregationPamSettings::operator=(AggregationPamSettings const &other)
+{
+    if(this != &other)
+    {
+        SubAggregationsBaseSettings::operator=(other);
+    }
+
+    return *this;
+}
+
+AggregationPamSettings const& AggregationPamSettings::operator=(AggregationPamSettings &&other)
+{
+    if(this != &other)
+    {
+        SubAggregationsBaseSettings::operator=(std::move(other));
+    }
+
+    return *this;
+}
+
+void AggregationPamSettings::ReadSettings(IJsonContainerPtr const &pConfig)
+{
+    SubAggregationsBaseSettings::ReadSettings(pConfig);
+}
+
+AggrGrabber AggregationPamSettings::GetAggrType()
+{
+    return AggrGrabber::aggrPam;
+}
+
+
+// ///////////////////////////////////////////////////////////////
 // SubAggregationSettingsCreator
 // Class-factory for creating specific aggregation settings.
 // ///////////////////////////////////////////////////////////////
@@ -242,6 +355,10 @@ SubAggregationBaseSettingsPtr SubAggregationSettingsCreator::Create(AggrGrabber 
         return std::make_shared<AggregationVsftpdSettings>();
     case AggrGrabber::aggrSshd:
         return std::make_shared<AggregationSshdSettings>();
+    case AggrGrabber::aggrApache:
+        return std::make_shared<AggregationApacheSettings>();
+    case AggrGrabber::aggrPam:
+        return std::make_shared<AggregationPamSettings>();
     default:
         throw AggregationException("Cannot create aggregator settings by aggregation type",
                                    AggregationException::INVALID_GRABBER_SETTINGS_TYPE);
@@ -329,11 +446,22 @@ void AggregationSettings::ReadSettings()
         {
             AggrGrabber kindGrabber = types.second;
 
-            SubAggregationBaseSettingsPtr pSettings = creator.Create(kindGrabber);
-            pSettings->ReadSettings(pConfig);
+            try
+            {
+                SubAggregationBaseSettingsPtr pSettings = creator.Create(kindGrabber);
+                pSettings->ReadSettings(pConfig);
 
-            m_SubAggrs.push_back(pSettings);
-            m_GrabbersTypes.push_back(kindGrabber);
+                m_SubAggrs.push_back(pSettings);
+                m_GrabbersTypes.push_back(kindGrabber);
+            }
+            catch(AggregationException const &ex)
+            {
+                SiemLogger &logger = SiemLogger::GetInstance();
+
+                logger.WriteLog("AggregationSettings",
+                                ex.what() + std::to_string(ex.getErrorCode()) + "| grabber type: " + AggrGrabber2String(kindGrabber),
+                                0);
+            }
         }
     }
 }

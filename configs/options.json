@@ -25,6 +25,16 @@
       "src_file" : "vsftpd.log",
       "dst_file" : "vsftpd.json",
       "details_level" : "0"
+    },
+    "apache" : {
+      "src_file" : "apache.log",
+      "dst_file" : "apache.json",
+      "details_level" : "0"
+    },
+    "pam" : {
+      "src_file" : "pam.log",
+      "dst_file" : "pam.json",
+      "details_level" : "0"
     }
   }
 }

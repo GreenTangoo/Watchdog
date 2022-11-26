@@ -34,6 +34,18 @@ IGrabberPtr GrabberFactory::Create(AggrGrabber const aggrType, AggregationSettin
                     std::dynamic_pointer_cast<AggregationSshdSettings>(
                         settings.GetSettingsByType(AggrGrabber::aggrSshd)));
 
+    case AggrGrabber::aggrApache:
+
+        return std::make_shared<AggregationApache>(
+                    std::dynamic_pointer_cast<AggregationApacheSettings>(
+                        settings.GetSettingsByType(AggrGrabber::aggrApache)));
+
+    case AggrGrabber::aggrPam:
+
+        return std::make_shared<AggregationPam>(
+                    std::dynamic_pointer_cast<AggregationPamSettings>(
+                        settings.GetSettingsByType(AggrGrabber::aggrPam)));
+
     default:
         throw AggregationException("Cannot create aggregator by aggregation type",
                                    AggregationException::INVALID_GRABBER_TYPE);
@@ -95,13 +107,24 @@ void AggregationInitializer::InitDefaultGrabbers(SettingsSIEM const &settings)
     // distribute them between threads.
     for(const auto grabberType : typesVec)
     {
-        IGrabberPtr pGrabber = factory.Create(grabberType, aggrSettings);
-        m_GrabbersSet[vectorNum].push_back(pGrabber);
-
-        vectorNum++;
-        if(vectorNum >= m_AmountThreads)
+        try
         {
-            vectorNum = 0;
+            IGrabberPtr pGrabber = factory.Create(grabberType, aggrSettings);
+            m_GrabbersSet[vectorNum].push_back(pGrabber);
+
+            vectorNum++;
+            if(vectorNum >= m_AmountThreads)
+            {
+                vectorNum = 0;
+            }
+        }
+        catch(AggregationException const &ex)
+        {
+            SiemLogger &logger = SiemLogger::GetInstance();
+
+            logger.WriteLog("AggregationInitializer",
+                            ex.what() + std::to_string(ex.getErrorCode()) + "| grabber type: " + AggrGrabber2String(grabberType),
+                            0);
         }
     }
 }
