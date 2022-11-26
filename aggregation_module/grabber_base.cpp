@@ -58,12 +58,6 @@ IGrabber const& IGrabber::operator=(IGrabber &&other)
 // GrabberBase
 // Base class for all types aggregation, using in SIEM.
 // ////////////////////////////////////////////////////////////////////////
-//GrabberBase::GrabberBase(const SubAggregationBaseSettingsPtr &settings) :
-//    m_SrcLogFile(settings->GetSrcFile()), m_DestLogFile(settings->GetDstFile(), FileManipulator::READ_WRITE),
-//    m_DetailsLvl(static_cast<DetailsLevel>(settings->GetDetailsLevel())), m_SerializeType(settings->GetSerializeKind())
-//{
-
-//}
 GrabberBase::GrabberBase(SubAggregationBaseSettingsPtr const &settings) :
     IGrabber(settings)
 {

@@ -5,6 +5,8 @@
 #include <vector>
 
 #include "net_grabbers.hpp"
+#include "system_grabbers.hpp"
+#include "aggregation_serializer_visitor.hpp"
 
 #include "../utility_module/thread_pool.hpp"
 

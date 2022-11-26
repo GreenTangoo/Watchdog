@@ -112,7 +112,7 @@ namespace siem_ex_space
     {
     public:
         enum AggregationErrorCode { INVALID_GRABBER_TYPE = 1 , INVALID_GRABBER_SETTINGS_TYPE,
-                                    CANNOT_CREATE_RECORD};
+                                    CANNOT_CREATE_RECORD, INVALID_GRABBER_SERIALIZER_TYPE };
 
         AggregationException(std::string const &exMsg, int errCode) :
             SIEMException(exMsg, errCode) {};

@@ -1,4 +1,5 @@
 #include "net_grabbers.hpp"
+#include "aggregation_serializer_visitor.hpp"
 
 using namespace aggregation_space;
 using namespace utility_space;
@@ -33,23 +34,19 @@ namespace
 // /////////////////////////////////////////////////////////////////////////////
 // AggregationIPtables
 // Class for IpTables symptoms aggregation.
-//
-// Depending on the level of detail of the collection of logs,
-// the following information is collected:
-// 1) LOW - source and destination ip address, src and dest mac address, datetime.
-// 2) MEDIUM - LOW + interface name, protocol type.
-// 3) HIGH - MEDIUM + source and destination ports.
-//
-// Other information collect depends on settings.
 // ////////////////////////////////////////////////////////////////////////////
-static const std::string IpTablesSrcIpAddrExp = "SRC=(\\S+)";
-static const std::string IpTablesDstIpAddrExp = "DST=(\\S+)";
-static const std::string IpTablesMacAddrExp = "MAC=(\\S+)";
-static const std::string IpTablesInterfaceExp = "IN=(\\S+)";
-static const std::string IpTablesProtoExp = "PROTO=(\\S+)";
-static const std::string IpTablesSrcPortExp = "SPT=(\\S+)";
-static const std::string IpTablesDstPortExp = "DPT=(\\S+)";
-static const std::string IpTablesTimeExp = "\\d{2}:\\d{2}:\\d{2}";
+
+namespace
+{
+    const std::string IpTablesSrcIpAddrExp = "SRC=(\\S+)";
+    const std::string IpTablesDstIpAddrExp = "DST=(\\S+)";
+    const std::string IpTablesMacAddrExp = "MAC=(\\S+)";
+    const std::string IpTablesInterfaceExp = "IN=(\\S+)";
+    const std::string IpTablesProtoExp = "PROTO=(\\S+)";
+    const std::string IpTablesSrcPortExp = "SPT=(\\S+)";
+    const std::string IpTablesDstPortExp = "DPT=(\\S+)";
+    const std::string IpTablesTimeExp = "\\d{2}:\\d{2}:\\d{2}";
+}
 
 AggregationIpTables::AggregationIpTables(const AggregationIpTablesSettingsPtr &settings) :
     GrabberBase(settings)
@@ -126,11 +123,6 @@ bool AggregationIpTables::StartAggregate()
 void AggregationIpTables::Accept(IAggrSerializerVisitorPtr const &pVisitor)
 {
     pVisitor->Visit(this);
-}
-
-std::map<Ip4Addr, std::vector<AggregationIpTables::IpTablesRecordInfo>> const&  AggregationIpTables::GetData() const
-{
-    return m_Records;
 }
 
 void AggregationIpTables::ParseString(std::string const &logLine)
@@ -256,20 +248,16 @@ void AggregationIpTables::SetTime(IpTablesRecordInfo &record, std::string const 
 // /////////////////////////////////////////////////////////////////////////////
 // AggregationVsftpd
 // Class for vsftpd symptoms aggregation.
-//
-// Depending on the level of detail of the collection of logs,
-// the following information is collected:
-// 1) LOW - source addr, connection type.
-// 2) MEDIUM - LOW + interaction status
-// 3) HIGH - MEDIUM + file path, datetime.
-//
-// Other information collect depends on settings.
 // ////////////////////////////////////////////////////////////////////////////
-static const std::string VsftpdSrcAddrExp = "\\d+\\.\\d+\\.\\d+\\.\\d+";
-static const std::string VsftpdInteractionTypeExp = "([A-Z]+):";
-static const std::string VsftpdInteractionStatusExp = "\\[\\w+\\]\\s(\\w+)";
-static const std::string VsftpdFilePathExp = "\\\"\\/*\\w+\\.*\\w*\\\"";
-static const std::string VsftpdTimeExp = "\\d{2}:\\d{2}:\\d{2}";
+
+namespace
+{
+    const std::string VsftpdSrcAddrExp = "\\d+\\.\\d+\\.\\d+\\.\\d+";
+    const std::string VsftpdInteractionTypeExp = "([A-Z]+):";
+    const std::string VsftpdInteractionStatusExp = "\\[\\w+\\]\\s(\\w+)";
+    const std::string VsftpdFilePathExp = "\\\"\\/*\\w+\\.*\\w*\\\"";
+    const std::string VsftpdTimeExp = "\\d{2}:\\d{2}:\\d{2}";
+}
 
 static std::map<std::string, unsigned short> FtpStrToConnMap =
 {
@@ -355,11 +343,6 @@ bool AggregationVsftpd::StartAggregate()
 void AggregationVsftpd::Accept(IAggrSerializerVisitorPtr const &pVisitor)
 {
     pVisitor->Visit(this);
-}
-
-std::map<Ip4Addr, std::vector<AggregationVsftpd::VsftpdRecordInfo>> const& AggregationVsftpd::GetData() const
-{
-    return m_Records;
 }
 
 void AggregationVsftpd::ParseString(std::string const &logLine)
@@ -469,20 +452,16 @@ void AggregationVsftpd::SetTime(VsftpdRecordInfo &record, std::string const &log
 // /////////////////////////////////////////////////////////////////////////////
 // AggregationSshd
 // Class for sshd symptoms aggregation.
-//
-// Depending on the level of detail of the collection of logs,
-// the following information is collected:
-// 1) LOW - source addr, action type.
-// 2) MEDIUM - LOW + action status, port.
-// 3) HIGH - MEDIUM + datetime.
-//
-// Other information collect depends on settings.
 // ////////////////////////////////////////////////////////////////////////////
-static const std::string SshdSourceAddrExp = "from\\s([A-Za-z0-9\\.]+)\\s";
-static const std::string SshdActionTypeExp = "publickey|password|privatekey";
-static const std::string SshdActionStatusExp = "Accepted|Failed";
-static const std::string SshdPortNumExp = "port\\s(\\d+)";
-static const std::string SshdTimeExp = "\\d{2}:\\d{2}:\\d{2}";
+
+namespace
+{
+    const std::string SshdSourceAddrExp = "from\\s([A-Za-z0-9\\.]+)\\s";
+    const std::string SshdActionTypeExp = "publickey|password|privatekey";
+    const std::string SshdActionStatusExp = "Accepted|Failed";
+    const std::string SshdPortNumExp = "port\\s(\\d+)";
+    const std::string SshdTimeExp = "\\d{2}:\\d{2}:\\d{2}";
+}
 
 static std::map<std::string, unsigned short> SshdStrToActStatusMap =
 {
@@ -567,11 +546,6 @@ bool AggregationSshd::StartAggregate()
 void AggregationSshd::Accept(IAggrSerializerVisitorPtr const &pVisitor)
 {
     pVisitor->Visit(this);
-}
-
-std::map<std::string, std::vector<AggregationSshd::SshdRecordInfo>> const& AggregationSshd::GetData() const
-{
-    return m_Records;
 }
 
 void AggregationSshd::ParseString(std::string const &logLine)
@@ -683,22 +657,18 @@ void AggregationSshd::SetTime(SshdRecordInfo &record, std::string const &logLine
 // /////////////////////////////////////////////////////////////////////////////
 // AggregationApache
 // Class for apache symptoms aggregation.
-//
-// Depending on the level of detail of the collection of logs,
-// the following information is collected:
-// 1) LOW - source addr, request type, request status.
-// 2) MEDIUM - LOW + server path, protocol version.
-// 3) HIGH - MEDIUM + file size, datetime.
-//
-// Other information collect depends on settings.
 // ////////////////////////////////////////////////////////////////////////////
-static const std::string ApacheSourceAddrExp = "\\d+\\.\\d+\\.\\d+\\.\\d+";
-static const std::string ApacheReqTypeExp = "]\\s\\\"(\\w+)";
-static const std::string ApacheReqStatusExp = "\\\"\\s(\\d+)";
-static const std::string ApacheServPathExp = "\\\"\\w+\\s(\\S+)";
-static const std::string ApacheProtoVerExp = "\\s(\\S+)\\\"";
-static const std::string ApacheFileSizeExp = "\\\"\\s\\d+\\s(\\d+)";
-static const std::string ApacheTimeExp = "\\d+:\\d+:\\d+:\\d+";
+
+namespace
+{
+    const std::string ApacheSourceAddrExp = "\\d+\\.\\d+\\.\\d+\\.\\d+";
+    const std::string ApacheReqTypeExp = "]\\s\\\"(\\w+)";
+    const std::string ApacheReqStatusExp = "\\\"\\s(\\d+)";
+    const std::string ApacheServPathExp = "\\\"\\w+\\s(\\S+)";
+    const std::string ApacheProtoVerExp = "\\s(\\S+)\\\"";
+    const std::string ApacheFileSizeExp = "\\\"\\s\\d+\\s(\\d+)";
+    const std::string ApacheTimeExp = "\\d+:\\d+:\\d+:\\d+";
+}
 
 static std::map<std::string, unsigned short> ApacheReqTypeMap =
 {
@@ -785,11 +755,6 @@ bool AggregationApache::StartAggregate()
 void AggregationApache::Accept(IAggrSerializerVisitorPtr const &pVisitor)
 {
     pVisitor->Visit(this);
-}
-
-std::map<Ip4Addr, std::vector<AggregationApache::ApacheRecordInfo>> const& AggregationApache::GetData() const
-{
-    return m_Records;
 }
 
 void AggregationApache::ParseString(std::string const &logLine)
@@ -927,478 +892,3 @@ void AggregationApache::SetDateTime(ApacheRecordInfo &record, std::string const 
     }
 }
 
-
-// /////////////////////////////////////////////////////////////////////////////
-// AggregationPam
-// Class for pam symptoms aggregation.
-//
-// Depending on the level of detail of the collection of logs,
-// the following information is collected:
-// 1) LOW - source addr, request type, request status.
-// 2) MEDIUM - LOW + server path, protocol version.
-// 3) HIGH - MEDIUM + file size, datetime.
-//
-// Other information collect depends on settings.
-// ////////////////////////////////////////////////////////////////////////////
-static const std::string PamProcessName1Exp = "(\\w+):\\spam_unix";
-static const std::string PamProcessName2Exp = "(\\w+)[(\\[]";
-static const std::string PamSessionManipulationExp = "session\\s(?:opened|closed)";
-static const std::string PamAuthFailruleExp = "authentication\\sfailure";
-static const std::string PamInvalidLoginAttemptExp = "check\\spass";
-static const std::string PamUsernameExp = "user\\s(\\w+)";
-static const std::string PamPidExp = "\\[(\\d+)\\]";
-static const std::string PamSessionTypeExp = "session\\s(opened|closed)";
-static const std::string PamRemoteHostExp = "rhost=(\\d+\\.\\d+\\.\\d+\\.\\d+)";
-static const std::string PamRemoteUserExp = "ruser=(\\w+)";
-static const std::string PamTtyExp = "tty=(\\d+)";
-
-
-
-
-AggregationPam::AggregationPam(AggregationPamSettingsPtr const &settings) :
-    GrabberBase(settings)
-{
-
-}
-
-AggregationPam::AggregationPam(AggregationPam const &other) :
-    GrabberBase(other)
-{
-
-}
-
-AggregationPam::AggregationPam(AggregationPam &&other) :
-    GrabberBase(std::move(other))
-{
-
-}
-
-AggregationPam const& AggregationPam::operator=(AggregationPam const &other)
-{
-    if(this != &other)
-    {
-        GrabberBase::operator=(other);
-    }
-
-    return *this;
-}
-
-AggregationPam const& AggregationPam::operator=(AggregationPam &&other)
-{
-    if(this != &other)
-    {
-        GrabberBase::operator=(std::move(other));
-    }
-
-    return *this;
-}
-
-bool AggregationPam::StartAggregate()
-{
-    try
-    {
-        FileManipulator reader(GetSrcFile());
-
-        std::string logLine;
-        while(reader->GetStream().peek() != EOF)
-        {
-            reader->ReadLine(logLine);
-            ParseString(logLine);
-        }
-
-        return true;
-    }
-    catch(FileManipulator::FilesystemSiemException const &ex)
-    {
-        SiemLogger &logger = SiemLogger::GetInstance();
-
-        if(ex.GetErrno() == FileManipulator::FilesystemSiemException::INVALID_PATH)
-        {
-            logger.WriteLog("AggregationApache", "Cannot open log file: " + GetSrcFile(), 1);
-        }
-        else
-        {
-            logger.WriteLog("AggregationApache", "Unrecognized filesystem error", 1);
-        }
-    }
-
-    return false;
-}
-
-void AggregationPam::Accept(IAggrSerializerVisitorPtr const &pVisitor)
-{
-    pVisitor->Visit(this);
-}
-
-std::map<std::string, std::vector<AggregationPam::PamRecordInfo>> const& AggregationPam::GetData() const
-{
-    return m_Records;
-}
-
-void AggregationPam::ParseString(std::string const &logLine)
-{
-    try
-    {
-        PamRecordInfo& record = CreateRecordInfo(logLine);
-
-        SetRecordType(record, logLine);
-
-        if(std::shared_ptr<PamRecordBase> pRecordDetails =
-                CreateDetailsByRecordType(record.m_RecType))
-        {
-            SetUserName(*pRecordDetails, logLine);
-            SetPid(*pRecordDetails, logLine);
-
-            record.m_RecordDetails = pRecordDetails;
-        }
-        else
-        {
-            throw AggregationException("Cannot create pam record details by record type", 3);
-        }
-
-        DetailsLevel logLvl = GetAggregationDetailsLevel();
-
-        if((logLvl == DetailsLevel::MEDIUM) || (logLvl == DetailsLevel::HIGH))
-        {
-
-            if(logLvl == DetailsLevel::HIGH)
-            {
-            }
-        }
-    }
-    catch(AggregationException const &ex)
-    {
-        SiemLogger &logger = SiemLogger::GetInstance();
-        logger.WriteLog("AggregationPam", ex.what(), 1);
-    }
-}
-
-AggregationPam::PamRecordInfo& AggregationPam::CreateRecordInfo(std::string const &logLine)
-{
-    bool isFoundProcName = false;
-    std::string procName = FindByRegex(logLine, PamProcessName1Exp, 1);
-
-    if(procName.size() > 0)
-    {
-        isFoundProcName = true;
-    }
-    else
-    {
-        procName = FindByRegex(logLine, PamProcessName2Exp, 1);
-
-        if(procName.size() > 0)
-        {
-            isFoundProcName = true;
-        }
-    }
-
-    if(isFoundProcName)
-    {
-        return CreateRecordInfoEx(procName, m_Records);
-    }
-    else
-    {
-        throw AggregationException("Cannot create pam record info: process name empty",
-                                    AggregationException::CANNOT_CREATE_RECORD);
-    }
-}
-
-std::shared_ptr<AggregationPam::PamRecordBase> AggregationPam::CreateDetailsByRecordType(PamRecordType const detailsType)
-{
-    switch (detailsType)
-    {
-    case PamRecordType::SESSION_MANIPULATION:
-        return std::make_shared<SessionRecord>();
-    case PamRecordType::FAILED:
-        return std::make_shared<LoginFailed>();
-    case PamRecordType::INVALID_LOGIN_ATTEMPT:
-        return std::make_shared<PamRecordBase>();
-    default:
-        return nullptr;
-    }
-}
-
-void AggregationPam::SetRecordType(PamRecordInfo &record, std::string const &logLine)
-{    
-    for(;;)
-    {
-        std::string recordTypeStr = FindByRegex(logLine, PamSessionManipulationExp, 0);
-        if(recordTypeStr.size() > 0)
-        {
-            record.m_RecType = PamRecordType::SESSION_MANIPULATION;
-            break;
-        }
-
-        recordTypeStr = FindByRegex(logLine, PamAuthFailruleExp, 0);
-        if(recordTypeStr.size() > 0)
-        {
-            record.m_RecType = PamRecordType::SESSION_MANIPULATION;
-            break;
-        }
-
-        recordTypeStr = FindByRegex(logLine, PamInvalidLoginAttemptExp, 0);
-        if(recordTypeStr.size() > 0)
-        {
-            record.m_RecType = PamRecordType::SESSION_MANIPULATION;
-            break;
-        }
-
-        record.m_RecType = PamRecordType::NONE;
-    }
-}
-
-void AggregationPam::SetUserName(PamRecordBase &baseRecord, std::string const &logLine)
-{
-    const std::string username = FindByRegex(logLine, PamUsernameExp, 1);
-
-    if(username.size() > 0)
-    {
-        baseRecord.m_Username = username;
-    }
-}
-
-void AggregationPam::SetPid(PamRecordBase &baseRecord, std::string const &logLine)
-{
-    const std::string pidStr = FindByRegex(logLine, PamPidExp, 1);
-
-    if(pidStr.size() > 0)
-    {
-        baseRecord.m_Pid =
-                static_cast<unsigned int>(std::atoi(pidStr.c_str()));
-    }
-}
-
-void AggregationPam::SetSessionType(PamRecordBase &sessRecord, std::string const &logLine)
-{
-
-}
-
-void AggregationPam::SetRemoteHost(PamRecordBase &failRecord, std::string const &logLine)
-{
-
-}
-
-void AggregationPam::SetRemoteUser(PamRecordBase &failRecord, std::string const &logLine)
-{
-
-}
-
-void AggregationPam::SetTTY(PamRecordBase &failRecord, std::string const &logLine)
-{
-
-}
-
-
-// /////////////////////////////////////////////////////////////////////////////
-// AggrJsonSerializerVisitor
-// Class for serialize grabbers to JSON file.
-// ////////////////////////////////////////////////////////////////////////////
-static const std::string DestIpKey = "destination_ip";
-static const std::string SrcMacKey = "source_mac";
-static const std::string DestMacKey = "destination_mac";
-static const std::string SrcPortKey = "source_port";
-static const std::string DestPortKey = "destination_port";
-static const std::string InetProtoKey = "internet_proto";
-static const std::string InterfaceNameKey = "interface";
-static const std::string DateTimeKey = "datetime";
-
-static const std::string ConnectionTypeKey = "connection_type";
-static const std::string StatusTypeKey = "status_type";
-static const std::string FilePathKey = "filepath";
-
-static const std::string ActionTypeKey = "action_type";
-static const std::string ActionStatusKey = "action_status";
-
-static const std::string RequestTypeKey = "request_type";
-static const std::string RequestStatusKey = "request_status";
-static const std::string ProtocolVersionKey = "protocol_version";
-static const std::string FileSizeKey = "filesize";
-
-
-void AggrJsonSerializerVisitor::Visit(AggregationIpTables const *pAggrIpTables) const
-{
-    std::map<std::string, IJsonContainerPtr> serializeMap;
-
-    for(const auto& pair : pAggrIpTables->GetData())
-    {
-        const std::string key = Bytes2StringIp(pair.first);
-        FillSerializeStructure(key, pair.second, serializeMap);
-    }
-
-    IJsonContainerPtr pRecordsContainer = CreateContainer(serializeMap);
-    std::map<std::string, IJsonContainerPtr> finalContainer =
-    {
-        { "iptables", pRecordsContainer }
-    };
-
-    JsonFileSerializer serializer(CreateContainer(finalContainer), pAggrIpTables->GetDstFile());
-    serializer.Write();
-}
-
-void AggrJsonSerializerVisitor::Visit(AggregationVsftpd const *pAggrVsftpd) const
-{
-    std::map<std::string, IJsonContainerPtr> serializeMap;
-
-    for(const auto& pair : pAggrVsftpd->GetData())
-    {
-        const std::string key = Bytes2StringIp(pair.first);
-        FillSerializeStructure(key, pair.second, serializeMap);
-    }
-
-    IJsonContainerPtr pRecordsContainer = CreateContainer(serializeMap);
-    std::map<std::string, IJsonContainerPtr> finalContainer =
-    {
-        { "vsftpd", pRecordsContainer }
-    };
-
-    JsonFileSerializer serializer(CreateContainer(finalContainer), pAggrVsftpd->GetDstFile());
-    serializer.Write();
-}
-
-void AggrJsonSerializerVisitor::Visit(AggregationSshd const *pAggrSshd) const
-{
-    std::map<std::string, IJsonContainerPtr> serializeMap;
-
-    for(const auto& pair : pAggrSshd->GetData())
-    {
-        const std::string key = pair.first;
-        FillSerializeStructure(key, pair.second, serializeMap);
-    }
-
-    IJsonContainerPtr pRecordsContainer = CreateContainer(serializeMap);
-    std::map<std::string, IJsonContainerPtr> finalContainer =
-    {
-        { "sshd", pRecordsContainer }
-    };
-
-    JsonFileSerializer serializer(CreateContainer(finalContainer), pAggrSshd->GetDstFile());
-    serializer.Write();
-}
-
-void AggrJsonSerializerVisitor::Visit(AggregationApache const *pAggrApache) const
-{
-    std::map<std::string, IJsonContainerPtr> serializeMap;
-
-    for(const auto& pair : pAggrApache->GetData())
-    {
-        const std::string key = Bytes2StringIp(pair.first);
-        FillSerializeStructure(key, pair.second, serializeMap);
-    }
-
-    IJsonContainerPtr pRecordsContainer = CreateContainer(serializeMap);
-    std::map<std::string, IJsonContainerPtr> finalContainer =
-    {
-        { "apache", pRecordsContainer }
-    };
-
-    JsonFileSerializer serializer(CreateContainer(finalContainer), pAggrApache->GetDstFile());
-    serializer.Write();
-}
-
-void AggrJsonSerializerVisitor::Visit(AggregationPam const *pAggrPam) const
-{
-    std::map<std::string, IJsonContainerPtr> serializeMap;
-
-    for(const auto& pair : pAggrPam->GetData())
-    {
-        const std::string key = pair.first;
-        FillSerializeStructure(key, pair.second, serializeMap);
-    }
-
-    IJsonContainerPtr pRecordsContainer = CreateContainer(serializeMap);
-    std::map<std::string, IJsonContainerPtr> finalContainer =
-    {
-        { "pam", pRecordsContainer }
-    };
-
-    JsonFileSerializer serializer(CreateContainer(finalContainer), pAggrPam->GetDstFile());
-    serializer.Write();
-}
-
-template<class RecordStruct>
-void AggrJsonSerializerVisitor::FillSerializeStructure(std::string const &key,
-        std::vector<RecordStruct> const &values,
-        std::map<std::string, IJsonContainerPtr> &resStruct) const
-{
-    std::vector<IJsonContainerPtr> containersVec;
-    containersVec.reserve(values.size());
-
-    for(const auto& record : values)
-    {
-        containersVec.emplace_back(FromRecordInfo(record));
-    }
-
-    resStruct.emplace(key, CreateContainer(containersVec));
-}
-
-IJsonContainerPtr AggrJsonSerializerVisitor::FromRecordInfo(AggregationIpTables::IpTablesRecordInfo const &record) const
-{
-    std::map<std::string, IJsonContainerPtr> const recordContainer =
-    {
-        {DestIpKey, CreateContainer(Bytes2StringIp(record.m_DstIpAddr))},
-        {SrcMacKey, CreateContainer(Bytes2StringMac(record.m_SrcMacAddr))},
-        {DestMacKey, CreateContainer(Bytes2StringMac(record.m_DstMacAddr))},
-        {SrcPortKey, CreateContainer(std::to_string(record.m_SrcPort))},
-        {DestPortKey, CreateContainer(std::to_string(record.m_DstPort))},
-        {InetProtoKey, CreateContainer(std::to_string(static_cast<int>(record.m_Protocol)))},
-        {InterfaceNameKey, CreateContainer(record.m_InterfaceName)},
-        {DateTimeKey, CreateContainer(record.m_Time.getFormatTime("%h:%m:%s"))}
-    };
-
-    return CreateContainer(recordContainer);
-}
-
-IJsonContainerPtr AggrJsonSerializerVisitor::FromRecordInfo(AggregationVsftpd::VsftpdRecordInfo const &record) const
-{
-    std::map<std::string, IJsonContainerPtr> const recordContainer =
-    {
-        {ConnectionTypeKey, CreateContainer(std::to_string(static_cast<int>(record.m_InteractionType)))},
-        {StatusTypeKey, CreateContainer(std::to_string(static_cast<int>(record.m_InteractionStatus)))},
-        {FilePathKey, CreateContainer(record.m_filePath)},
-        {DateTimeKey, CreateContainer(record.m_Time.getFormatTime("%h:%m:%s"))}
-    };
-
-    return CreateContainer(recordContainer);
-}
-
-IJsonContainerPtr AggrJsonSerializerVisitor::FromRecordInfo(AggregationSshd::SshdRecordInfo const &record) const
-{
-    std::map<std::string, IJsonContainerPtr> const recordContainer =
-    {
-        {ActionTypeKey, CreateContainer(std::to_string(static_cast<int>(record.m_ActType)))},
-        {ActionStatusKey, CreateContainer(std::to_string(static_cast<int>(record.m_Status)))},
-        {DestPortKey, CreateContainer(std::to_string(record.m_Port))},
-        {DateTimeKey, CreateContainer(record.m_Time.getFormatTime("%h:%m:%s"))}
-    };
-
-    return CreateContainer(recordContainer);
-}
-
-IJsonContainerPtr AggrJsonSerializerVisitor::FromRecordInfo(AggregationApache::ApacheRecordInfo const &record) const
-{
-    std::map<std::string, IJsonContainerPtr> const recordContainer =
-    {
-        {RequestTypeKey, CreateContainer(std::to_string(static_cast<int>(record.m_ReqType)))},
-        {RequestStatusKey, CreateContainer(std::to_string(static_cast<int>(record.m_ReqStatus)))},
-        {ProtocolVersionKey, CreateContainer(std::to_string(static_cast<int>(record.m_ProtoVer)))},
-        {FilePathKey, CreateContainer(record.m_ServerPath)},
-        {FileSizeKey, CreateContainer(std::to_string(record.m_FileSize))},
-        {DateTimeKey, CreateContainer(record.m_Time.getFormatTime("%Y:%h:%m:%s"))}
-    };
-
-    return CreateContainer(recordContainer);
-}
-
-IJsonContainerPtr AggrJsonSerializerVisitor::FromRecordInfo(AggregationPam::PamRecordInfo const &record) const
-{
-
-}
-
-IAggrSerializerVisitorPtr aggregation_space::CreateVisitor(SerializeType const serializeKind)
-{
-    switch(serializeKind)
-    {
-    case SerializeType::serializeJSON:
-        return std::make_shared<AggrJsonSerializerVisitor>();
-    }
-}

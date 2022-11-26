@@ -9,10 +9,14 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(AGGREGATION_MODULE
     aggregation_module/aggregation_module_initializer.hpp
     aggregation_module/aggregation_module_initializer.cpp
+    aggregation_module/aggregation_serializer_visitor.hpp
+    aggregation_module/aggregation_serializer_visitor.cpp
     aggregation_module/grabber_base.hpp
     aggregation_module/grabber_base.cpp
     aggregation_module/net_grabbers.hpp
     aggregation_module/net_grabbers.cpp
+    aggregation_module/system_grabbers.hpp
+    aggregation_module/system_grabbers.cpp
 )
 
 set(CORRELATION_MODULE

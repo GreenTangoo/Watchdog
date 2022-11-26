@@ -1,5 +1,5 @@
-#ifndef GRABBERS_HPP
-#define GRABBERS_HPP
+#ifndef NET_GRABBERS_HPP
+#define NET_GRABBERS_HPP
 
 #include "grabber_base.hpp"
 #include "../utility_module/regex_siem.hpp"
@@ -7,6 +7,18 @@
 
 namespace aggregation_space
 {
+    // /////////////////////////////////////////////////////////////////////////////
+    // AggregationIPtables
+    // Class for IpTables symptoms aggregation.
+    //
+    // Depending on the level of detail of the collection of logs,
+    // the following information is collected:
+    // 1) LOW - source and destination ip address, src and dest mac address, datetime.
+    // 2) MEDIUM - LOW + interface name, protocol type.
+    // 3) HIGH - MEDIUM + source and destination ports.
+    //
+    // Other information collect depends on settings.
+    // ////////////////////////////////////////////////////////////////////////////
     class AggregationIpTables : public GrabberBase
     {
     public:
@@ -32,7 +44,7 @@ namespace aggregation_space
             DateTime m_Time;
         };
     public:
-        inline std::map<Ip4Addr, std::vector<IpTablesRecordInfo>> const&  GetData() const;
+        std::map<Ip4Addr, std::vector<IpTablesRecordInfo>> const&  GetData() const { return m_Records; }
     private:
         void ParseString(std::string const &logLine);
         IpTablesRecordInfo& CreateRecordInfo(std::string const &logLine);
@@ -48,6 +60,19 @@ namespace aggregation_space
     typedef std::shared_ptr<AggregationIpTables> AggregationIPtablesPtr;
 
 
+
+    // /////////////////////////////////////////////////////////////////////////////
+    // AggregationVsftpd
+    // Class for vsftpd symptoms aggregation.
+    //
+    // Depending on the level of detail of the collection of logs,
+    // the following information is collected:
+    // 1) LOW - source addr, connection type.
+    // 2) MEDIUM - LOW + interaction status
+    // 3) HIGH - MEDIUM + file path, datetime.
+    //
+    // Other information collect depends on settings.
+    // ////////////////////////////////////////////////////////////////////////////
     class AggregationVsftpd : public GrabberBase
     {
     public:
@@ -85,7 +110,7 @@ namespace aggregation_space
             DateTime m_Time;
         };
     public:
-        inline std::map<Ip4Addr, std::vector<VsftpdRecordInfo>> const& GetData() const;
+        std::map<Ip4Addr, std::vector<VsftpdRecordInfo>> const& GetData() const { return m_Records; }
     private:
         void ParseString(std::string const &logLine);
         VsftpdRecordInfo& CreateRecordInfo(std::string const &logLine);
@@ -99,6 +124,19 @@ namespace aggregation_space
     typedef std::shared_ptr<AggregationVsftpd> AggregationVsftpdPtr;
 
 
+
+    // /////////////////////////////////////////////////////////////////////////////
+    // AggregationSshd
+    // Class for sshd symptoms aggregation.
+    //
+    // Depending on the level of detail of the collection of logs,
+    // the following information is collected:
+    // 1) LOW - source addr, action type.
+    // 2) MEDIUM - LOW + action status, port.
+    // 3) HIGH - MEDIUM + datetime.
+    //
+    // Other information collect depends on settings.
+    // ////////////////////////////////////////////////////////////////////////////
     class AggregationSshd : public GrabberBase
     {
     public:
@@ -135,7 +173,7 @@ namespace aggregation_space
             DateTime m_Time;
         };
     public:
-        inline std::map<std::string, std::vector<SshdRecordInfo>> const& GetData() const;
+        std::map<std::string, std::vector<SshdRecordInfo>> const& GetData() const { return m_Records; }
     private:
         void ParseString(std::string const &logLine);
         SshdRecordInfo& CreateRecordInfo(std::string const &logLine);
@@ -149,6 +187,19 @@ namespace aggregation_space
     typedef std::shared_ptr<AggregationSshd> AggregationSshdPtr;
 
 
+
+    // /////////////////////////////////////////////////////////////////////////////
+    // AggregationApache
+    // Class for apache symptoms aggregation.
+    //
+    // Depending on the level of detail of the collection of logs,
+    // the following information is collected:
+    // 1) LOW - source addr, request type, request status.
+    // 2) MEDIUM - LOW + server path, protocol version.
+    // 3) HIGH - MEDIUM + file size, datetime.
+    //
+    // Other information collect depends on settings.
+    // ////////////////////////////////////////////////////////////////////////////
     class AggregationApache : public GrabberBase
     {
     public:
@@ -186,7 +237,7 @@ namespace aggregation_space
             DateTime m_Time;
         };
     public:
-        inline std::map<Ip4Addr, std::vector<ApacheRecordInfo>> const& GetData() const;
+        std::map<Ip4Addr, std::vector<ApacheRecordInfo>> const& GetData() const { return m_Records; }
     private:
         void ParseString(std::string const &logLine);
         ApacheRecordInfo& CreateRecordInfo(std::string const &logLine);
@@ -200,112 +251,6 @@ namespace aggregation_space
         std::map<Ip4Addr, std::vector<ApacheRecordInfo>> m_Records;
     };
     typedef std::shared_ptr<AggregationApache> AggregationApachePtr;
-
-
-    class AggregationPam : public GrabberBase
-    {
-    public:
-        explicit AggregationPam(const AggregationPamSettingsPtr &settings);
-        explicit AggregationPam(AggregationPam const &other);
-        explicit AggregationPam(AggregationPam &&other);
-        ~AggregationPam() = default;
-        AggregationPam const& operator=(AggregationPam const &other);
-        AggregationPam const& operator=(AggregationPam &&other);
-    public:
-        bool StartAggregate() override;
-        void Accept(IAggrSerializerVisitorPtr const &pVisitor) override;
-    public:
-        enum class PamRecordType : unsigned short
-        {
-            NONE = 0,
-            SESSION_MANIPULATION = 1, // Session open/close
-            FAILED = 2,               // Authentication failrule
-            INVALID_LOGIN_ATTEMPT = 3 // Invalid user login attempt
-        };
-
-        struct PamRecordBase
-        {
-            std::string m_Username;
-            unsigned int m_Pid;
-        };
-
-        struct SessionRecord : public PamRecordBase
-        {
-            enum class SessionManipulationType : unsigned short
-            {
-                NONE = 0,
-                SESS_OPENED = 1,
-                SESS_CLOSED = 2
-            };
-
-            SessionManipulationType m_SessionType;
-        };
-
-        struct LoginFailed : public PamRecordBase
-        {
-            std::string m_RemoteHost;
-            std::string m_RemoteUser;
-            std::string m_TTY;
-        };
-
-        struct PamRecordInfo
-        {
-            PamRecordType m_RecType;
-            std::shared_ptr<PamRecordBase> m_RecordDetails;
-            DateTime m_DateTime;
-        };
-    public:
-        inline std::map<std::string, std::vector<PamRecordInfo>> const& GetData() const;
-    private:
-        void ParseString(std::string const &logLine);
-        PamRecordInfo& CreateRecordInfo(std::string const &logLine);
-        std::shared_ptr<PamRecordBase> CreateDetailsByRecordType(PamRecordType const detailsType);
-        void SetRecordType(PamRecordInfo &record, std::string const &logLine);
-        void SetUserName(PamRecordBase &baseRecord, std::string const &logLine);
-        void SetPid(PamRecordBase &baseRecord, std::string const &logLine);
-        void SetSessionType(PamRecordBase &sessRecord, std::string const &logLine);
-        void SetRemoteHost(PamRecordBase &failRecord, std::string const &logLine);
-        void SetRemoteUser(PamRecordBase &failRecord, std::string const &logLine);
-        void SetTTY(PamRecordBase &failRecord, std::string const &logLine);
-    private:
-        std::map<std::string, std::vector<PamRecordInfo>> m_Records;
-    };
-    typedef std::shared_ptr<AggregationPam> AggregationPamPtr;
-
-
-    class IAggrSerializerVisitor
-    {
-    public:
-        virtual void Visit(AggregationIpTables const *pAggrIpTables) const = 0;
-        virtual void Visit(AggregationVsftpd const *pAggrVsftpd) const = 0;
-        virtual void Visit(AggregationSshd const *pAggrSshd) const = 0;
-        virtual void Visit(AggregationApache const *pAggrApache) const = 0;
-        virtual void Visit(AggregationPam const *pAggrPam) const = 0;
-    };
-
-    class AggrJsonSerializerVisitor : public IAggrSerializerVisitor
-    {
-    public:
-        void Visit(AggregationIpTables const *pAggrIpTables) const override;
-        void Visit(AggregationVsftpd const *pAggrVsftpd) const override;
-        void Visit(AggregationSshd const *pAggrSshd) const override;
-        void Visit(AggregationApache const *pAggrApache) const override;
-        void Visit(AggregationPam const *pAggrPam) const override;
-    private:
-        template<class RecordStruct>
-        void FillSerializeStructure(
-                std::string const &key,
-                std::vector<RecordStruct> const &values,
-                std::map<std::string, IJsonContainerPtr> &resStruct) const;
-    private:
-        IJsonContainerPtr FromRecordInfo(AggregationIpTables::IpTablesRecordInfo const &record) const;
-        IJsonContainerPtr FromRecordInfo(AggregationVsftpd::VsftpdRecordInfo const &record) const;
-        IJsonContainerPtr FromRecordInfo(AggregationSshd::SshdRecordInfo const &record) const;
-        IJsonContainerPtr FromRecordInfo(AggregationApache::ApacheRecordInfo const &record) const;
-        IJsonContainerPtr FromRecordInfo(AggregationPam::PamRecordInfo const &record) const;
-    };
-
-    IAggrSerializerVisitorPtr CreateVisitor(SerializeType const serializeKind);
 }
 
 #endif // GRABBERS_HPP
