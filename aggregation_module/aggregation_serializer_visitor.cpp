@@ -2,12 +2,6 @@
 
 using namespace aggregation_space;
 
-
-// /////////////////////////////////////////////////////////////////////////////
-// AggrJsonSerializerVisitor
-// Class for serialize grabbers to JSON file.
-// ////////////////////////////////////////////////////////////////////////////
-
 namespace
 {
     const std::string DestIpKey = "destination_ip";
@@ -30,9 +24,20 @@ namespace
     const std::string RequestStatusKey = "request_status";
     const std::string ProtocolVersionKey = "protocol_version";
     const std::string FileSizeKey = "filesize";
+
+    const std::string ProcessIdKey = "process_id";
+    const std::string UsernameKey = "username";
+    const std::string SessionTypeKey = "session_type";
+    const std::string RemoteHostKey = "remote_host";
+    const std::string RemoteUserKey = "remote_user";
+    const std::string TtyKey = "tty";
 }
 
 
+// /////////////////////////////////////////////////////////////////////////////
+// AggrJsonSerializerVisitor
+// Class for serialize grabbers to JSON file.
+// ////////////////////////////////////////////////////////////////////////////
 void AggrJsonSerializerVisitor::Visit(AggregationIpTables const *pAggrIpTables) const
 {
     std::map<std::string, IJsonContainerPtr> serializeMap;
@@ -209,7 +214,34 @@ IJsonContainerPtr AggrJsonSerializerVisitor::FromRecordInfo(AggregationApache::A
 
 IJsonContainerPtr AggrJsonSerializerVisitor::FromRecordInfo(AggregationPam::PamRecordInfo const &record) const
 {
+    std::map<std::string, IJsonContainerPtr> recordContainer =
+    {
+        {ProcessIdKey, CreateContainer(std::to_string(static_cast<int>(record.m_RecordDetails->m_Pid)))},
+        {SessionTypeKey, CreateContainer(std::to_string(static_cast<int>(record.m_RecType)))}
+    };
 
+    if(record.m_RecType == AggregationPam::PamRecordType::SESSION_MANIPULATION)
+    {
+        AggregationPam::SessionRecord *pSession =
+                static_cast<AggregationPam::SessionRecord*>(record.m_RecordDetails.get());
+
+        const std::string sessionTypeStr = std::to_string(
+                    static_cast<int>(pSession->m_SessionType));
+
+        recordContainer.insert({SessionTypeKey, CreateContainer(sessionTypeStr)});
+    }
+    else if(record.m_RecType == AggregationPam::PamRecordType::FAILED)
+    {
+        AggregationPam::LoginFailed *pFailed =
+                static_cast<AggregationPam::LoginFailed*>(record.m_RecordDetails.get());
+
+        recordContainer.insert({RemoteHostKey, CreateContainer(pFailed->m_RemoteHost)});
+        recordContainer.insert({RemoteUserKey, CreateContainer(pFailed->m_RemoteUser)});
+        recordContainer.insert({TtyKey, CreateContainer(pFailed->m_TTY)});
+    }
+
+
+    return CreateContainer(recordContainer);
 }
 
 IAggrSerializerVisitorPtr aggregation_space::CreateVisitor(SerializeType const serializeKind)

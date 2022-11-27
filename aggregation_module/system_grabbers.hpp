@@ -14,9 +14,9 @@ namespace aggregation_space
     //
     // Depending on the level of detail of the collection of logs,
     // the following information is collected:
-    // 1) LOW - source addr, request type, request status.
-    // 2) MEDIUM - LOW + server path, protocol version.
-    // 3) HIGH - MEDIUM + file size, datetime.
+    // 1) LOW - process name, username, pid.
+    // 2) MEDIUM - LOW + session type, remote host, remote user.
+    // 3) HIGH - MEDIUM + datetime.
     //
     // Other information collect depends on settings.
     // ////////////////////////////////////////////////////////////////////////////
@@ -77,6 +77,7 @@ namespace aggregation_space
     private:
         void ParseString(std::string const &logLine);
         PamRecordInfo& CreateRecordInfo(std::string const &logLine);
+        void ParseByRecordType(PamRecordInfo &record, std::string const &logLine);
         std::shared_ptr<PamRecordBase> CreateDetailsByRecordType(PamRecordType const detailsType);
         void SetRecordType(PamRecordInfo &record, std::string const &logLine);
         void SetUserName(PamRecordBase &baseRecord, std::string const &logLine);
@@ -85,6 +86,7 @@ namespace aggregation_space
         void SetRemoteHost(PamRecordBase &failRecord, std::string const &logLine);
         void SetRemoteUser(PamRecordBase &failRecord, std::string const &logLine);
         void SetTTY(PamRecordBase &failRecord, std::string const &logLine);
+        void SetTime(PamRecordInfo &record, std::string const &logLine);
     private:
         std::map<std::string, std::vector<PamRecordInfo>> m_Records;
     };

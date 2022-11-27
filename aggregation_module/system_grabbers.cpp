@@ -47,6 +47,7 @@ namespace
     const std::string PamRemoteHostExp = "rhost=(\\d+\\.\\d+\\.\\d+\\.\\d+)";
     const std::string PamRemoteUserExp = "ruser=(\\w+)";
     const std::string PamTtyExp = "tty=(\\d+)";
+    const std::string PamTimeExp = "\\d+:\\d+:\\d+";
 }
 
 
@@ -133,28 +134,7 @@ void AggregationPam::ParseString(std::string const &logLine)
 
         SetRecordType(record, logLine);
 
-        if(std::shared_ptr<PamRecordBase> pRecordDetails =
-                CreateDetailsByRecordType(record.m_RecType))
-        {
-            SetUserName(*pRecordDetails, logLine);
-            SetPid(*pRecordDetails, logLine);
-
-            record.m_RecordDetails = pRecordDetails;
-        }
-        else
-        {
-            throw AggregationException("Cannot create pam record details by record type", 3);
-        }
-
-        DetailsLevel logLvl = GetAggregationDetailsLevel();
-
-        if((logLvl == DetailsLevel::MEDIUM) || (logLvl == DetailsLevel::HIGH))
-        {
-
-            if(logLvl == DetailsLevel::HIGH)
-            {
-            }
-        }
+        ParseByRecordType(record, logLine);
     }
     catch(AggregationException const &ex)
     {
@@ -193,6 +173,45 @@ AggregationPam::PamRecordInfo& AggregationPam::CreateRecordInfo(std::string cons
     }
 }
 
+void AggregationPam::ParseByRecordType(PamRecordInfo &record, std::string const &logLine)
+{
+    if(std::shared_ptr<PamRecordBase> pRecordDetails =
+            CreateDetailsByRecordType(record.m_RecType))
+    {
+        SetUserName(*pRecordDetails, logLine);
+        SetPid(*pRecordDetails, logLine);
+
+        record.m_RecordDetails = pRecordDetails;
+
+        DetailsLevel logLvl = GetAggregationDetailsLevel();
+
+        if((logLvl == DetailsLevel::MEDIUM) || (logLvl == DetailsLevel::HIGH))
+        {
+            if(record.m_RecType == PamRecordType::SESSION_MANIPULATION)
+            {
+                SetSessionType(*pRecordDetails, logLine);
+            }
+
+            if(record.m_RecType == PamRecordType::FAILED)
+            {
+                SetRemoteHost(*pRecordDetails, logLine);
+                SetRemoteUser(*pRecordDetails, logLine);
+                SetTTY(*pRecordDetails, logLine);
+            }
+
+            if(logLvl == DetailsLevel::HIGH)
+            {
+                SetTime(record, logLine);
+            }
+        }
+    }
+    else
+    {
+        throw AggregationException("Cannot create pam record details by record type",
+                                   AggregationException::CANNOT_CREATE_RECORD);
+    }
+}
+
 std::shared_ptr<AggregationPam::PamRecordBase> AggregationPam::CreateDetailsByRecordType(PamRecordType const detailsType)
 {
     switch (detailsType)
@@ -222,14 +241,14 @@ void AggregationPam::SetRecordType(PamRecordInfo &record, std::string const &log
         recordTypeStr = FindByRegex(logLine, PamAuthFailruleExp, 0);
         if(recordTypeStr.size() > 0)
         {
-            record.m_RecType = PamRecordType::SESSION_MANIPULATION;
+            record.m_RecType = PamRecordType::FAILED;
             break;
         }
 
         recordTypeStr = FindByRegex(logLine, PamInvalidLoginAttemptExp, 0);
         if(recordTypeStr.size() > 0)
         {
-            record.m_RecType = PamRecordType::SESSION_MANIPULATION;
+            record.m_RecType = PamRecordType::INVALID_LOGIN_ATTEMPT;
             break;
         }
 
@@ -266,7 +285,18 @@ void AggregationPam::SetSessionType(PamRecordBase &sessRecord, std::string const
 
     if(sessionTypeStr.size() > 0)
     {
-
+        if(sessionTypeStr == "opened")
+        {
+            pSessRecord->m_SessionType = SessionRecord::SessionManipulationType::SESS_OPENED;
+        }
+        else if(sessionTypeStr == "closed")
+        {
+            pSessRecord->m_SessionType = SessionRecord::SessionManipulationType::SESS_CLOSED;
+        }
+        else
+        {
+            pSessRecord->m_SessionType = SessionRecord::SessionManipulationType::NONE;
+        }
     }
     else
     {
@@ -276,15 +306,43 @@ void AggregationPam::SetSessionType(PamRecordBase &sessRecord, std::string const
 
 void AggregationPam::SetRemoteHost(PamRecordBase &failRecord, std::string const &logLine)
 {
+    LoginFailed *pFailRecord = static_cast<LoginFailed*>(&failRecord);
+    const std::string remoteHostStr = FindByRegex(logLine, PamRemoteHostExp, 1);
 
+    if(remoteHostStr.size() > 0)
+    {
+        pFailRecord->m_RemoteHost = remoteHostStr;
+    }
 }
 
 void AggregationPam::SetRemoteUser(PamRecordBase &failRecord, std::string const &logLine)
 {
+    LoginFailed *pFailRecord = static_cast<LoginFailed*>(&failRecord);
+    const std::string remoteUserStr = FindByRegex(logLine, PamRemoteUserExp, 1);
 
+    if(remoteUserStr.size() > 0)
+    {
+        pFailRecord->m_RemoteUser = remoteUserStr;
+    }
 }
 
 void AggregationPam::SetTTY(PamRecordBase &failRecord, std::string const &logLine)
 {
+    LoginFailed *pFailRecord = static_cast<LoginFailed*>(&failRecord);
+    const std::string ttyStr = FindByRegex(logLine, PamTtyExp, 1);
 
+    if(ttyStr.size() > 0)
+    {
+        pFailRecord->m_TTY = ttyStr;
+    }
+}
+
+void AggregationPam::SetTime(PamRecordInfo &record, std::string const &logLine)
+{
+    const std::string timeStr = FindByRegex(logLine, PamTimeExp, 0);
+
+    if(timeStr.size() > 0)
+    {
+        record.m_DateTime.putFormatTime(timeStr, "%h:%m:%s");
+    }
 }
