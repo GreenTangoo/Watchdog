@@ -152,22 +152,7 @@ namespace utility_space
         void SetFile(std::string const &filename);
         IJsonContainerPtr Read();
     public:
-        class JsonFileDeserializerException : public SIEMException
-        {
-        private:
-            int m_Errno;
-            char m_ReadedSymbol;
-        public:
-            enum JsonFileDeserializerErrCode
-            {
-                JSON_FILE_SYNTAX_ERROR = 1
-            };
-        public:
-            JsonFileDeserializerException(std::string const &exMsg, int errCode, char symbol = 0);
-            JsonFileDeserializerException(std::string &&exMsg, int errCode, char symbol = 0);
-            ~JsonFileDeserializerException() = default;
-            inline char GetLastSymbol();
-        };
+
     private:
         static std::string ReadUntilSymbol(FileManipulator &reader, char const symbol);
         static operationState ReadSymbolWithSkipUseless(FileManipulator &reader, char &symbol);

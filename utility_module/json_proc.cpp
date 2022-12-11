@@ -610,8 +610,8 @@ std::string JsonFileDeserializer::GetKey(FileManipulator &reader)
 
     if(ch != static_cast<char>(SymbolType::DOUBLE_DOTS))
     {
-        throw JsonFileDeserializerException("Error occured due json file reading",
-                                            JsonFileDeserializerException::JSON_FILE_SYNTAX_ERROR, ch);
+        throw JsonStreamDeserializerException("Error occured due json file reading",
+                                            static_cast<short>(JsonException::JsonErrorCode::JSON_STREAM_SYNTAX_ERROR), ch);
     }
 
     return key;
@@ -707,27 +707,9 @@ IJsonContainerPtr JsonFileDeserializer::JsonFileReaderResolver::RecursiveResolve
         return JsonFileDeserializer::ReadString(reader);
         break;
     default:
-        throw JsonFileDeserializerException("Error occured due json file reading",
-                                            JsonFileDeserializerException::JSON_FILE_SYNTAX_ERROR, ch);
+        throw JsonStreamDeserializerException("Error occured due json file reading",
+                                            static_cast<short>(JsonException::JsonErrorCode::JSON_STREAM_SYNTAX_ERROR), ch);
     }
 }
 
 
-// //////////////////////////////////////////////////////////////////////
-// JsonFileDeserializer::JsonFileDeserializerException
-JsonFileDeserializer::JsonFileDeserializerException::JsonFileDeserializerException(std::string const &exMsg, int errCode, char symbol) :
-    SIEMException(exMsg, errCode), m_ReadedSymbol(symbol)
-{
-
-}
-
-JsonFileDeserializer::JsonFileDeserializerException::JsonFileDeserializerException(std::string &&exMsg, int errCode, char symbol) :
-    SIEMException(std::move(exMsg), errCode), m_ReadedSymbol(symbol)
-{
-
-}
-
-char JsonFileDeserializer::JsonFileDeserializerException::GetLastSymbol()
-{
-    return m_ReadedSymbol;
-}
