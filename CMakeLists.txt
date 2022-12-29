@@ -62,6 +62,8 @@ set(UTILITY_MODULE
     utility_module/data_storage.hpp
     utility_module/json_proc.hpp
     utility_module/json_proc.cpp
+    utility_module/stream_siem.hpp
+    utility_module/stream_siem.cpp
 )
 
 set(UTILITY_MODULE_HEADERS

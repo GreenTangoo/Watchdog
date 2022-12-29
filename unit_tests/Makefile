@@ -5,13 +5,13 @@ FLAGS_GEN=--error-printer
 
 
 
-all: clean init tests postcompile
+all: init tests postcompile
 
-tests: JsonStreamTest
+tests: SIEMStreamMemoryTest
 
-JsonStreamTest:
-	$(TEST_GEN_PATH) $(FLAGS_GEN) -o runner.cpp $(SRC_TESTS_DIR)/JsonStreamTest.h
-	g++ -o $(RES_TESTS_DIR)/JsonStreamTest -I cxxtest-4.4 runner.cpp
+SIEMStreamMemoryTest:
+	$(TEST_GEN_PATH) $(FLAGS_GEN) -o runner.cpp $(SRC_TESTS_DIR)/SIEMStreamMemoryTest.h
+	g++ -o $(RES_TESTS_DIR)/SIEMStreamMemoryTest -I cxxtest-4.4 -I ../utility_module runner.cpp
 
 init:
 	mkdir $(RES_TESTS_DIR)
@@ -21,3 +21,4 @@ postcompile:
 
 clean:
 	rm -rf $(RES_TESTS_DIR)
+	if [ -f runner.cpp ]; then rm runner.cpp; fi

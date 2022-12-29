@@ -137,5 +137,16 @@ namespace siem_ex_space
 
         ~AggregationException() = default;
     };
+
+    class StreamSIEMException : public SIEMException
+    {
+    public:
+        enum StreamErrorCode { INVALID_STREAM_POSITION = 1 };
+
+        StreamSIEMException(std::string const &exMsg, short errCode) :
+            SIEMException(exMsg, errCode) {};
+
+        ~StreamSIEMException() = default;
+    };
 }
 #endif // EXCEPTIONS_HPP
