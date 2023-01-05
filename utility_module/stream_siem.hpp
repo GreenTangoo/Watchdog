@@ -2,6 +2,7 @@
 #define STREAM_SIEM_HPP
 
 #include <memory>
+#include <fstream>
 #include <cstring>
 #include <list>
 
@@ -52,8 +53,10 @@ namespace utility_space
     public:
         size_t GetBufSize() const { return m_BufSize; }
         unsigned long long GetStreamSize() const { return m_StreamSize; }
-        unsigned long long GetPos() const { return m_StreamPos; }
-        void SetPos(unsigned long long newPos) { m_StreamPos = newPos; }
+        unsigned long long GetPosW() const { return m_StreamPos; }
+        unsigned long long GetPosR() const { return m_StreamPos; }
+        void SetPosR(unsigned long long newPos) { m_StreamPos = newPos; }
+        void SetPosW(unsigned long long newPos) { m_StreamPos = newPos; }
     protected:
         void SetStreamSize(unsigned long long newSize) { m_StreamSize = newSize; }
     private:
@@ -66,7 +69,7 @@ namespace utility_space
 
 
     // SIEMStreamMemory
-    // Class implementation stream in heap.
+    // Class implements stream in heap.
     // Stream consists of list of buffers with m_BufSize size each one.
     // For optimization purposes should to read/write a large data
     //  with minimum calls. Multiple read/write will call
@@ -87,10 +90,54 @@ namespace utility_space
         virtual StreamStatus Get(char ch) override;
         virtual StreamStatus Put(char &ch) override;
     private:
+        enum class BufInteractType : char
+        {
+            ReadFromBuffer = 0,
+            WriteToBuffer = 1
+        };
+    private:
         void ExtendStream(size_t amountBytes);
         std::list<char*>::iterator GetStreamIterByPos(unsigned long long  currPos);
+        char* CopyBufferToWrite(char *pDest, size_t amountBlocks);
+        const char *CopyBufferToRead(char const *pSrc, size_t amountBlocks);
+        char* AlignBuffer(char *buf, size_t &bufSize, BufInteractType interaction);
+        char* CopyBuffer(char *buf, size_t amountBlocks, BufInteractType interaction);
     private:
         std::list<char*> m_StreamData;
+    };
+
+
+    // SIEMStreamFilesystem
+    // Class implements stream in file.
+    // Stream consists of std::fstream thread and
+    //  associate with one file.
+    class SIEMStreamFilesystem : public SIEMStreamImpl
+    {
+    public:
+        SIEMStreamFilesystem() = default;
+        SIEMStreamFilesystem(size_t bufSize);
+        virtual ~SIEMStreamFilesystem() = default;
+        SIEMStreamFilesystem(SIEMStreamFilesystem const &other) = delete;
+        SIEMStreamFilesystem(SIEMStreamFilesystem && other) = delete;
+        SIEMStreamFilesystem& operator=(SIEMStreamFilesystem const &other) = delete;
+        SIEMStreamFilesystem& operator=(SIEMStreamFilesystem &&other) = delete;
+    public:
+        virtual StreamStatus Read(char const *buf, size_t bufSize) override;
+        virtual StreamStatus Write(char *buf, size_t bufSize) override;
+        virtual StreamStatus Get(char ch) override;
+        virtual StreamStatus Put(char &ch) override;
+    public:
+        unsigned long long GetStreamSize() const;
+        unsigned long long GetPosW() const { return m_FileStream.tellp(); }
+        unsigned long long GetPosR() const { return m_FileStream.tellg(); }
+        void SetPosW(unsigned long long newPos) { m_FileStream.seekp(newPos); }
+        void SetPosR(unsigned long long newPos) { m_FileStream.seekg(newPos); }
+        std::string GetFilename() const { return m_Filename; }
+    private:
+        void GenerateFilename();
+    private:
+        std::string m_Filename;
+        mutable std::fstream m_FileStream;
     };
 
 }
